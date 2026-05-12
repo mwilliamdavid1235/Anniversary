@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { TRIP } from "@/lib/data";
 import Header from "@/components/Header";
 import UpNextBanner from "@/components/UpNextBanner";
@@ -78,9 +79,46 @@ export default function Home() {
 
       {/* Footer */}
       <footer
-        className="text-center py-8 border-t"
+        className="text-center py-10 border-t"
         style={{ borderColor: "#1E3319" }}
       >
+        {/* Section links */}
+        <div className="flex items-center justify-center gap-6 mb-8">
+          <Link
+            href="/connection"
+            className="group flex flex-col items-center gap-1 transition-opacity duration-150 hover:opacity-80"
+            style={{ textDecoration: "none" }}
+          >
+            <span
+              className="font-display italic"
+              style={{ fontSize: "22px", color: "#E2D9C6" }}
+            >
+              Connection
+            </span>
+            <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#3A5040" }}>
+              28 questions
+            </span>
+          </Link>
+
+          <div style={{ width: 1, height: 36, background: "#1E3319" }} />
+
+          <Link
+            href="/intimacy"
+            className="group flex flex-col items-center gap-1 transition-opacity duration-150 hover:opacity-80"
+            style={{ textDecoration: "none" }}
+          >
+            <span
+              className="font-display italic"
+              style={{ fontSize: "22px", color: "#E2D9C6" }}
+            >
+              Intimacy
+            </span>
+            <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#3A5040" }}>
+              Private ✦
+            </span>
+          </Link>
+        </div>
+
         <p
           className="font-display mb-1"
           style={{ fontSize: "20px", color: "#3A5040" }}
