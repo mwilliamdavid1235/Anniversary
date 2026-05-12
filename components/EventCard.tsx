@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import type { TripEvent, EventLink, EventOption } from "@/types";
 import PlaylistCard from "./PlaylistCard";
 
@@ -52,26 +53,169 @@ function LinkButton({ link }: { link: EventLink }) {
   );
 }
 
-function OptionItem({ option }: { option: EventOption }) {
-  return (
-    <div
-      className="rounded-lg p-3 mb-2 last:mb-0"
-      style={{
-        background: "rgba(11,19,9,0.6)",
-        border: "1px solid #1E3319",
-      }}
-    >
-      <p className="font-display mb-1" style={{ fontSize: "17px", color: "#E2D9C6" }}>
-        {option.name}
-      </p>
-      <p className="mb-2 leading-relaxed" style={{ fontSize: "11px", color: "#6E8A74" }}>
-        {option.description}
-      </p>
-      {option.links.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {option.links.map((l) => <LinkButton key={l.href + l.label} link={l} />)}
+// ── Options panel with persistent selection ──────────────────
+function OptionsPanel({ eventId, options }: { eventId: string; options: EventOption[] }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(`option-selection-${eventId}`);
+    if (stored) setSelectedId(stored);
+  }, [eventId]);
+
+  function choose(optionId: string) {
+    localStorage.setItem(`option-selection-${eventId}`, optionId);
+    setSelectedId(optionId);
+    setExpandedId(null);
+  }
+
+  function reset() {
+    localStorage.removeItem(`option-selection-${eventId}`);
+    setSelectedId(null);
+    setExpandedId(null);
+  }
+
+  // ── Chosen state ─────────────────────────────────────────
+  if (selectedId) {
+    const chosen = options.find((o) => o.id === selectedId);
+    if (!chosen) return null;
+    return (
+      <div className="mt-3">
+        <div
+          className="rounded-lg p-3"
+          style={{
+            background: "rgba(61,107,71,0.12)",
+            border: "1px solid #2D5038",
+          }}
+        >
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <p
+              className="font-display italic"
+              style={{ fontSize: "17px", color: "#E2D9C6" }}
+            >
+              ✓ {chosen.name}
+            </p>
+            <button
+              onClick={reset}
+              style={{
+                fontSize: "9px",
+                letterSpacing: "0.12em",
+                color: "#3A5040",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "2px 0",
+                flexShrink: 0,
+                textTransform: "uppercase",
+              }}
+            >
+              Change
+            </button>
+          </div>
+          <p className="leading-relaxed mb-2" style={{ fontSize: "11px", color: "#6E8A74" }}>
+            {chosen.description}
+          </p>
+          {chosen.links.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {chosen.links.map((l) => (
+                <LinkButton key={l.href + l.label} link={l} />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // ── No selection — collapsed list, one expandable at a time ──
+  return (
+    <div className="mt-3">
+      <p
+        className="mb-2"
+        style={{
+          fontSize: "9px",
+          letterSpacing: "0.15em",
+          textTransform: "uppercase",
+          color: "#3A5040",
+        }}
+      >
+        — Choose one —
+      </p>
+      {options.map((opt) => {
+        const isExpanded = expandedId === opt.id;
+        return (
+          <div
+            key={opt.id}
+            className="rounded-lg mb-2 last:mb-0 overflow-hidden"
+            style={{
+              background: isExpanded ? "rgba(11,19,9,0.8)" : "rgba(11,19,9,0.4)",
+              border: `1px solid ${isExpanded ? "#2D5038" : "#1E3319"}`,
+              transition: "background 0.15s ease, border-color 0.15s ease",
+            }}
+          >
+            {/* Collapsed header — always visible */}
+            <button
+              onClick={() => setExpandedId(isExpanded ? null : opt.id)}
+              className="w-full flex items-center justify-between text-left"
+              style={{
+                padding: "10px 12px",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              <span
+                className="font-display italic"
+                style={{ fontSize: "15px", color: isExpanded ? "#E2D9C6" : "#9BB09E" }}
+              >
+                {opt.name}
+              </span>
+              <span
+                style={{
+                  fontSize: "9px",
+                  color: "#3A5040",
+                  marginLeft: 8,
+                  flexShrink: 0,
+                }}
+              >
+                {isExpanded ? "▲" : "▼"}
+              </span>
+            </button>
+
+            {/* Expanded details */}
+            {isExpanded && (
+              <div style={{ padding: "0 12px 12px" }}>
+                <p className="leading-relaxed mb-3" style={{ fontSize: "11px", color: "#6E8A74" }}>
+                  {opt.description}
+                </p>
+                {opt.links.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {opt.links.map((l) => (
+                      <LinkButton key={l.href + l.label} link={l} />
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => choose(opt.id)}
+                  className="rounded transition-opacity duration-100 active:scale-95"
+                  style={{
+                    fontSize: "10px",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    padding: "6px 14px",
+                    background: "rgba(61,107,71,0.25)",
+                    border: "1px solid #2D5038",
+                    color: "#6DB87E",
+                    cursor: "pointer",
+                  }}
+                >
+                  Choose this
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -141,7 +285,7 @@ export default function EventCard({ event, isNext, isPast }: EventCardProps) {
 
         {/* Title */}
         <h3
-          className="font-display leading-tight mb-1"
+          className="font-display italic leading-tight mb-1"
           style={{ fontSize: "22px", color: "#E2D9C6" }}
         >
           {event.title}
@@ -154,22 +298,7 @@ export default function EventCard({ event, isNext, isPast }: EventCardProps) {
 
         {/* Options */}
         {event.options && event.options.length > 0 && (
-          <div className="mt-3">
-            <p
-              className="mb-2"
-              style={{
-                fontSize: "9px",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: "#3A5040",
-              }}
-            >
-              — Choose one —
-            </p>
-            {event.options.map((opt) => (
-              <OptionItem key={opt.id} option={opt} />
-            ))}
-          </div>
+          <OptionsPanel eventId={event.id} options={event.options} />
         )}
 
         {/* Direct links */}

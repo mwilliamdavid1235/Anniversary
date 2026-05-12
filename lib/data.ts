@@ -1,254 +1,361 @@
 import type { Trip } from "@/types";
 
-// ─────────────────────────────────────────────────────────────
-//  TRIP DATA  — replace with real details when ready
-//  Dates, names, links, confirmation numbers all TBD
-// ─────────────────────────────────────────────────────────────
 export const TRIP: Trip = {
   id: "anniversary-2026",
-  title: "Anniversary",
-  subtitle: "A weekend for two",
-  startDate: "2026-06-06",
-  endDate:   "2026-06-08",
-
+  title: "Among the Stars",
+  subtitle: "Twenty-Eight Years",
+  startDate: "2026-05-15",
+  endDate: "2026-05-17",
   days: [
-    // ══════════════════════════════════════════════════
-    //  DAY 1 — FRIDAY
-    // ══════════════════════════════════════════════════
+    // ─────────────────────────────────────────
+    // DAY 1 — FRIDAY, MAY 15
+    // ─────────────────────────────────────────
     {
       id: "day-1",
       dayNumber: 1,
       label: "Friday",
-      date: "2026-06-06",
+      date: "2026-05-15",
       events: [
         {
           id: "d1-e1",
-          time: "15:00",
-          title: "Hit the road",
+          time: "10:00",
+          title: "Depart Knoxville",
           type: "travel",
-          description: "About two hours. Snacks loaded. Aux cord is yours.",
+          description:
+            "Leave South Knoxville by 10 AM. About 1 hour 15 minutes to the Sevierville area — easy drive through the foothills. No rush.",
           links: [
-            { label: "Waze to hotel", href: "https://waze.com/ul?q=The+Blossom+Inn+Charlottesville+VA&navigate=yes", kind: "waze" },
+            {
+              label: "Waze",
+              href: "https://waze.com/ul?q=Sevierville+TN&navigate=yes",
+              kind: "waze",
+            },
           ],
           playlist: {
             id: "pl-drive-up",
             label: "For the drive up",
-            mood: "indie folk road trip feel-good",
-            spotifyQuery: "indie folk road trip",
+            mood: "Easy open-road energy",
+            spotifyQuery: "road trip indie folk driving",
           },
         },
+
         {
           id: "d1-e2",
-          time: "17:00",
-          title: "The Blossom Inn",
-          type: "lodging",
-          description: "123 Garden Lane, Suite 12. Ask for the corner room — views of the courtyard.",
-          note: "Confirmation #BL-8847 · Early check-in requested · Soaking tub in room",
-          links: [
-            { label: "Hotel website", href: "#", kind: "website" },
-            { label: "Waze", href: "https://waze.com/ul?q=123+Garden+Lane+Charlottesville+VA&navigate=yes", kind: "waze" },
-            { label: "(540) 555-0172", href: "tel:+15405550172", kind: "phone" },
-          ],
-        },
-        {
-          id: "d1-e3",
-          time: "18:30",
-          title: "Wander downtown",
-          type: "activity",
-          description: "The pedestrian mall is walkable from the hotel. No agenda — just the two of you.",
-          links: [
-            { label: "Waze to mall", href: "https://waze.com/ul?q=Downtown+Mall+Charlottesville+VA", kind: "waze" },
-          ],
-        },
-        {
-          id: "d1-e4",
-          time: "19:30",
-          title: "Friday night dinner",
+          time: "11:30",
+          title: "Lunch in Downtown Sevierville",
           type: "restaurant",
-          description: "Choose on the night — both solid options.",
+          description:
+            "Arrive in historic downtown Sevierville for a relaxed first lunch. Two good local options — pick your vibe.",
           options: [
             {
-              id: "opt-harvest",
-              name: "Harvest Table",
-              description: "Farm-to-table, seasonal menu. Cozy, candlelit, unhurried.",
+              id: "opt-local-goat",
+              name: "The Local Goat",
+              description:
+                "Casual gastropub in the heart of historic downtown, steps from The Appalachian. Local sourcing, excellent burgers, craft beer — zero tourist trap energy.",
               links: [
-                { label: "Waze", href: "https://waze.com/ul?q=Harvest+Table+Charlottesville", kind: "waze" },
-                { label: "Menu", href: "#", kind: "menu" },
-                { label: "Reserve", href: "#", kind: "reserve" },
+                {
+                  label: "Website",
+                  href: "https://www.thelocalgoat.com",
+                  kind: "website",
+                },
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=The+Local+Goat+Sevierville+TN&navigate=yes",
+                  kind: "waze",
+                },
+                {
+                  label: "Call",
+                  href: "tel:+18653663035",
+                  kind: "phone",
+                },
               ],
             },
             {
-              id: "opt-oak",
-              name: "Oak & Vine",
-              description: "Wine bar + small plates. Good for lingering over bottles.",
+              id: "opt-five-oaks",
+              name: "Five Oaks Farm Kitchen",
+              description:
+                "Legacy Southern restaurant rooted in the Ogle family's 1925 farm — griddle cakes, biscuits and gravy, chicken and waffles, and real Sevier County hospitality.",
               links: [
-                { label: "Waze", href: "https://waze.com/ul?q=Oak+and+Vine+Wine+Bar+Charlottesville", kind: "waze" },
-                { label: "Menu", href: "#", kind: "menu" },
-                { label: "Reserve", href: "#", kind: "reserve" },
+                {
+                  label: "Website",
+                  href: "https://fiveoaksfarmkitchen.com",
+                  kind: "website",
+                },
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Five+Oaks+Farm+Kitchen+Sevierville+TN&navigate=yes",
+                  kind: "waze",
+                },
+                {
+                  label: "Call",
+                  href: "tel:+18653651008",
+                  kind: "phone",
+                },
               ],
             },
           ],
+        },
+
+        {
+          id: "d1-e3",
+          time: "13:30",
+          title: "Grocery Run — Provisions for the Weekend",
+          type: "activity",
+          description:
+            "Stock up for Friday night dinner on the deck and anything else for the weekend. Publix on Winfield Dunn sits right on the route from downtown toward the resort.",
+          links: [
+            {
+              label: "Waze",
+              href: "https://waze.com/ul?q=Publix+750+Winfield+Dunn+Pkwy+Sevierville+TN&navigate=yes",
+              kind: "waze",
+            },
+          ],
+        },
+
+        {
+          id: "d1-e4",
+          time: "18:00",
+          title: "Check In — Stellara Resort",
+          type: "lodging",
+          description:
+            "Arrive at golden hour. 85 acres in the Smoky Mountain foothills — private treehouse or mirror cabin with hot tub, fire pit, telescope, and BBQ on the deck.",
+          note: "Check-in assistance available 4–7:30 PM. The access road is unlit gravel — arriving before dark makes settling in easier.",
+          links: [
+            {
+              label: "Reservation Portal",
+              href: "https://guest.ensoconnect.com/?auth=f7d54fe4",
+              kind: "reserve",
+            },
+            {
+              label: "Waze",
+              href: "https://waze.com/ul?q=Stellara+Resort+1708+Minty+Way+Sevierville+TN&navigate=yes",
+              kind: "waze",
+            },
+            {
+              label: "Call",
+              href: "tel:+18654135590",
+              kind: "phone",
+            },
+          ],
+        },
+
+        {
+          id: "d1-e5",
+          time: "21:30",
+          title: "A Night Among the Stars — The Tour",
+          type: "activity",
+          description:
+            "Ten stops across the night sky — planets, stars, clusters, and galaxies — guided by a custom star tour built for this trip. Begins after dark. Runs roughly 90 minutes. The light arriving tonight from your anniversary star left in 1998.",
+          note: "Star tour launches from the Pecan & Poplar app. Begin after dark when the sky is fully dark.",
           playlist: {
-            id: "pl-friday-dinner",
-            label: "Dinner soundtrack",
-            mood: "romantic jazz dinner candlelight",
-            spotifyQuery: "romantic jazz dinner candlelight",
+            id: "pl-star-tour",
+            label: "Among the stars",
+            mood: "Still, vast, and timeless",
+            spotifyQuery: "ambient space drone instrumental",
           },
         },
       ],
     },
 
-    // ══════════════════════════════════════════════════
-    //  DAY 2 — SATURDAY
-    // ══════════════════════════════════════════════════
+    // ─────────────────────────────────────────
+    // DAY 2 — SATURDAY, MAY 16
+    // ─────────────────────────────────────────
     {
       id: "day-2",
       dayNumber: 2,
       label: "Saturday",
-      date: "2026-06-07",
+      date: "2026-05-16",
       events: [
         {
           id: "d2-e1",
-          time: "09:00",
-          title: "The Morning Standard",
-          type: "restaurant",
-          description: "No rush. Great coffee, avocado toast, fresh pastries. Walk-in friendly.",
+          time: "08:30",
+          title: "Hen Wallow Falls — Gabes Mountain Trail",
+          type: "activity",
+          description:
+            "A 4.4-mile moderate hike in the quieter Cosby section of Great Smoky Mountains National Park, ending at a 90-foot waterfall with a natural wading pool at the base. Lush hemlock and rhododendron forest, far fewer people than anything near Gatlinburg.",
+          note: "Bring water shoes for the falls. A GSMNP parking tag is required — $5/day or $15/week. Purchase at the trailhead kiosk or online.",
           links: [
-            { label: "Waze", href: "https://waze.com/ul?q=The+Morning+Standard+Charlottesville", kind: "waze" },
-            { label: "Menu", href: "#", kind: "menu" },
+            {
+              label: "NPS Trail Info",
+              href: "https://www.nps.gov/grsm/planyourvisit/cosby.htm",
+              kind: "website",
+            },
+            {
+              label: "Waze",
+              href: "https://waze.com/ul?q=Cosby+Picnic+Area+Cosby+TN&navigate=yes",
+              kind: "waze",
+            },
           ],
           playlist: {
-            id: "pl-morning",
-            label: "Slow morning",
-            mood: "slow morning acoustic coffee",
-            spotifyQuery: "slow morning acoustic coffee",
+            id: "pl-hike",
+            label: "Morning on the trail",
+            mood: "Steady, earthy, forward-moving",
+            spotifyQuery: "hiking morning energy folk indie",
           },
         },
+
         {
           id: "d2-e2",
-          time: "11:00",
-          title: "Botanical Garden Tour",
+          time: "12:30",
+          title: "Cool Down at Greenbrier",
           type: "activity",
-          description: "Guided 90-minute walk through the heritage gardens. Comfortable shoes.",
-          note: "Tickets confirmed for two · QR code on your phones",
+          description:
+            "On the drive back from Cosby, pull off along the Middle Fork of the Little Pigeon River for a post-hike wade. Greenbrier is a locals-only vibe — find a pull-off, walk down to the bank, let the cold mountain water do its thing.",
           links: [
-            { label: "Waze", href: "https://waze.com/ul?q=Lewis+Ginter+Botanical+Garden", kind: "waze" },
-            { label: "Garden site", href: "#", kind: "website" },
-            { label: "Tickets", href: "#", kind: "tickets" },
+            {
+              label: "Waze",
+              href: "https://waze.com/ul?q=Greenbrier+GSMNP+Gatlinburg+TN&navigate=yes",
+              kind: "waze",
+            },
           ],
+          playlist: {
+            id: "pl-creek",
+            label: "Post-hike cool down",
+            mood: "Warm, loose, drifting",
+            spotifyQuery: "warm acoustic chill afternoon",
+          },
         },
+
         {
           id: "d2-e3",
-          time: "13:00",
-          title: "Provisions Market",
-          type: "restaurant",
-          description: "Deli + wine shop. Build your own lunch — charcuterie, bread, cheese. Eat outside.",
-          links: [
-            { label: "Waze", href: "https://waze.com/ul?q=Provisions+Market+Charlottesville", kind: "waze" },
-            { label: "Website", href: "#", kind: "website" },
-          ],
+          time: "14:30",
+          title: "Back at Stellara — Rest & Get Ready",
+          type: "lodging",
+          description:
+            "Return to the resort. Hot tub, clean up, rest before dinner. You've earned it.",
+          playlist: {
+            id: "pl-afternoon",
+            label: "Slow afternoon",
+            mood: "Unhurried, soft, warm",
+            spotifyQuery: "soft acoustic slow afternoon",
+          },
         },
+
         {
           id: "d2-e4",
-          time: "15:00",
-          title: "Cedar Ridge Winery",
-          type: "activity",
-          description: "Private tasting for two — six pours, charcuterie board. Ask for the terrace.",
-          note: "3:00pm reservation confirmed · Request the terrace seats",
+          time: "19:00",
+          title: "Dinner at The Appalachian",
+          type: "restaurant",
+          description:
+            "Contemporary Southern Appalachian cuisine in historic downtown Sevierville — farm-to-table, wood-burning hearth at the center of the kitchen, menu printed daily. Featured in Garden & Gun and Travel & Leisure.",
+          note: "Reservation confirmed for 2 at 7:00 PM via Resy. Menu changes daily — no need to preview. Just show up hungry.",
           links: [
-            { label: "Waze", href: "https://waze.com/ul?q=Cedar+Ridge+Winery+Virginia", kind: "waze" },
-            { label: "Winery site", href: "#", kind: "website" },
+            {
+              label: "Website",
+              href: "https://theappalachianrestaurant.com",
+              kind: "website",
+            },
+            {
+              label: "Reservation",
+              href: "https://www.resy.com",
+              kind: "reserve",
+            },
+            {
+              label: "Waze",
+              href: "https://waze.com/ul?q=The+Appalachian+133+Bruce+Street+Sevierville+TN&navigate=yes",
+              kind: "waze",
+            },
+            {
+              label: "Call",
+              href: "tel:+18655050245",
+              kind: "phone",
+            },
           ],
           playlist: {
-            id: "pl-winery",
-            label: "Wine afternoon",
-            mood: "bossa nova afternoon wine terrace",
-            spotifyQuery: "bossa nova afternoon relaxed",
+            id: "pl-dinner",
+            label: "Woodsmoke & candlelight",
+            mood: "Intimate, slow-burning, Southern soul",
+            spotifyQuery: "southern soul jazz intimate dinner",
           },
         },
+
         {
           id: "d2-e5",
-          time: "19:00",
-          title: "Eloise",
-          type: "restaurant",
-          description: "The centerpiece of the weekend. Tasting menu, optional wine pairing. Dress nicely.",
-          note: "7:00pm reservation confirmed · Anniversary noted in the booking",
-          links: [
-            { label: "Waze", href: "https://waze.com/ul?q=Eloise+Restaurant+Charlottesville", kind: "waze" },
-            { label: "Menu", href: "#", kind: "menu" },
-            { label: "Reservation", href: "#", kind: "reserve" },
+          time: "21:30",
+          title: "Evening Under the Stars",
+          type: "activity",
+          description:
+            "Back at Stellara, the night is yours. Keep the star tour here if you saved it for tonight, or let the hot tub and fire pit do the work.",
+          options: [
+            {
+              id: "opt-star-tour-sat",
+              name: "Star Tour Tonight",
+              description:
+                "Launch the guided 10-stop telescope tour from the Pecan & Poplar app. Same experience as Friday — move it here if weather, energy, or vibe called for it. Begins after dark, runs ~90 minutes.",
+              links: [],
+            },
+            {
+              id: "opt-hot-tub",
+              name: "Hot Tub & Fire Pit",
+              description:
+                "Skip the telescope. Pour something good, get in the hot tub, watch the sky without a plan. The resort's 85 dark acres do the rest.",
+              links: [],
+            },
           ],
-          playlist: {
-            id: "pl-anniversary-dinner",
-            label: "The big night",
-            mood: "romantic anniversary dinner elegant",
-            spotifyQuery: "romantic dinner elegant jazz anniversary",
-          },
         },
       ],
     },
 
-    // ══════════════════════════════════════════════════
-    //  DAY 3 — SUNDAY
-    // ══════════════════════════════════════════════════
+    // ─────────────────────────────────────────
+    // DAY 3 — SUNDAY, MAY 17
+    // ─────────────────────────────────────────
     {
       id: "day-3",
       dayNumber: 3,
       label: "Sunday",
-      date: "2026-06-08",
+      date: "2026-05-17",
       events: [
         {
           id: "d3-e1",
-          time: "10:00",
-          title: "Check-out — The Blossom Inn",
-          type: "lodging",
-          description: "Late check-out until 11am. Bags can stay at the front desk.",
+          time: "09:00",
+          title: "Breakfast at Sawyer's Farmhouse",
+          type: "restaurant",
+          description:
+            "Locally owned farmhouse breakfast on the quieter Wears Valley Road — scratch-made pancakes, mountain berry crepes, biscuits and gravy, and genuinely warm service. A Sunday morning pace you won't find on the Parkway.",
+          note: "Walk-in only, no reservations. Arrive by 9 to beat the wait. Open 7 AM – 2 PM.",
           links: [
-            { label: "(540) 555-0172", href: "tel:+15405550172", kind: "phone" },
+            {
+              label: "Website",
+              href: "https://sawyersbreakfast.com",
+              kind: "website",
+            },
+            {
+              label: "Waze",
+              href: "https://waze.com/ul?q=Sawyers+Farmhouse+862+Wears+Valley+Rd+Pigeon+Forge+TN&navigate=yes",
+              kind: "waze",
+            },
+            {
+              label: "Call",
+              href: "tel:+18653661090",
+              kind: "phone",
+            },
           ],
+          playlist: {
+            id: "pl-sunday-breakfast",
+            label: "Sunday morning ease",
+            mood: "Warm coffee, slow tempo, no agenda",
+            spotifyQuery: "sunday morning coffee slow jazz",
+          },
         },
+
         {
           id: "d3-e2",
           time: "11:00",
-          title: "Birch & Grain",
-          type: "restaurant",
-          description: "Unhurried Sunday brunch. Famous for the brioche french toast and bloody marys.",
-          links: [
-            { label: "Waze", href: "https://waze.com/ul?q=Birch+and+Grain+Charlottesville", kind: "waze" },
-            { label: "Menu", href: "#", kind: "menu" },
-          ],
-          playlist: {
-            id: "pl-brunch",
-            label: "Sunday brunch",
-            mood: "sunday brunch jazz soul warm",
-            spotifyQuery: "sunday brunch jazz soul",
-          },
-        },
-        {
-          id: "d3-e3",
-          time: "13:30",
-          title: "Scenic Overlook Walk",
-          type: "activity",
-          description: "Easy 45-min loop. Sweeping views, good light for photos. Bring water.",
-          links: [
-            { label: "Waze", href: "https://waze.com/ul?q=Humpback+Rocks+Overlook+Virginia", kind: "waze" },
-            { label: "Trail info", href: "#", kind: "website" },
-          ],
-        },
-        {
-          id: "d3-e4",
-          time: "15:30",
-          title: "Head home",
+          title: "Head Home",
           type: "travel",
-          description: "~2 hours. Playlist vol. 2. Happy anniversary.",
+          description:
+            "About 1 hour 15 minutes back to South Knoxville. Take the scenic route through Wears Valley and Townsend if the mood is right — it adds maybe 20 minutes and it's worth it.",
           links: [
-            { label: "Waze home", href: "https://waze.com/ul?q=home&navigate=yes", kind: "waze" },
+            {
+              label: "Waze",
+              href: "https://waze.com/ul?q=South+Knoxville+TN+37920&navigate=yes",
+              kind: "waze",
+            },
           ],
           playlist: {
             id: "pl-drive-home",
-            label: "The drive home",
-            mood: "nostalgic sunday drive indie warm",
-            spotifyQuery: "nostalgic sunday drive indie",
+            label: "The long way home",
+            mood: "Reflective, satisfied, roads you know",
+            spotifyQuery: "mellow indie road trip homeward",
           },
         },
       ],
