@@ -30,6 +30,7 @@ export interface TripEvent {
   note?: string;         // confirmation / green note
   links?: EventLink[];
   options?: EventOption[]; // mutually exclusive choices
+  bailouts?: EventOption[]; // backup alternatives, reference only
   playlist?: Playlist;   // inline playlist card
 }
 
