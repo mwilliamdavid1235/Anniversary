@@ -5,9 +5,8 @@ import Link from "next/link";
 import PasswordGate from "@/components/sections/PasswordGate";
 import PersonSelector, { type Person } from "@/components/sections/PersonSelector";
 import QuestionView, { type AnswerData } from "@/components/sections/QuestionView";
-import ExplorationGrid from "@/components/sections/ExplorationGrid";
 import TogetherReveal from "@/components/sections/TogetherReveal";
-import { INTIMACY_QUESTIONS, TOTAL_INTIMACY, type GridResponse } from "@/lib/intimacy-questions";
+import { INTIMACY_QUESTIONS, TOTAL_INTIMACY } from "@/lib/intimacy-questions";
 
 // ── Intimate palette ──────────────────────────────────────────
 const I = {
@@ -34,112 +33,6 @@ function AnimatedQuestion({ children, qKey }: { children: React.ReactNode; qKey:
   return (
     <div key={qKey} className="fade-up" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
       {children}
-    </div>
-  );
-}
-
-// ── Exploration grid question view ────────────────────────────
-// Special wrapper for the grid since QuestionView only handles open/choice
-function GridQuestionView({
-  question,
-  questionNumber,
-  totalQuestions,
-  gridValues,
-  partnerGridValues,
-  partnerName,
-  onGridChange,
-  onNext,
-  onBack,
-  isFirst,
-}: {
-  question: typeof INTIMACY_QUESTIONS[0];
-  questionNumber: number;
-  totalQuestions: number;
-  gridValues: Record<string, GridResponse>;
-  partnerGridValues?: Record<string, GridResponse>;
-  partnerName: string;
-  onGridChange: (item: string, val: GridResponse) => void;
-  onNext: () => void;
-  onBack: () => void;
-  isFirst: boolean;
-}) {
-  const [peekOpen, setPeekOpen] = useState(false);
-  const myAnsweredCount = Object.keys(gridValues).length;
-  const partnerAnsweredCount = Object.keys(partnerGridValues ?? {}).length;
-  const canPeek = myAnsweredCount > 0 && partnerAnsweredCount > 0;
-
-  return (
-    <div className="flex flex-col min-h-screen" style={{ background: I.bg }}>
-      {/* Top bar */}
-      <div className="flex items-center gap-4 px-6 py-4 flex-shrink-0" style={{ borderBottom: `1px solid ${I.edge}` }}>
-        <button onClick={onBack} disabled={isFirst} style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: isFirst ? "transparent" : I.textDim, background: "none", border: "none", cursor: isFirst ? "default" : "pointer", padding: 0, flexShrink: 0 }}>
-          ← Back
-        </button>
-        <div className="flex-1 flex flex-col gap-1.5">
-          <div className="rounded-full overflow-hidden" style={{ height: 2, background: I.edge }}>
-            <div className="h-full rounded-full transition-all duration-400" style={{ width: `${(questionNumber / totalQuestions) * 100}%`, background: I.rose }} />
-          </div>
-          <span style={{ fontSize: "9px", color: I.textDim, letterSpacing: "0.1em" }}>{questionNumber} of {totalQuestions}</span>
-        </div>
-      </div>
-
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-6 py-8 max-w-xl mx-auto w-full">
-        <p style={{ fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: I.textFaint, marginBottom: 12 }}>✦ {question.category}</p>
-        <h2 className="font-display italic leading-snug mb-6" style={{ fontSize: "clamp(18px, 4vw, 24px)", color: I.text }}>
-          {question.text}
-        </h2>
-
-        {question.gridItems && (
-          <ExplorationGrid
-            items={question.gridItems}
-            values={gridValues}
-            onChange={onGridChange}
-            palette="intimate"
-          />
-        )}
-
-        {canPeek && (
-          <div className="mt-6">
-            <button
-              onClick={() => setPeekOpen((v) => !v)}
-              style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: I.textFaint, background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 6 }}
-            >
-              <span>{peekOpen ? "▲" : "▼"}</span>
-              <span>See what {partnerName} marked</span>
-            </button>
-            {peekOpen && partnerGridValues && (
-              <div className="mt-3 rounded-xl p-4 fade-up" style={{ background: "rgba(196,126,160,0.05)", border: `1px solid ${I.edgeHi}` }}>
-                <p style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: I.textFaint, marginBottom: 8 }}>{partnerName}</p>
-                {question.gridItems?.map((item) => {
-                  const val = partnerGridValues[item];
-                  if (!val) return null;
-                  return (
-                    <div key={item} className="flex items-center justify-between mb-2">
-                      <span style={{ fontSize: "11px", color: I.textMuted }}>{item}</span>
-                      <span style={{ fontSize: "10px", color: val === "yes" ? I.rose : val === "maybe" ? "#C49A45" : I.textDim, letterSpacing: "0.08em" }}>
-                        {val === "yes" ? "Yes" : val === "maybe" ? "Maybe" : "—"}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Bottom nav */}
-      <div className="flex items-center justify-between px-6 py-5 flex-shrink-0" style={{ borderTop: `1px solid ${I.edge}` }}>
-        <div style={{ width: 80 }} />
-        <button
-          onClick={onNext}
-          className="rounded-xl transition-all duration-150 active:scale-[0.98]"
-          style={{ padding: "11px 24px", background: myAnsweredCount > 0 ? "rgba(196,126,160,0.12)" : "transparent", border: `1px solid ${myAnsweredCount > 0 ? I.rose : I.edge}`, color: myAnsweredCount > 0 ? I.text : I.textDim, fontSize: "12px", cursor: "pointer", fontFamily: "var(--font-dm-mono), monospace" }}
-        >
-          {myAnsweredCount > 0 ? "Next →" : "Skip →"}
-        </button>
-      </div>
     </div>
   );
 }
@@ -243,14 +136,6 @@ export default function IntimacyPage() {
     loadStatus();
   }
 
-  function handleGridChange(questionId: string, item: string, value: GridResponse) {
-    const existing = answers[questionId]?.answer_text;
-    let grid: Record<string, GridResponse> = {};
-    try { grid = JSON.parse(existing || "{}"); } catch {}
-    grid[item] = value;
-    saveAnswer(questionId, { answer_text: JSON.stringify(grid) });
-  }
-
   function handleNext() {
     if (currentIndex < TOTAL_INTIMACY - 1) {
       goTo(currentIndex + 1);
@@ -325,16 +210,16 @@ export default function IntimacyPage() {
         </div>
         <main className="max-w-3xl mx-auto px-6 py-10 fade-up">
           <TogetherReveal
-            questions={INTIMACY_QUESTIONS as Parameters<typeof TogetherReveal>[0]["questions"]}
+            questions={INTIMACY_QUESTIONS}
             maryAnswers={togetherAnswers.mary}
             mdAnswers={togetherAnswers.md}
             palette="intimate"
           />
           <div className="mt-12 rounded-xl p-6 text-center" style={{ background: "rgba(196,126,160,0.06)", border: `1px solid ${I.edgeHi}` }}>
             <p className="font-display italic mb-2" style={{ fontSize: "18px", color: I.text }}>Ready to go deeper?</p>
-            <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 16 }}>The guided experience is waiting.</p>
-            <Link href="/intimacy/together-experience" style={{ display: "inline-block", padding: "12px 28px", background: "rgba(196,126,160,0.15)", border: `1px solid ${I.rose}`, color: I.text, fontSize: "13px", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", textDecoration: "none", borderRadius: 12 }}>
-              Begin the Experience ✦
+            <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 16 }}>The Exploration Menu is next.</p>
+            <Link href="/exploration" style={{ display: "inline-block", padding: "12px 28px", background: "rgba(196,126,160,0.15)", border: `1px solid ${I.rose}`, color: I.text, fontSize: "13px", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", textDecoration: "none", borderRadius: 12 }}>
+              Go to Exploration Menu ✦
             </Link>
           </div>
         </main>
@@ -410,41 +295,6 @@ export default function IntimacyPage() {
   const myAns = answers[q.id] ?? {};
   const partnerAns = partnerAnswers[q.id];
 
-  // Exploration grid special case
-  if (q.kind === "grid" && q.gridItems) {
-    let myGrid: Record<string, GridResponse> = {};
-    let partnerGrid: Record<string, GridResponse> = {};
-    try { myGrid = JSON.parse(myAns.answer_text || "{}"); } catch {}
-    try { partnerGrid = JSON.parse(partnerAns?.answer_text || "{}"); } catch {}
-    const hasMyAnswer = Object.keys(myGrid).length > 0;
-    const hasPartnerAnswered = Object.keys(partnerGrid).length > 0;
-
-    return (
-      <div style={{ background: I.bg, minHeight: "100vh" }}>
-        <div className="absolute top-4 left-4 z-10">
-          <Link href="/" style={{ fontSize: "9px", color: I.textDim, letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase" }}>← Home</Link>
-        </div>
-        <div className="absolute top-4 right-4 z-10">
-          <span style={{ fontSize: "9px", color: I.textDim, letterSpacing: "0.1em" }}>{myName}</span>
-        </div>
-        <AnimatedQuestion qKey={`${q.id}-${currentIndex}`}>
-          <GridQuestionView
-            question={q}
-            questionNumber={currentIndex + 1}
-            totalQuestions={TOTAL_INTIMACY}
-            gridValues={myGrid}
-            partnerGridValues={hasMyAnswer && hasPartnerAnswered ? partnerGrid : undefined}
-            partnerName={partnerName}
-            onGridChange={(item, val) => handleGridChange(q.id, item, val)}
-            onNext={handleNext}
-            onBack={handleBack}
-            isFirst={currentIndex === 0}
-          />
-        </AnimatedQuestion>
-      </div>
-    );
-  }
-
   return (
     <div style={{ background: I.bg, minHeight: "100vh" }}>
       <div className="absolute top-4 left-4 z-10">
@@ -455,7 +305,7 @@ export default function IntimacyPage() {
       </div>
       <AnimatedQuestion qKey={`${q.id}-${currentIndex}`}>
         <QuestionView
-          question={q as Parameters<typeof QuestionView>[0]["question"]}
+          question={q}
           questionNumber={currentIndex + 1}
           totalQuestions={TOTAL_INTIMACY}
           myAnswer={myAns}

@@ -1,8 +1,7 @@
 "use client";
 
 import type { Question } from "@/lib/connection-questions";
-import type { IntimacyQuestion, GridResponse } from "@/lib/intimacy-questions";
-import { EXPLORATION_ITEMS } from "@/lib/intimacy-questions";
+import type { IntimacyQuestion } from "@/lib/intimacy-questions";
 
 type AnyQuestion = Question | IntimacyQuestion;
 
@@ -21,55 +20,6 @@ function isSameOption(a: string | undefined, b: string | undefined) {
   return a && b && a === b;
 }
 
-function GridTogetherView({
-  maryGrid,
-  mdGrid,
-}: {
-  maryGrid: Record<string, GridResponse>;
-  mdGrid: Record<string, GridResponse>;
-}) {
-  const matches = EXPLORATION_ITEMS.filter((item) => {
-    const m = maryGrid[item];
-    const md = mdGrid[item];
-    if (!m || !md) return false;
-    if (m === "not_for_me" || md === "not_for_me") return false;
-    return true; // both yes, both maybe, or yes+maybe
-  });
-
-  if (matches.length === 0) {
-    return (
-      <p style={{ fontSize: "12px", color: "#6B4A7A", fontStyle: "italic" }}>
-        No mutual matches yet — keep talking.
-      </p>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-2">
-      {matches.map((item) => {
-        const m = maryGrid[item] as GridResponse;
-        const md = mdGrid[item] as GridResponse;
-        const bothYes = m === "yes" && md === "yes";
-        return (
-          <div
-            key={item}
-            className="rounded-lg p-3"
-            style={{
-              background: bothYes ? "rgba(196,126,160,0.12)" : "rgba(196,154,69,0.06)",
-              border: `1px solid ${bothYes ? "#C47EA0" : "#7A5F25"}`,
-            }}
-          >
-            <p style={{ fontSize: "13px", color: "#EDE0E8", marginBottom: 4 }}>{item}</p>
-            <p style={{ fontSize: "10px", color: bothYes ? "#C47EA0" : "#C49A45", letterSpacing: "0.08em" }}>
-              {bothYes ? "You both said yes" : "One yes, one maybe — worth talking about"}
-            </p>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export default function TogetherReveal({
   questions,
   maryAnswers,
@@ -84,7 +34,6 @@ export default function TogetherReveal({
   const categoryBg = isIntimate ? "rgba(46,31,64,0.3)" : "rgba(30,51,25,0.3)";
   const categoryBorder = isIntimate ? "#2E1F40" : "#1E3319";
 
-  // Group questions by category
   const categories: Record<string, AnyQuestion[]> = {};
   for (const q of questions) {
     if (!categories[q.category]) categories[q.category] = [];
@@ -97,19 +46,11 @@ export default function TogetherReveal({
     <div>
       {Object.entries(categories).map(([cat, qs]) => (
         <div key={cat} className="mb-10">
-          {/* Category header */}
           <div
             className="rounded-lg px-4 py-2 mb-4 flex items-center gap-3"
             style={{ background: categoryBg, border: `1px solid ${categoryBorder}` }}
           >
-            <span
-              style={{
-                fontSize: "9px",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                color: labelColor,
-              }}
-            >
+            <span style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: labelColor }}>
               {cat}
             </span>
           </div>
@@ -118,34 +59,6 @@ export default function TogetherReveal({
             qIndex++;
             const mAns = maryAnswers[q.id];
             const dAns = mdAnswers[q.id];
-
-            // Special: exploration grid
-            if (q.kind === "grid") {
-              let maryGrid: Record<string, GridResponse> = {};
-              let mdGrid: Record<string, GridResponse> = {};
-              try { maryGrid = JSON.parse(mAns?.answer_text || "{}"); } catch {}
-              try { mdGrid = JSON.parse(dAns?.answer_text || "{}"); } catch {}
-              return (
-                <div key={q.id} className="mb-6">
-                  <p
-                    className="mb-3 leading-snug"
-                    style={{
-                      fontSize: "15px",
-                      color: isIntimate ? "#EDE0E8" : "#E2D9C6",
-                      fontFamily: "var(--font-barlow), sans-serif",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {q.text}
-                  </p>
-                  <p style={{ fontSize: "11px", color: labelColor, marginBottom: 12 }}>
-                    Only showing mutual matches.
-                  </p>
-                  <GridTogetherView maryGrid={maryGrid} mdGrid={mdGrid} />
-                </div>
-              );
-            }
-
             const matched = q.kind === "choice" && isSameOption(mAns?.selected_option, dAns?.selected_option);
 
             return (
@@ -159,12 +72,7 @@ export default function TogetherReveal({
                   </span>
                   <p
                     className="leading-snug"
-                    style={{
-                      fontSize: "15px",
-                      color: isIntimate ? "#EDE0E8" : "#E2D9C6",
-                      fontFamily: "var(--font-barlow), sans-serif",
-                      fontWeight: 600,
-                    }}
+                    style={{ fontSize: "15px", color: isIntimate ? "#EDE0E8" : "#E2D9C6", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600 }}
                   >
                     {q.text}
                   </p>
@@ -212,9 +120,8 @@ export default function TogetherReveal({
                           </p>
                         )}
 
-                        {/* Elaboration or open-ended answer */}
-                        {(bodyText && bodyText.trim()) && (
-                          <p style={{ fontSize: "12px", color: labelColor, lineHeight: 1.6, whiteSpace: "pre-wrap", fontStyle: "italic", paddingLeft: chosenOption ? 22 : 0 }}>
+                        {bodyText && bodyText.trim() && chosenOption && (
+                          <p style={{ fontSize: "12px", color: labelColor, lineHeight: 1.6, whiteSpace: "pre-wrap", fontStyle: "italic", paddingLeft: 22 }}>
                             {bodyText}
                           </p>
                         )}

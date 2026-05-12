@@ -1,6 +1,6 @@
 import type { QuestionKind } from "./connection-questions";
 
-export type IntimacyQuestionKind = QuestionKind | "grid";
+export type IntimacyQuestionKind = QuestionKind;
 
 export interface IntimacyQuestion {
   id: string;
@@ -9,24 +9,7 @@ export interface IntimacyQuestion {
   kind: IntimacyQuestionKind;
   options?: string[];
   placeholder?: string;
-  // For kind === 'grid'
-  gridItems?: string[];
 }
-
-export const EXPLORATION_ITEMS = [
-  "A dedicated unhurried evening with zero agenda",
-  "Trying a new location or setting",
-  "Using a toy or new object together",
-  "Role play or a scenario",
-  "Watching or reading something together",
-  "More dominant/submissive energy (either direction)",
-  "Extended foreplay with no main event",
-  "Talking through a fantasy out loud",
-  "Sensory play (blindfold, light restraint, etc.)",
-  "A slow intentional intimacy night — no sex, just touch",
-];
-
-export type GridResponse = "yes" | "maybe" | "not_for_me";
 
 export const INTIMACY_QUESTIONS: IntimacyQuestion[] = [
   // ── Category 1: Acknowledgment ───────────────────────────
@@ -224,24 +207,6 @@ export const INTIMACY_QUESTIONS: IntimacyQuestion[] = [
     placeholder: "The thing you've thought about…",
   },
   {
-    id: "i21",
-    category: "Exploration",
-    text: "For each item below, mark how you feel about it. Your answers are private until the Together view — where only mutual matches will be shown.",
-    kind: "grid",
-    gridItems: [
-      "A dedicated unhurried evening with zero agenda",
-      "Trying a new location or setting",
-      "Using a toy or new object together",
-      "Role play or a scenario",
-      "Watching or reading something together",
-      "More dominant/submissive energy (either direction)",
-      "Extended foreplay with no main event",
-      "Talking through a fantasy out loud",
-      "Sensory play (blindfold, light restraint, etc.)",
-      "A slow intentional intimacy night — no sex, just touch",
-    ],
-  },
-  {
     id: "i22",
     category: "Exploration",
     text: "Describe a scenario or experience you want to create with me that we haven't yet. Paint the picture.",
@@ -308,4 +273,4 @@ export const INTIMACY_CATEGORIES = [
   "The Real Talk",
 ];
 
-export const TOTAL_INTIMACY = INTIMACY_QUESTIONS.length; // 27
+export const TOTAL_INTIMACY = INTIMACY_QUESTIONS.length; // 26
