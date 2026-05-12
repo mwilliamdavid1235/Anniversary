@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/* ── Custom Design Tokens ──────────────────────────────── */
+@theme inline {
+  --color-ink:          #0B1309;
+  --color-surface:      #101A0D;
+  --color-panel:        #152012;
+  --color-edge:         #1E3319;
+  --color-edge-hi:      #2D4D28;
+
+  --color-parchment:    #E2D9C6;
+  --color-parchment-dim:#A8B8A0;
+  --color-muted:        #6E8A74;
+  --color-faint:        #3A5040;
+
+  --color-gold:         #C49A45;
+  --color-gold-dim:     #7A5F25;
+  --color-sage:         #6DB87E;
+  --color-sage-dim:     #3D6B47;
+
+  --font-display:       var(--font-instrument);
+  --font-mono:          var(--font-dm-mono);
+}
+
+/* ── Base ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: #0B1309;
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0B1309;
+  color: #E2D9C6;
+  font-family: var(--font-dm-mono), 'Courier New', monospace;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  font-size: 13px;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2D4D28; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #C49A45; }
+
+/* ── Selection ────────────────────────────────────────────── */
+::selection { background: rgba(196,154,69,0.2); color: #E2D9C6; }
+
+/* ── Instrument Serif display class ──────────────────────── */
+.font-display {
+  font-family: var(--font-instrument), Georgia, serif;
+}
+
+/* ── Animated gold shimmer ────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.gold-shimmer {
+  background: linear-gradient(90deg, #8A6B2A 0%, #F0D080 35%, #C49A45 55%, #8A6B2A 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3.5s linear infinite;
+}
+
+/* ── Fade up entry ────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.5s ease both; }
+
+/* ── Pulse dot ───────────────────────────────────────────── */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.9); opacity: 0.8; }
+  70%  { transform: scale(2);   opacity: 0; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.pulse-dot {
+  position: relative;
+}
+.pulse-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #6DB87E;
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+/* ── Spotify iframe wrapper ──────────────────────────────── */
+.spotify-frame {
+  display: block;
+  width: 100%;
+  border: 1px solid #1E3319;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #101A0D;
+}
+
+/* ── Card hover effect ────────────────────────────────────── */
+.event-card {
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.event-card:hover {
+  border-color: #2D4D28;
+  background: rgba(255,255,255,0.035);
+}
+
+/* ── Next event highlight ─────────────────────────────────── */
+.event-card.is-next {
+  border-color: #3D6B47;
+  background: rgba(109,184,126,0.05);
+}
+
+/* ── Past event dim ───────────────────────────────────────── */
+.event-row.is-past {
+  opacity: 0.38;
+}
+
+/* ── Watermark day number ─────────────────────────────────── */
+.day-watermark {
+  font-family: var(--font-instrument), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(120px, 28vw, 220px);
+  line-height: 0.85;
+  color: rgba(196,154,69,0.04);
+  user-select: none;
+  pointer-events: none;
+  letter-spacing: -0.04em;
+}
