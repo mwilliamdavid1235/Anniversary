@@ -184,8 +184,10 @@ export default function TogetherReveal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {(["mary", "md"] as const).map((person) => {
                     const ans = person === "mary" ? mAns : dAns;
-                    const display =
-                      q.kind === "choice" ? ans?.selected_option : ans?.answer_text;
+                    const chosenOption = q.kind === "choice" ? ans?.selected_option : undefined;
+                    const bodyText = ans?.answer_text;
+                    const openText = q.kind === "open" ? bodyText : undefined;
+                    const hasContent = chosenOption || openText;
                     return (
                       <div
                         key={person}
@@ -195,31 +197,33 @@ export default function TogetherReveal({
                           border: `1px solid ${isIntimate ? "#2E1F40" : "#1A2E18"}`,
                         }}
                       >
-                        <p
-                          style={{
-                            fontSize: "9px",
-                            letterSpacing: "0.2em",
-                            textTransform: "uppercase",
-                            color: labelColor,
-                            marginBottom: 6,
-                          }}
-                        >
+                        <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: labelColor, marginBottom: 6 }}>
                           {person === "mary" ? "Mary" : "MD"}
                         </p>
-                        <p
-                          style={{
-                            fontSize: "13px",
-                            color: isIntimate ? "#EDE0E8" : "#E2D9C6",
-                            lineHeight: 1.5,
-                            whiteSpace: "pre-wrap",
-                          }}
-                        >
-                          {display || (
-                            <span style={{ color: isIntimate ? "#3D2850" : "#2D4D28", fontStyle: "italic" }}>
-                              —
-                            </span>
-                          )}
-                        </p>
+
+                        {!hasContent && (
+                          <span style={{ fontSize: "13px", color: isIntimate ? "#3D2850" : "#2D4D28", fontStyle: "italic" }}>—</span>
+                        )}
+
+                        {chosenOption && (
+                          <p style={{ fontSize: "13px", color: isIntimate ? "#EDE0E8" : "#E2D9C6", lineHeight: 1.5, marginBottom: bodyText && bodyText.trim() ? 8 : 0 }}>
+                            <span style={{ marginRight: 8, color: isIntimate ? "#C47EA0" : "#6DB87E" }}>◆</span>
+                            {chosenOption}
+                          </p>
+                        )}
+
+                        {/* Elaboration or open-ended answer */}
+                        {(bodyText && bodyText.trim()) && (
+                          <p style={{ fontSize: "12px", color: labelColor, lineHeight: 1.6, whiteSpace: "pre-wrap", fontStyle: "italic", paddingLeft: chosenOption ? 22 : 0 }}>
+                            {bodyText}
+                          </p>
+                        )}
+
+                        {openText && !chosenOption && (
+                          <p style={{ fontSize: "13px", color: isIntimate ? "#EDE0E8" : "#E2D9C6", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+                            {openText}
+                          </p>
+                        )}
                       </div>
                     );
                   })}

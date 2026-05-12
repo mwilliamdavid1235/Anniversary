@@ -3,13 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import PersonSelector, { type Person } from "@/components/sections/PersonSelector";
-import QuestionCard from "@/components/sections/QuestionCard";
+import QuestionView, { type AnswerData } from "@/components/sections/QuestionView";
 import TogetherReveal from "@/components/sections/TogetherReveal";
-import { CONNECTION_QUESTIONS, CONNECTION_CATEGORIES, TOTAL_CONNECTION } from "@/lib/connection-questions";
+import { CONNECTION_QUESTIONS, TOTAL_CONNECTION } from "@/lib/connection-questions";
 
-interface AnswerMap {
-  [qId: string]: { answer_text?: string; selected_option?: string };
-}
+type AnswerMap = Record<string, AnswerData>;
 
 interface StatusData {
   mary: { answered_ids: string[]; count: number; total: number };
@@ -18,20 +16,38 @@ interface StatusData {
   is_unlocked: boolean;
 }
 
+// ── Animated question wrapper ─────────────────────────────────
+function AnimatedQuestion({ children, qKey }: { children: React.ReactNode; qKey: string }) {
+  return (
+    <div
+      key={qKey}
+      className="fade-up"
+      style={{ flex: 1, display: "flex", flexDirection: "column" }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function ConnectionPage() {
   const [person, setPerson] = useState<Person | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<AnswerMap>({});
+  const [partnerAnswers, setPartnerAnswers] = useState<AnswerMap>({});
   const [status, setStatus] = useState<StatusData | null>(null);
   const [togetherAnswers, setTogetherAnswers] = useState<{ mary: AnswerMap; md: AnswerMap } | null>(null);
   const [unlocking, setUnlocking] = useState(false);
+  const [showComplete, setShowComplete] = useState(false);
   const [showUnlockAnim, setShowUnlockAnim] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Hydrate person from localStorage
+  // ── Hydrate from localStorage ─────────────────────────────
   useEffect(() => {
     const stored = localStorage.getItem("connection_person") as Person | null;
+    const pos = parseInt(localStorage.getItem("connection_position") ?? "0", 10);
     setPerson(stored);
+    if (!isNaN(pos) && pos >= 0 && pos < TOTAL_CONNECTION) setCurrentIndex(pos);
     setHydrated(true);
   }, []);
 
@@ -40,30 +56,32 @@ export default function ConnectionPage() {
     setPerson(p);
   }
 
-  // Load this person's answers
-  const loadAnswers = useCallback(async (p: Person) => {
+  // ── Persist position ──────────────────────────────────────
+  function goTo(index: number) {
+    const clamped = Math.max(0, Math.min(TOTAL_CONNECTION - 1, index));
+    setCurrentIndex(clamped);
+    localStorage.setItem("connection_position", String(clamped));
+  }
+
+  // ── Data loading ──────────────────────────────────────────
+  const loadMyAnswers = useCallback(async (p: Person) => {
     const res = await fetch(`/api/connection/answers?person=${p}`);
     if (!res.ok) return;
     const { answers: rows } = await res.json();
     const map: AnswerMap = {};
-    for (const row of rows ?? []) {
-      map[row.question_id] = {
-        answer_text: row.answer_text,
-        selected_option: row.selected_option,
-      };
-    }
+    for (const r of rows ?? []) map[r.question_id] = { answer_text: r.answer_text, selected_option: r.selected_option };
     setAnswers(map);
   }, []);
 
-  const loadStatus = useCallback(async () => {
-    const res = await fetch("/api/connection/status");
+  const loadPartnerAnswers = useCallback(async (p: Person) => {
+    const partner = p === "mary" ? "md" : "mary";
+    const res = await fetch(`/api/connection/answers?person=${partner}`);
     if (!res.ok) return;
-    const data: StatusData = await res.json();
-    setStatus(data);
-    if (data.is_unlocked && !togetherAnswers) {
-      loadTogetherAnswers();
-    }
-  }, [togetherAnswers]); // eslint-disable-line react-hooks/exhaustive-deps
+    const { answers: rows } = await res.json();
+    const map: AnswerMap = {};
+    for (const r of rows ?? []) map[r.question_id] = { answer_text: r.answer_text, selected_option: r.selected_option };
+    setPartnerAnswers(map);
+  }, []);
 
   const loadTogetherAnswers = useCallback(async () => {
     const [mRes, dRes] = await Promise.all([
@@ -71,7 +89,6 @@ export default function ConnectionPage() {
       fetch("/api/connection/answers?person=md"),
     ]);
     const [{ answers: mRows }, { answers: dRows }] = await Promise.all([mRes.json(), dRes.json()]);
-
     function toMap(rows: { question_id: string; answer_text?: string; selected_option?: string }[]): AnswerMap {
       const m: AnswerMap = {};
       for (const r of rows ?? []) m[r.question_id] = { answer_text: r.answer_text, selected_option: r.selected_option };
@@ -80,16 +97,29 @@ export default function ConnectionPage() {
     setTogetherAnswers({ mary: toMap(mRows), md: toMap(dRows) });
   }, []);
 
+  const loadStatus = useCallback(async () => {
+    const res = await fetch("/api/connection/status");
+    if (!res.ok) return;
+    const data: StatusData = await res.json();
+    setStatus(data);
+    if (data.is_unlocked) loadTogetherAnswers();
+  }, [loadTogetherAnswers]);
+
   useEffect(() => {
     if (!person) return;
-    loadAnswers(person);
+    loadMyAnswers(person);
+    loadPartnerAnswers(person);
     loadStatus();
-    // Poll for partner completion every 30s
-    pollRef.current = setInterval(loadStatus, 30_000);
+    // Poll partner answers + status every 30s
+    pollRef.current = setInterval(() => {
+      loadPartnerAnswers(person);
+      loadStatus();
+    }, 30_000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [person, loadAnswers, loadStatus]);
+  }, [person, loadMyAnswers, loadPartnerAnswers, loadStatus]);
 
-  async function saveAnswer(qId: string, data: { answer_text?: string; selected_option?: string }) {
+  // ── Save answer ───────────────────────────────────────────
+  async function saveAnswer(qId: string, data: AnswerData) {
     if (!person) return;
     setAnswers((prev) => ({ ...prev, [qId]: { ...prev[qId], ...data } }));
     await fetch("/api/connection/answers", {
@@ -97,10 +127,27 @@ export default function ConnectionPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ person, question_id: qId, ...data }),
     });
-    // Refresh status after saving
     loadStatus();
   }
 
+  // ── Navigation ────────────────────────────────────────────
+  function handleNext() {
+    if (currentIndex < TOTAL_CONNECTION - 1) {
+      goTo(currentIndex + 1);
+    } else {
+      setShowComplete(true);
+    }
+  }
+
+  function handleBack() {
+    if (showComplete) {
+      setShowComplete(false);
+    } else {
+      goTo(currentIndex - 1);
+    }
+  }
+
+  // ── Unlock together ───────────────────────────────────────
   async function handleUnlock() {
     if (!person) return;
     setUnlocking(true);
@@ -121,66 +168,45 @@ export default function ConnectionPage() {
   if (!hydrated) return null;
   if (!person) return <PersonSelector onSelect={selectPerson} />;
 
-  const myAnsweredCount = Object.keys(answers).filter((id) => {
-    const a = answers[id];
-    return (a.answer_text && a.answer_text.trim()) || a.selected_option;
-  }).length;
-
-  const myProgress = Math.round((myAnsweredCount / TOTAL_CONNECTION) * 100);
-  const partnerName = person === "mary" ? "MD" : "Mary";
   const myName = person === "mary" ? "Mary" : "MD";
+  const partnerName = person === "mary" ? "MD" : "Mary";
   const partnerCount = status ? (person === "mary" ? status.md.count : status.mary.count) : null;
 
-  // ── Together view ────────────────────────────────────────────
+  const myAnsweredCount = Object.values(answers).filter(
+    (a) => (a.answer_text && a.answer_text.trim()) || a.selected_option
+  ).length;
+
+  // ── Together view ─────────────────────────────────────────
   if (status?.is_unlocked && togetherAnswers) {
     return (
       <div className="min-h-screen" style={{ background: "#0B1309" }}>
-        {/* Header */}
+        {showUnlockAnim && (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center fade-up" style={{ background: "rgba(11,19,9,0.97)" }}>
+            <p className="gold-shimmer font-display italic" style={{ fontSize: "clamp(32px, 8vw, 56px)" }}>Together ✦</p>
+            <p style={{ fontSize: "13px", color: "#6E8A74", marginTop: 12 }}>Reading together now…</p>
+          </div>
+        )}
         <div style={{ borderBottom: "1px solid #1E3319" }}>
           <div className="max-w-3xl mx-auto px-6 py-6">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 mb-6"
-              style={{ fontSize: "10px", color: "#3A5040", letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase" }}
-            >
+            <Link href="/" style={{ fontSize: "10px", color: "#3A5040", letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20 }}>
               ← Back
             </Link>
-            <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#3A5040", marginBottom: 4 }}>
-              ✦ Together
-            </p>
-            <h1 className="font-display italic" style={{ fontSize: "clamp(32px, 8vw, 52px)", color: "#E2D9C6" }}>
-              Connection
-            </h1>
-            <p style={{ fontSize: "12px", color: "#6E8A74", marginTop: 6 }}>
-              Both of your answers, side by side.
-            </p>
-
-            {/* Person key */}
+            <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#3A5040", marginBottom: 4 }}>✦ Together</p>
+            <h1 className="font-display italic" style={{ fontSize: "clamp(32px, 8vw, 52px)", color: "#E2D9C6" }}>Connection</h1>
+            <p style={{ fontSize: "12px", color: "#6E8A74", marginTop: 6 }}>Both of your answers, side by side.</p>
             <div className="flex gap-4 mt-4">
               {(["mary", "md"] as const).map((p) => (
                 <div key={p} className="flex items-center gap-2">
-                  <div
-                    style={{
-                      width: 8, height: 8, borderRadius: "50%",
-                      background: p === "mary" ? "#9B8FC4" : "#6DB87E",
-                    }}
-                  />
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: p === "mary" ? "#9B8FC4" : "#6DB87E" }} />
                   <span style={{ fontSize: "11px", color: "#6E8A74" }}>{p === "mary" ? "Mary" : "MD"}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
         <main className="max-w-3xl mx-auto px-6 py-10 fade-up">
-          <TogetherReveal
-            questions={CONNECTION_QUESTIONS}
-            maryAnswers={togetherAnswers.mary}
-            mdAnswers={togetherAnswers.md}
-            palette="forest"
-          />
+          <TogetherReveal questions={CONNECTION_QUESTIONS} maryAnswers={togetherAnswers.mary} mdAnswers={togetherAnswers.md} palette="forest" />
         </main>
-
         <footer className="text-center py-8 border-t" style={{ borderColor: "#1E3319" }}>
           <p className="font-display" style={{ fontSize: "18px", color: "#3A5040" }}>pecanandpoplar.com</p>
         </footer>
@@ -188,186 +214,122 @@ export default function ConnectionPage() {
     );
   }
 
-  // ── Questionnaire view ────────────────────────────────────────
-  return (
-    <div className="min-h-screen" style={{ background: "#0B1309" }}>
-      {/* Unlock reveal overlay */}
-      {showUnlockAnim && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center fade-up"
-          style={{ background: "rgba(11,19,9,0.97)" }}
-        >
-          <p className="gold-shimmer font-display italic" style={{ fontSize: "clamp(32px, 8vw, 56px)" }}>
-            Together ✦
-          </p>
-          <p style={{ fontSize: "13px", color: "#6E8A74", marginTop: 12 }}>Reading together now…</p>
-        </div>
-      )}
-
-      {/* Header */}
-      <div style={{ borderBottom: "1px solid #1E3319" }}>
-        <div className="max-w-2xl mx-auto px-6 py-6">
-          <Link
-            href="/"
-            style={{ fontSize: "10px", color: "#3A5040", letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20 }}
-          >
-            ← Back
-          </Link>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#3A5040", marginBottom: 4 }}>
-                ✦ {myName}
-              </p>
-              <h1 className="font-display italic" style={{ fontSize: "clamp(32px, 8vw, 48px)", color: "#E2D9C6" }}>
-                Connection
-              </h1>
-            </div>
-            {/* Progress */}
-            <div className="text-right flex-shrink-0">
-              <p style={{ fontSize: "22px", color: "#C49A45", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600 }}>
-                {myAnsweredCount}/{TOTAL_CONNECTION}
-              </p>
-              <p style={{ fontSize: "9px", color: "#3A5040", letterSpacing: "0.1em" }}>answered</p>
-            </div>
+  // ── Completion screen ─────────────────────────────────────
+  if (showComplete) {
+    return (
+      <div className="min-h-screen flex flex-col" style={{ background: "#0B1309" }}>
+        {showUnlockAnim && (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center fade-up" style={{ background: "rgba(11,19,9,0.97)" }}>
+            <p className="gold-shimmer font-display italic" style={{ fontSize: "clamp(32px, 8vw, 56px)" }}>Together ✦</p>
+            <p style={{ fontSize: "13px", color: "#6E8A74", marginTop: 12 }}>Reading together now…</p>
           </div>
-
-          {/* Progress bar */}
-          <div className="mt-4 rounded-full overflow-hidden" style={{ height: 2, background: "#1E3319" }}>
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${myProgress}%`, background: "#C49A45" }}
-            />
-          </div>
-
-          {/* Partner status */}
-          {status && (
-            <p className="mt-3" style={{ fontSize: "11px", color: "#3A5040" }}>
-              {partnerName}:{" "}
-              <span style={{ color: partnerCount === TOTAL_CONNECTION ? "#6DB87E" : "#3A5040" }}>
-                {partnerCount === TOTAL_CONNECTION ? "Done ✓" : `${partnerCount ?? 0}/${TOTAL_CONNECTION}`}
-              </span>
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Questions */}
-      <main className="max-w-2xl mx-auto px-6 py-8">
-        {CONNECTION_CATEGORIES.map((cat) => {
-          const qs = CONNECTION_QUESTIONS.filter((q) => q.category === cat);
-          const catAnswered = qs.filter((q) => {
-            const a = answers[q.id];
-            return a && ((a.answer_text && a.answer_text.trim()) || a.selected_option);
-          }).length;
-
-          return (
-            <div key={cat} className="mb-10">
-              {/* Category header */}
-              <div className="flex items-center gap-3 mb-5">
-                <span
-                  className="font-display italic"
-                  style={{ fontSize: "19px", color: "#E2D9C6" }}
-                >
-                  {cat}
-                </span>
-                <div className="flex-1 h-px" style={{ background: "#1E3319" }} />
-                <span style={{ fontSize: "10px", color: catAnswered === qs.length ? "#6DB87E" : "#3A5040" }}>
-                  {catAnswered === qs.length ? "✓ done" : `${catAnswered}/${qs.length}`}
-                </span>
+        )}
+        <div style={{ borderBottom: "1px solid #1E3319" }}>
+          <div className="max-w-xl mx-auto px-6 py-4 flex items-center gap-4">
+            <button onClick={handleBack} style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#3A5040", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              ← Back
+            </button>
+            <div className="flex-1">
+              <div className="rounded-full overflow-hidden" style={{ height: 2, background: "#1E3319" }}>
+                <div className="h-full rounded-full" style={{ width: `${(myAnsweredCount / TOTAL_CONNECTION) * 100}%`, background: "#C49A45" }} />
               </div>
-
-              {qs.map((q, qi) => {
-                const globalIndex = CONNECTION_QUESTIONS.indexOf(q) + 1;
-                const a = answers[q.id] ?? {};
-                return (
-                  <QuestionCard
-                    key={q.id}
-                    question={q}
-                    answerText={a.answer_text ?? ""}
-                    selectedOption={a.selected_option ?? ""}
-                    onSave={saveAnswer}
-                    palette="forest"
-                    number={globalIndex}
-                  />
-                );
-              })}
+              <div className="flex justify-between mt-1">
+                <span style={{ fontSize: "9px", color: "#3A5040", letterSpacing: "0.1em" }}>{myAnsweredCount} of {TOTAL_CONNECTION} answered</span>
+              </div>
             </div>
-          );
-        })}
+          </div>
+        </div>
 
-        {/* Completion / unlock zone */}
-        <div className="mt-8 mb-16">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 fade-up">
           {myAnsweredCount < TOTAL_CONNECTION ? (
-            <p style={{ fontSize: "12px", color: "#3A5040", textAlign: "center" }}>
-              {TOTAL_CONNECTION - myAnsweredCount} question{TOTAL_CONNECTION - myAnsweredCount !== 1 ? "s" : ""} left
-            </p>
+            <>
+              <p className="font-display italic mb-2" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: "#E2D9C6", textAlign: "center" }}>
+                {TOTAL_CONNECTION - myAnsweredCount} left
+              </p>
+              <p style={{ fontSize: "12px", color: "#6E8A74", marginBottom: 24, textAlign: "center" }}>
+                You can go back and fill them in, or skip them for now.
+              </p>
+              <button onClick={() => { setShowComplete(false); goTo(0); }} style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#3A5040", background: "none", border: "1px solid #1E3319", padding: "8px 18px", borderRadius: 8, cursor: "pointer" }}>
+                Review from the start
+              </button>
+            </>
           ) : !status?.both_complete ? (
-            <div
-              className="rounded-xl p-6 text-center"
-              style={{ background: "rgba(61,107,71,0.08)", border: "1px solid #2D4D28" }}
-            >
-              <p style={{ fontSize: "22px", color: "#6DB87E", fontFamily: "var(--font-barlow), sans-serif", fontStyle: "italic", fontWeight: 600, marginBottom: 6 }}>
-                You're done ✓
+            <>
+              <p className="font-display italic mb-2" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: "#E2D9C6", textAlign: "center" }}>
+                You&apos;re done ✓
               </p>
-              <p style={{ fontSize: "12px", color: "#6E8A74" }}>
-                Waiting for {partnerName} to finish ({partnerCount ?? 0}/{TOTAL_CONNECTION}).
+              <p style={{ fontSize: "12px", color: "#6E8A74", marginBottom: 6, textAlign: "center" }}>
+                Waiting for {partnerName} to finish.
               </p>
-              <button
-                onClick={loadStatus}
-                className="mt-4 rounded transition-opacity"
-                style={{
-                  fontSize: "9px",
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                  color: "#3A5040",
-                  background: "none",
-                  border: "1px solid #1E3319",
-                  padding: "6px 14px",
-                  cursor: "pointer",
-                }}
-              >
+              <p style={{ fontSize: "11px", color: "#3A5040", marginBottom: 24, textAlign: "center" }}>
+                {partnerCount ?? 0}/{TOTAL_CONNECTION} answered
+              </p>
+              <button onClick={() => { loadPartnerAnswers(person); loadStatus(); }} style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#3A5040", background: "none", border: "1px solid #1E3319", padding: "6px 14px", borderRadius: 6, cursor: "pointer" }}>
                 Refresh
               </button>
-            </div>
+            </>
           ) : (
-            <div className="text-center">
-              <p
-                className="font-display italic mb-2"
-                style={{ fontSize: "20px", color: "#E2D9C6" }}
-              >
+            <>
+              <p className="font-display italic mb-2" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: "#E2D9C6", textAlign: "center" }}>
                 You both finished.
               </p>
-              <p style={{ fontSize: "12px", color: "#6E8A74", marginBottom: 20 }}>
+              <p style={{ fontSize: "12px", color: "#6E8A74", marginBottom: 24, textAlign: "center" }}>
                 Ready to read together?
               </p>
               <button
                 onClick={handleUnlock}
                 disabled={unlocking}
                 className="rounded-xl transition-all duration-200 active:scale-[0.98]"
-                style={{
-                  padding: "14px 32px",
-                  background: "rgba(196,154,69,0.12)",
-                  border: "1px solid #C49A45",
-                  color: "#E2D9C6",
-                  fontSize: "14px",
-                  fontFamily: "var(--font-barlow), sans-serif",
-                  fontWeight: 600,
-                  fontStyle: "italic",
-                  cursor: unlocking ? "wait" : "pointer",
-                  opacity: unlocking ? 0.6 : 1,
-                  letterSpacing: "0.02em",
-                }}
+                style={{ padding: "14px 32px", background: "rgba(196,154,69,0.12)", border: "1px solid #C49A45", color: "#E2D9C6", fontSize: "14px", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", cursor: unlocking ? "wait" : "pointer", opacity: unlocking ? 0.6 : 1 }}
               >
                 {unlocking ? "Opening…" : "We're ready to read together ✦"}
               </button>
-            </div>
+            </>
           )}
         </div>
-      </main>
 
-      <footer className="text-center py-8 border-t" style={{ borderColor: "#1E3319" }}>
-        <p className="font-display" style={{ fontSize: "18px", color: "#3A5040" }}>pecanandpoplar.com</p>
-      </footer>
+        <footer className="text-center py-6 border-t" style={{ borderColor: "#1E3319" }}>
+          <Link href="/" style={{ fontSize: "10px", color: "#2D4D28", letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase" }}>
+            ← Itinerary
+          </Link>
+        </footer>
+      </div>
+    );
+  }
+
+  // ── Single-question view ──────────────────────────────────
+  const q = CONNECTION_QUESTIONS[currentIndex];
+  const myAns = answers[q.id] ?? {};
+  const partnerAns = partnerAnswers[q.id];
+
+  return (
+    <div style={{ background: "#0B1309", minHeight: "100vh" }}>
+      {/* Subtle header link */}
+      <div className="absolute top-4 left-4 z-10">
+        <Link href="/" style={{ fontSize: "9px", color: "#2D4D28", letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase" }}>
+          ← Home
+        </Link>
+      </div>
+      <div className="absolute top-4 right-4 z-10">
+        <span style={{ fontSize: "9px", color: "#2D4D28", letterSpacing: "0.1em" }}>{myName}</span>
+      </div>
+
+      <AnimatedQuestion qKey={`${q.id}-${currentIndex}`}>
+        <QuestionView
+          question={q}
+          questionNumber={currentIndex + 1}
+          totalQuestions={TOTAL_CONNECTION}
+          myAnswer={myAns}
+          partnerAnswer={partnerAns}
+          partnerName={partnerName}
+          onSave={saveAnswer}
+          onNext={handleNext}
+          onBack={handleBack}
+          isFirst={currentIndex === 0}
+          isLast={currentIndex === TOTAL_CONNECTION - 1}
+          palette="forest"
+        />
+      </AnimatedQuestion>
     </div>
   );
 }
