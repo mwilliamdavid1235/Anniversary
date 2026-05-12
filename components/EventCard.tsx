@@ -61,7 +61,7 @@ function OptionItem({ option }: { option: EventOption }) {
         border: "1px solid #1E3319",
       }}
     >
-      <p className="font-display italic mb-1" style={{ fontSize: "17px", color: "#E2D9C6" }}>
+      <p className="font-display mb-1" style={{ fontSize: "17px", color: "#E2D9C6" }}>
         {option.name}
       </p>
       <p className="mb-2 leading-relaxed" style={{ fontSize: "11px", color: "#6E8A74" }}>
@@ -141,7 +141,7 @@ export default function EventCard({ event, isNext, isPast }: EventCardProps) {
 
         {/* Title */}
         <h3
-          className="font-display italic leading-tight mb-1"
+          className="font-display leading-tight mb-1"
           style={{ fontSize: "22px", color: "#E2D9C6" }}
         >
           {event.title}

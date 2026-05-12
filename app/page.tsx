@@ -59,7 +59,7 @@ export default function Home() {
         {/* Day label */}
         <div className="relative z-10 mb-6 flex items-center gap-3">
           <span
-            className="font-display italic"
+            className="font-display"
             style={{ fontSize: "13px", color: "#3A5040", letterSpacing: "0.04em" }}
           >
             {currentDay.label}
@@ -82,7 +82,7 @@ export default function Home() {
         style={{ borderColor: "#1E3319" }}
       >
         <p
-          className="font-display italic mb-1"
+          className="font-display mb-1"
           style={{ fontSize: "20px", color: "#3A5040" }}
         >
           pecanandpoplar.com

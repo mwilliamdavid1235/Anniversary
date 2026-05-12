@@ -83,7 +83,7 @@ export default function UpNextBanner({ days }: UpNextBannerProps) {
             {typeBadge[next.event.type] ?? next.event.type}
           </span>
           <p
-            className="font-display italic truncate leading-tight mt-0.5"
+            className="font-display truncate leading-tight mt-0.5"
             style={{ fontSize: "18px", color: "#E2D9C6" }}
           >
             {next.event.title}

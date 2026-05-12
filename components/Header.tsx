@@ -43,7 +43,7 @@ export default function Header({ title, subtitle, startDate, endDate }: HeaderPr
 
         {/* Title */}
         <h1
-          className="font-display italic leading-none mb-2"
+          className="font-display leading-none mb-2"
           style={{
             fontSize: "clamp(42px, 10vw, 72px)",
             color: "#E2D9C6",
