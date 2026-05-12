@@ -45,6 +45,44 @@ export const TRIP: Trip = {
           type: "restaurant",
           description:
             "Arrive in historic downtown Sevierville for a relaxed first lunch. Two good local options — pick your vibe.",
+          bailouts: [
+            {
+              id: "bail-crocketts-fri",
+              name: "Crockett's Breakfast Camp",
+              description:
+                "Southern Appalachian breakfast all day — cinnamon rolls, skilleted eggs, biscuits. On the Parkway in Gatlinburg but genuinely not a tourist trap. Good energy, warm room.",
+              links: [
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Crocketts+Breakfast+Camp+Gatlinburg+TN&navigate=yes",
+                  kind: "waze",
+                },
+                {
+                  label: "Call",
+                  href: "tel:+18653251403",
+                  kind: "phone",
+                },
+              ],
+            },
+            {
+              id: "bail-sawyersfri",
+              name: "Sawyer's Farmhouse",
+              description:
+                "Scratch-made farmhouse breakfast on Wears Valley Road — pancakes, crepes, biscuits and gravy. Works great for Friday if you'd rather save downtown for later.",
+              links: [
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Sawyers+Farmhouse+862+Wears+Valley+Rd+Pigeon+Forge+TN&navigate=yes",
+                  kind: "waze",
+                },
+                {
+                  label: "Call",
+                  href: "tel:+18653661090",
+                  kind: "phone",
+                },
+              ],
+            },
+          ],
           options: [
             {
               id: "opt-local-goat",
@@ -109,6 +147,21 @@ export const TRIP: Trip = {
               kind: "waze",
             },
           ],
+          bailouts: [
+            {
+              id: "bail-skip-grocery",
+              name: "Skip it — go straight to Stellara",
+              description:
+                "If the grocery run feels like too much of an errand after a travel day, head straight to the resort and decompress. Stellara has 2 miles of trails, a hot tub, and a meditation labyrinth. Grab essentials at Food City on the way — quick in-and-out, no experience required.",
+              links: [
+                {
+                  label: "Food City — Waze",
+                  href: "https://waze.com/ul?q=Food+City+1414+Dolly+Parton+Pkwy+Sevierville+TN&navigate=yes",
+                  kind: "waze",
+                },
+              ],
+            },
+          ],
         },
 
         {
@@ -146,6 +199,22 @@ export const TRIP: Trip = {
           description:
             "Ten stops across the night sky — planets, stars, clusters, and galaxies — guided by a custom star tour built for this trip. Begins after dark. Runs roughly 90 minutes. The light arriving tonight from your anniversary star left in 1998.",
           note: "Star tour launches from the Pecan & Poplar app. Begin after dark when the sky is fully dark.",
+          bailouts: [
+            {
+              id: "bail-star-move",
+              name: "Move it to Saturday night",
+              description:
+                "If it's cloudy, cold, or she's tired after a long travel day — don't push it. Saturday evening is already set up as an option in the app. Light a fire, use the hot tub, call it a perfect evening. The tour goes nowhere.",
+              links: [],
+            },
+            {
+              id: "bail-star-skip",
+              name: "Skip the guided tour entirely",
+              description:
+                "Use Stellara's own telescope casually and spend the night on the deck. The resort provides a constellation map and stargazing apps with each stay — you don't need the full experience to have a magical night under a new moon in the Smokies.",
+              links: [],
+            },
+          ],
           playlist: {
             id: "pl-star-tour",
             label: "Among the stars",
@@ -173,6 +242,33 @@ export const TRIP: Trip = {
           description:
             "A 4.4-mile moderate hike in the quieter Cosby section of Great Smoky Mountains National Park, ending at a 90-foot waterfall with a natural wading pool at the base. Lush hemlock and rhododendron forest, far fewer people than anything near Gatlinburg.",
           note: "Bring water shoes for the falls. A GSMNP parking tag is required — $5/day or $15/week. Purchase at the trailhead kiosk or online.",
+          bailouts: [
+            {
+              id: "bail-porters-creek",
+              name: "Porters Creek Trail",
+              description:
+                "4.5 miles round-trip, easy-to-moderate — feels more like a wander than a workout. Spring wildflower corridor that locals call one of the best in the Smokies in May. Historic homestead ruins, 1875 cantilever barn, and Fern Branch Falls at the end. You can cut it at 2 miles and still have a full experience. Parking tag required ($5/day).",
+              links: [
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Greenbrier+Trailhead+Gatlinburg+TN&navigate=yes",
+                  kind: "waze",
+                },
+                {
+                  label: "AllTrails",
+                  href: "https://www.alltrails.com/trail/us/tennessee/porters-creek-trail",
+                  kind: "website",
+                },
+              ],
+            },
+            {
+              id: "bail-resort-walk",
+              name: "Resort Property Walk",
+              description:
+                "Stellara has 2 miles of on-property trails across 85 acres. Zero drive, zero parking, zero decision fatigue — lace up and walk out the front door. Good for a morning that needs to stay slow.",
+              links: [],
+            },
+          ],
           links: [
             {
               label: "NPS Trail Info",
@@ -200,6 +296,34 @@ export const TRIP: Trip = {
           type: "activity",
           description:
             "On the drive back from Cosby, pull off along the Middle Fork of the Little Pigeon River for a post-hike wade. Greenbrier is a locals-only vibe — find a pull-off, walk down to the bank, let the cold mountain water do its thing.",
+          bailouts: [
+            {
+              id: "bail-metcalf",
+              name: "Metcalf Bottoms Picnic Area",
+              description:
+                "Shallow river access right at a picnic area on Little River Road — pull up, walk 50 feet, put your feet in. More parking, easier access, picnic tables if you want to linger.",
+              links: [
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Metcalf+Bottoms+Picnic+Area+GSMNP+TN&navigate=yes",
+                  kind: "waze",
+                },
+              ],
+            },
+            {
+              id: "bail-townsend-wye",
+              name: "Townsend Wye (The Y)",
+              description:
+                "Where two rivers meet — big shallow pools, jump-off rocks. More of a scene than Greenbrier but a local summer hangout, not a tourist trap. Arrive before noon on a hot day.",
+              links: [
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Townsend+Wye+Townsend+TN&navigate=yes",
+                  kind: "waze",
+                },
+              ],
+            },
+          ],
           links: [
             {
               label: "Waze",
@@ -222,6 +346,44 @@ export const TRIP: Trip = {
           type: "lodging",
           description:
             "Return to the resort. Hot tub, clean up, rest before dinner. You've earned it.",
+          bailouts: [
+            {
+              id: "bail-hillside-winery",
+              name: "Hillside Winery",
+              description:
+                "If she'd rather not sit at the resort for 3 hours before dinner — Italian-style and sparkling wines, free tastings, mountain views from the patio, zero pressure. Set back from the main strip, never crowded. Leaves you ~4 miles from The Appalachian.",
+              links: [
+                {
+                  label: "Website",
+                  href: "https://hillsidewine.com",
+                  kind: "website",
+                },
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Hillside+Winery+Sevierville+TN&navigate=yes",
+                  kind: "waze",
+                },
+                {
+                  label: "Call",
+                  href: "tel:+18659088482",
+                  kind: "phone",
+                },
+              ],
+            },
+            {
+              id: "bail-tn-cider",
+              name: "Tennessee Cider Company",
+              description:
+                "If cider is more her thing — downtown Gatlinburg, more scene-y but genuinely great. Free samples, 6 tasting stations, craft hard ciders and meads. Fine before dinner if you keep it to one round.",
+              links: [
+                {
+                  label: "Website",
+                  href: "https://www.tncidercompany.com",
+                  kind: "website",
+                },
+              ],
+            },
+          ],
           playlist: {
             id: "pl-afternoon",
             label: "Slow afternoon",
@@ -312,6 +474,44 @@ export const TRIP: Trip = {
           description:
             "Locally owned farmhouse breakfast on the quieter Wears Valley Road — scratch-made pancakes, mountain berry crepes, biscuits and gravy, and genuinely warm service. A Sunday morning pace you won't find on the Parkway.",
           note: "Walk-in only, no reservations. Arrive by 9 to beat the wait. Open 7 AM – 2 PM.",
+          bailouts: [
+            {
+              id: "bail-five-oaks-sun",
+              name: "Five Oaks Farm Kitchen",
+              description:
+                "If Sawyer's has a long wait or you skipped it Friday — all-day breakfast in a massive farmhouse setting rooted in Sevier County history. Use their waitlist app (\"The List\") to get in queue before you arrive.",
+              links: [
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Five+Oaks+Farm+Kitchen+Sevierville+TN&navigate=yes",
+                  kind: "waze",
+                },
+                {
+                  label: "Call",
+                  href: "tel:+18653651008",
+                  kind: "phone",
+                },
+              ],
+            },
+            {
+              id: "bail-crocketts-sun",
+              name: "Crockett's Breakfast Camp",
+              description:
+                "Best if you're already heading toward Gatlinburg on the way home. Appalachian-inspired menu, warm atmosphere, genuinely local.",
+              links: [
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Crocketts+Breakfast+Camp+Gatlinburg+TN&navigate=yes",
+                  kind: "waze",
+                },
+                {
+                  label: "Call",
+                  href: "tel:+18653251403",
+                  kind: "phone",
+                },
+              ],
+            },
+          ],
           links: [
             {
               label: "Website",
@@ -344,6 +544,28 @@ export const TRIP: Trip = {
           type: "travel",
           description:
             "About 1 hour 15 minutes back to South Knoxville. Take the scenic route through Wears Valley and Townsend if the mood is right — it adds maybe 20 minutes and it's worth it.",
+          bailouts: [
+            {
+              id: "bail-scenic-route",
+              name: "The Scenic Route",
+              description:
+                "Instead of I-40, take Wears Valley Rd → TN-73 through Townsend → US-321 → Maryville → Knoxville. Quiet two-lane roads through open valley, no traffic, beautiful. About 20 minutes longer and worth every one of them.",
+              links: [],
+            },
+            {
+              id: "bail-the-sinks",
+              name: "Quick Stop — The Sinks",
+              description:
+                "On Little River Road between Gatlinburg and Townsend. Pull off, walk 100 feet, watch a waterfall pour into a deep green pool. Five minutes. Free. Genuinely stunning.",
+              links: [
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=The+Sinks+Little+River+Road+GSMNP+TN&navigate=yes",
+                  kind: "waze",
+                },
+              ],
+            },
+          ],
           links: [
             {
               label: "Waze",

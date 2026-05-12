@@ -53,6 +53,79 @@ function LinkButton({ link }: { link: EventLink }) {
   );
 }
 
+// ── Backup plans panel (reference only, no selection) ────────
+function BackupsPanel({ options }: { options: EventOption[] }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mt-3" style={{ borderTop: "1px solid #141F13", paddingTop: 12 }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5"
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: 0,
+        }}
+      >
+        <span
+          style={{
+            fontSize: "9px",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            color: "#2D4D28",
+          }}
+        >
+          {open ? "▲" : "▼"}
+        </span>
+        <span
+          style={{
+            fontSize: "9px",
+            letterSpacing: "0.15em",
+            textTransform: "uppercase",
+            color: "#2D4D28",
+          }}
+        >
+          Backup plans
+        </span>
+      </button>
+
+      {open && (
+        <div className="mt-2">
+          {options.map((opt) => (
+            <div
+              key={opt.id}
+              className="rounded-lg p-3 mb-2 last:mb-0"
+              style={{
+                background: "rgba(11,19,9,0.4)",
+                border: "1px solid #141F13",
+              }}
+            >
+              <p
+                className="font-display italic mb-1"
+                style={{ fontSize: "15px", color: "#7A9980" }}
+              >
+                {opt.name}
+              </p>
+              <p className="leading-relaxed mb-2" style={{ fontSize: "11px", color: "#3A5040" }}>
+                {opt.description}
+              </p>
+              {opt.links.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {opt.links.map((l) => (
+                    <LinkButton key={l.href + l.label} link={l} />
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Options panel with persistent selection ──────────────────
 function OptionsPanel({ eventId, options }: { eventId: string; options: EventOption[] }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -321,6 +394,11 @@ export default function EventCard({ event, isNext, isPast }: EventCardProps) {
           >
             {event.note}
           </div>
+        )}
+
+        {/* Backup plans */}
+        {event.bailouts && event.bailouts.length > 0 && (
+          <BackupsPanel options={event.bailouts} />
         )}
 
         {/* Playlist */}
