@@ -44,24 +44,41 @@ const PARTNER: Record<Person, string> = { mary: "MD", md: "Mary" };
 
 // ── ItemCard ──────────────────────────────────────────────────
 
+const AUTO_COMMENT: Set<GridResponse> = new Set(["curious", "fantasy_only"]);
+
 function ItemCard({
   item,
   isOpen,
   onToggle,
   response,
+  comment,
   onSelect,
+  onCommentChange,
+  onDone,
   locked,
 }: {
   item: { id: string; label: string; description: string };
   isOpen: boolean;
   onToggle: () => void;
   response: GridResponse | null;
+  comment: string;
   onSelect: (r: GridResponse) => void;
+  onCommentChange: (val: string) => void;
+  onDone: () => void;
   locked: boolean;
 }) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const hasAnswer = !!response;
   const color = hasAnswer ? RESPONSE_COLORS[response!] : PALETTE.edge;
   const label = hasAnswer ? EXPLORATION_OPTION_LABELS[response!] : null;
+  const showTextarea = isOpen && hasAnswer && !locked;
+
+  // Auto-focus textarea when a "conditional" response is picked
+  useEffect(() => {
+    if (showTextarea && response && AUTO_COMMENT.has(response)) {
+      setTimeout(() => textareaRef.current?.focus(), 50);
+    }
+  }, [showTextarea, response]);
 
   return (
     <div
@@ -96,9 +113,16 @@ function ItemCard({
             {item.description}
           </p>
           {hasAnswer && !isOpen && label && (
-            <p style={{ fontSize: "11px", color, marginTop: 5 }}>
-              {label.emoji} {label.short}
-            </p>
+            <>
+              <p style={{ fontSize: "11px", color, marginTop: 5 }}>
+                {label.emoji} {label.short}
+              </p>
+              {comment.trim() && (
+                <p style={{ fontSize: "11px", color: PALETTE.textFaint, marginTop: 3, fontStyle: "italic", lineHeight: 1.4 }}>
+                  {comment.length > 80 ? comment.slice(0, 80) + "…" : comment}
+                </p>
+              )}
+            </>
           )}
         </div>
         {!locked && (
@@ -134,6 +158,51 @@ function ItemCard({
               </button>
             );
           })}
+
+          {/* Optional note */}
+          {showTextarea && (
+            <div style={{ marginTop: 6 }}>
+              <textarea
+                ref={textareaRef}
+                value={comment}
+                onChange={(e) => onCommentChange(e.target.value)}
+                placeholder={
+                  response && AUTO_COMMENT.has(response)
+                    ? "If it was… or what makes me curious…"
+                    : "Anything you want to add… (optional)"
+                }
+                rows={2}
+                className="w-full rounded-xl outline-none resize-none leading-relaxed"
+                style={{
+                  background: "rgba(12,8,16,0.6)",
+                  border: `1px solid ${PALETTE.edge}`,
+                  color: PALETTE.text,
+                  fontSize: "13px",
+                  padding: "10px 14px",
+                  fontFamily: "var(--font-dm-mono), monospace",
+                  transition: "border-color 0.2s ease",
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = PALETTE.rose + "50"; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = PALETTE.edge; }}
+              />
+              <button
+                onClick={onDone}
+                style={{
+                  marginTop: 8,
+                  fontSize: "10px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: PALETTE.rose,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
+                Done →
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -147,6 +216,8 @@ function DiscussScreen({
   person,
   myAnswers,
   partnerAnswers,
+  myComments,
+  partnerComments,
   summary,
   isLastSection,
   onNext,
@@ -155,6 +226,8 @@ function DiscussScreen({
   person: Person;
   myAnswers: Record<string, GridResponse>;
   partnerAnswers: Record<string, GridResponse>;
+  myComments: Record<string, string>;
+  partnerComments: Record<string, string>;
   summary: string;
   isLastSection: boolean;
   onNext: () => void;
@@ -212,6 +285,8 @@ function DiscussScreen({
                 {items.map((item) => {
                   const myR = myAnswers[item.id];
                   const partnerR = partnerAnswers[item.id];
+                  const myC = myComments[item.id]?.trim();
+                  const partnerC = partnerComments[item.id]?.trim();
                   return (
                     <div key={item.id} className="rounded-xl p-4" style={{ background: "rgba(13,11,16,0.3)", border: `1px solid ${PALETTE.edge}` }}>
                       <p style={{ fontSize: "14px", color: PALETTE.text, fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", marginBottom: 2 }}>
@@ -227,6 +302,7 @@ function DiscussScreen({
                             <p style={{ fontSize: "12px", color: RESPONSE_COLORS[myR] }}>
                               {EXPLORATION_OPTION_LABELS[myR].emoji} {EXPLORATION_OPTION_LABELS[myR].short}
                             </p>
+                            {myC && <p style={{ fontSize: "11px", color: PALETTE.textFaint, marginTop: 4, fontStyle: "italic", lineHeight: 1.4 }}>{myC}</p>}
                           </div>
                         )}
                         {partnerR && (
@@ -235,6 +311,7 @@ function DiscussScreen({
                             <p style={{ fontSize: "12px", color: RESPONSE_COLORS[partnerR] }}>
                               {EXPLORATION_OPTION_LABELS[partnerR].emoji} {EXPLORATION_OPTION_LABELS[partnerR].short}
                             </p>
+                            {partnerC && <p style={{ fontSize: "11px", color: PALETTE.textFaint, marginTop: 4, fontStyle: "italic", lineHeight: 1.4 }}>{partnerC}</p>}
                           </div>
                         )}
                       </div>
@@ -295,6 +372,8 @@ export default function ExplorationPage() {
   const [openItemId, setOpenItemId] = useState<string | null>(null);
   const [myAnswers, setMyAnswers] = useState<Record<string, GridResponse>>({});
   const [partnerAnswers, setPartnerAnswers] = useState<Record<string, GridResponse>>({});
+  const [myComments, setMyComments] = useState<Record<string, string>>({});
+  const [partnerComments, setPartnerComments] = useState<Record<string, string>>({});
   const [submittedSections, setSubmittedSections] = useState<Set<string>>(new Set());
   const [summaries, setSummaries] = useState<Record<string, string>>({});
   const [generatingSummary, setGeneratingSummary] = useState(false);
@@ -333,9 +412,14 @@ export default function ExplorationPage() {
     const res = await fetch(`/api/exploration/answers?person=${p}`);
     if (!res.ok) return;
     const { answers } = await res.json();
-    const map: Record<string, GridResponse> = {};
-    for (const a of answers ?? []) map[a.item_id] = a.response;
-    setMyAnswers(map);
+    const rMap: Record<string, GridResponse> = {};
+    const cMap: Record<string, string> = {};
+    for (const a of answers ?? []) {
+      rMap[a.item_id] = a.response;
+      if (a.comment) cMap[a.item_id] = a.comment;
+    }
+    setMyAnswers(rMap);
+    setMyComments(cMap);
   }, []);
 
   const loadPartnerAnswers = useCallback(async (p: Person) => {
@@ -343,9 +427,14 @@ export default function ExplorationPage() {
     const res = await fetch(`/api/exploration/answers?person=${partner}`);
     if (!res.ok) return;
     const { answers } = await res.json();
-    const map: Record<string, GridResponse> = {};
-    for (const a of answers ?? []) map[a.item_id] = a.response;
-    setPartnerAnswers(map);
+    const rMap: Record<string, GridResponse> = {};
+    const cMap: Record<string, string> = {};
+    for (const a of answers ?? []) {
+      rMap[a.item_id] = a.response;
+      if (a.comment) cMap[a.item_id] = a.comment;
+    }
+    setPartnerAnswers(rMap);
+    setPartnerComments(cMap);
   }, []);
 
   useEffect(() => {
@@ -374,16 +463,32 @@ export default function ExplorationPage() {
   // ── Save answer ──────────────────────────────────────────
   function handleSelect(itemId: string, response: GridResponse) {
     setMyAnswers((prev) => ({ ...prev, [itemId]: response }));
-    setOpenItemId(null);
+    // Stay open so user can optionally add a comment
     if (saveTimers.current[itemId]) clearTimeout(saveTimers.current[itemId]);
     saveTimers.current[itemId] = setTimeout(async () => {
       if (!person) return;
       await fetch("/api/exploration/answers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ person, item_id: itemId, response }),
+        body: JSON.stringify({ person, item_id: itemId, response, comment: myComments[itemId] ?? null }),
       });
     }, 400);
+  }
+
+  function handleCommentChange(itemId: string, val: string) {
+    setMyComments((prev) => ({ ...prev, [itemId]: val }));
+    const key = `comment_${itemId}`;
+    if (saveTimers.current[key]) clearTimeout(saveTimers.current[key]);
+    saveTimers.current[key] = setTimeout(async () => {
+      if (!person) return;
+      const response = myAnswers[itemId];
+      if (!response) return;
+      await fetch("/api/exploration/answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ person, item_id: itemId, response, comment: val }),
+      });
+    }, 800);
   }
 
   // ── Submit section ───────────────────────────────────────
@@ -502,6 +607,8 @@ export default function ExplorationPage() {
             person={person}
             myAnswers={myAnswers}
             partnerAnswers={partnerAnswers}
+            myComments={myComments}
+            partnerComments={partnerComments}
             summary={summaries[activeSectionId]}
             isLastSection={isLastSection}
             onNext={goNextSection}
@@ -515,7 +622,10 @@ export default function ExplorationPage() {
                 isOpen={openItemId === item.id}
                 onToggle={() => setOpenItemId((prev) => (prev === item.id ? null : item.id))}
                 response={myAnswers[item.id] ?? null}
+                comment={myComments[item.id] ?? ""}
                 onSelect={(r) => handleSelect(item.id, r)}
+                onCommentChange={(val) => handleCommentChange(item.id, val)}
+                onDone={() => setOpenItemId(null)}
                 locked={isSubmitted}
               />
             ))}
