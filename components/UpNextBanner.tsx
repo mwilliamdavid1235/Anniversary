@@ -1,23 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import type { TripDay, TripEvent } from "@/types";
 
 interface EventWithMeta {
   event: TripEvent;
   day: TripDay;
-  dateTime: Date;
+  dateTime: Date | null; // null when event has no time (manual flag)
 }
 
 interface UpNextBannerProps {
   days: TripDay[];
 }
 
-function buildEventList(days: TripDay[]): EventWithMeta[] {
-  return days
+function findNextByTime(days: TripDay[]): EventWithMeta | null {
+  const now = new Date();
+  const timed = days
     .flatMap((day) =>
       day.events
-        .filter((event) => !!event.time)
+        .filter((e) => !!e.time)
         .map((event) => {
           const [h, m] = event.time!.split(":").map(Number);
           const dt = new Date(`${day.date}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00`);
@@ -25,6 +26,15 @@ function buildEventList(days: TripDay[]): EventWithMeta[] {
         })
     )
     .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime());
+  return timed.find((e) => e.dateTime > now) ?? null;
+}
+
+function findById(days: TripDay[], eventId: string): EventWithMeta | null {
+  for (const day of days) {
+    const event = day.events.find((e) => e.id === eventId);
+    if (event) return { event, day, dateTime: null };
+  }
+  return null;
 }
 
 function formatTime(dt: Date): string {
@@ -34,17 +44,26 @@ function formatTime(dt: Date): string {
 export default function UpNextBanner({ days }: UpNextBannerProps) {
   const [next, setNext] = useState<EventWithMeta | null>(null);
 
-  useEffect(() => {
-    function tick() {
-      const now = new Date();
-      const all = buildEventList(days);
-      const found = all.find((e) => e.dateTime > now) ?? null;
-      setNext(found);
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch("/api/trip/state?key=active_event_id", { cache: "no-store" });
+      const { value } = await res.json();
+      if (value) {
+        const found = findById(days, value);
+        setNext(found);
+        return;
+      }
+    } catch {
+      // fall through to time-based
     }
-    tick();
-    const id = setInterval(tick, 60_000);
-    return () => clearInterval(id);
+    setNext(findNextByTime(days));
   }, [days]);
+
+  useEffect(() => {
+    refresh();
+    const id = setInterval(refresh, 30_000);
+    return () => clearInterval(id);
+  }, [refresh]);
 
   if (!next) return null;
 
@@ -54,6 +73,7 @@ export default function UpNextBanner({ days }: UpNextBannerProps) {
     lodging:    "LODGING",
     restaurant: "DINING",
     activity:   "ACTIVITY",
+    experience: "EXPERIENCE",
   };
 
   return (
@@ -64,24 +84,15 @@ export default function UpNextBanner({ days }: UpNextBannerProps) {
       <div className="max-w-2xl mx-auto flex items-center gap-4">
         {/* Pulse dot */}
         <div className="relative flex-shrink-0 pulse-dot" style={{ width: 8, height: 8 }}>
-          <div
-            className="absolute inset-0 rounded-full"
-            style={{ background: "#6DB87E" }}
-          />
+          <div className="absolute inset-0 rounded-full" style={{ background: "#6DB87E" }} />
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <span
-            className="text-[9px] tracking-[0.18em] uppercase mr-2"
-            style={{ color: "#6DB87E" }}
-          >
+          <span className="text-[9px] tracking-[0.18em] uppercase mr-2" style={{ color: "#6DB87E" }}>
             Up next
           </span>
-          <span
-            className="text-[10px] tracking-[0.1em] uppercase"
-            style={{ color: "#3D6B47" }}
-          >
+          <span className="text-[10px] tracking-[0.1em] uppercase" style={{ color: "#3D6B47" }}>
             {typeBadge[next.event.type] ?? next.event.type}
           </span>
           <p
@@ -92,17 +103,16 @@ export default function UpNextBanner({ days }: UpNextBannerProps) {
           </p>
         </div>
 
-        {/* Time */}
+        {/* Time / day */}
         <div className="text-right flex-shrink-0">
           <p className="text-[10px] tracking-[0.08em]" style={{ color: "#6E8A74" }}>
             {dayNames[next.day.dayNumber]}
           </p>
-          <p
-            className="text-[13px] tracking-[0.05em]"
-            style={{ color: "#C49A45" }}
-          >
-            {formatTime(next.dateTime)}
-          </p>
+          {next.dateTime && (
+            <p className="text-[13px] tracking-[0.05em]" style={{ color: "#C49A45" }}>
+              {formatTime(next.dateTime)}
+            </p>
+          )}
         </div>
       </div>
     </div>

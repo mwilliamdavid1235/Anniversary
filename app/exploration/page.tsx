@@ -376,7 +376,8 @@ export default function ExplorationPage() {
   const [partnerComments, setPartnerComments] = useState<Record<string, string>>({});
   const [submittedSections, setSubmittedSections] = useState<Set<string>>(new Set());
   const [summaries, setSummaries] = useState<Record<string, string>>({});
-  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [waitingForSummary, setWaitingForSummary] = useState(false);
+  const generatingRef = useRef(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
@@ -447,8 +448,9 @@ export default function ExplorationPage() {
 
   // ── Generate summary ─────────────────────────────────────
   useEffect(() => {
-    if (!isSubmitted || !partnerComplete || hasSummary || generatingSummary || !person) return;
-    setGeneratingSummary(true);
+    if (!isSubmitted || !partnerComplete || hasSummary || generatingRef.current || !person) return;
+    generatingRef.current = true;
+    setWaitingForSummary(true);
     const [maryMap, mdMap] = person === "mary" ? [myAnswers, partnerAnswers] : [partnerAnswers, myAnswers];
     fetch("/api/exploration/discuss", {
       method: "POST",
@@ -456,9 +458,23 @@ export default function ExplorationPage() {
       body: JSON.stringify({ sectionId: activeSectionId, maryAnswers: maryMap, mdAnswers: mdMap }),
     })
       .then((r) => r.json())
-      .then(({ summary: s }) => { if (s) setSummaries((prev) => ({ ...prev, [activeSectionId]: s })); })
-      .finally(() => setGeneratingSummary(false));
-  }, [isSubmitted, partnerComplete, hasSummary, generatingSummary, person, activeSectionId, myAnswers, partnerAnswers]);
+      .then(({ summary: s }) => {
+        setSummaries((prev) => ({
+          ...prev,
+          [activeSectionId]: s || "Talk through what stood out in this section together.",
+        }));
+      })
+      .catch(() => {
+        setSummaries((prev) => ({
+          ...prev,
+          [activeSectionId]: "Talk through what stood out in this section together.",
+        }));
+      })
+      .finally(() => {
+        generatingRef.current = false;
+        setWaitingForSummary(false);
+      });
+  }, [isSubmitted, partnerComplete, hasSummary, person, activeSectionId, myAnswers, partnerAnswers]);
 
   // ── Save answer ──────────────────────────────────────────
   function handleSelect(itemId: string, response: GridResponse) {
@@ -632,7 +648,7 @@ export default function ExplorationPage() {
 
             {isSubmitted ? (
               <div className="mt-6 rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${PALETTE.edge}` }}>
-                {generatingSummary ? (
+                {waitingForSummary ? (
                   <p style={{ fontSize: "11px", color: PALETTE.textFaint }}>Reading your answers…</p>
                 ) : (
                   <>
