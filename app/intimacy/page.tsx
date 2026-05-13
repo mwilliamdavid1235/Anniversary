@@ -6,9 +6,16 @@ import PasswordGate from "@/components/sections/PasswordGate";
 import PersonSelector, { type Person } from "@/components/sections/PersonSelector";
 import QuestionView, { type AnswerData } from "@/components/sections/QuestionView";
 import TogetherReveal from "@/components/sections/TogetherReveal";
-import { INTIMACY_QUESTIONS, TOTAL_INTIMACY } from "@/lib/intimacy-questions";
+import { INTIMACY_QUESTIONS, INTIMACY_CATEGORIES } from "@/lib/intimacy-questions";
 
-// ── Intimate palette ──────────────────────────────────────────
+const SECTIONS = INTIMACY_CATEGORIES.map((cat) => ({
+  name: cat,
+  questions: INTIMACY_QUESTIONS.filter((q) => q.category === cat),
+}));
+
+type Phase = "answering" | "waiting" | "reveal" | "complete";
+type AnswerMap = Record<string, AnswerData>;
+
 const I = {
   bg: "#0C0810",
   edge: "#2E1F40",
@@ -20,44 +27,31 @@ const I = {
   rose: "#C47EA0",
 };
 
-type AnswerMap = Record<string, AnswerData>;
-
-interface StatusData {
-  mary: { answered_ids: string[]; count: number; total: number };
-  md: { answered_ids: string[]; count: number; total: number };
-  both_complete: boolean;
-  is_unlocked: boolean;
-}
-
-function AnimatedQuestion({ children, qKey }: { children: React.ReactNode; qKey: string }) {
-  return (
-    <div key={qKey} className="fade-up" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-      {children}
-    </div>
-  );
-}
-
 export default function IntimacyPage() {
   const [pwUnlocked, setPwUnlocked] = useState(false);
   const [person, setPerson] = useState<Person | null>(null);
   const [hydrated, setHydrated] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [sectionIdx, setSectionIdx] = useState(0);
+  const [questionIdx, setQuestionIdx] = useState(0);
+  const [phase, setPhase] = useState<Phase>("answering");
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [partnerAnswers, setPartnerAnswers] = useState<AnswerMap>({});
-  const [status, setStatus] = useState<StatusData | null>(null);
-  const [togetherAnswers, setTogetherAnswers] = useState<{ mary: AnswerMap; md: AnswerMap } | null>(null);
-  const [unlocking, setUnlocking] = useState(false);
-  const [showComplete, setShowComplete] = useState(false);
-  const [showUnlockAnim, setShowUnlockAnim] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // ── Hydrate ───────────────────────────────────────────────
   useEffect(() => {
     const pw = localStorage.getItem("intimacy_unlocked");
     const p = localStorage.getItem("intimacy_person") as Person | null;
-    const pos = parseInt(localStorage.getItem("intimacy_position") ?? "0", 10);
+    const si = parseInt(localStorage.getItem("intimacy_section") ?? "0", 10);
+    const qi = parseInt(localStorage.getItem("intimacy_question") ?? "0", 10);
+    const ph = (localStorage.getItem("intimacy_phase") ?? "answering") as Phase;
     if (pw === "true") setPwUnlocked(true);
     if (p) setPerson(p);
-    if (!isNaN(pos) && pos >= 0 && pos < TOTAL_INTIMACY) setCurrentIndex(pos);
+    const safeSection = isNaN(si) ? 0 : Math.min(si, SECTIONS.length - 1);
+    const safeQuestion = isNaN(qi) ? 0 : Math.min(qi, SECTIONS[safeSection].questions.length - 1);
+    setSectionIdx(safeSection);
+    setQuestionIdx(safeQuestion);
+    setPhase(ph);
     setHydrated(true);
   }, []);
 
@@ -66,12 +60,16 @@ export default function IntimacyPage() {
     setPerson(p);
   }
 
-  function goTo(index: number) {
-    const clamped = Math.max(0, Math.min(TOTAL_INTIMACY - 1, index));
-    setCurrentIndex(clamped);
-    localStorage.setItem("intimacy_position", String(clamped));
+  function persist(si: number, qi: number, ph: Phase) {
+    setSectionIdx(si);
+    setQuestionIdx(qi);
+    setPhase(ph);
+    localStorage.setItem("intimacy_section", String(si));
+    localStorage.setItem("intimacy_question", String(qi));
+    localStorage.setItem("intimacy_phase", ph);
   }
 
+  // ── Data loading ──────────────────────────────────────────
   const loadMyAnswers = useCallback(async (p: Person) => {
     const res = await fetch(`/api/intimacy/answers?person=${p}`);
     if (!res.ok) return;
@@ -91,40 +89,15 @@ export default function IntimacyPage() {
     setPartnerAnswers(map);
   }, []);
 
-  const loadTogetherAnswers = useCallback(async () => {
-    const [mRes, dRes] = await Promise.all([
-      fetch("/api/intimacy/answers?person=mary"),
-      fetch("/api/intimacy/answers?person=md"),
-    ]);
-    const [{ answers: mRows }, { answers: dRows }] = await Promise.all([mRes.json(), dRes.json()]);
-    function toMap(rows: { question_id: string; answer_text?: string; selected_option?: string }[]): AnswerMap {
-      const m: AnswerMap = {};
-      for (const r of rows ?? []) m[r.question_id] = { answer_text: r.answer_text, selected_option: r.selected_option };
-      return m;
-    }
-    setTogetherAnswers({ mary: toMap(mRows), md: toMap(dRows) });
-  }, []);
-
-  const loadStatus = useCallback(async () => {
-    const res = await fetch("/api/intimacy/status");
-    if (!res.ok) return;
-    const data: StatusData = await res.json();
-    setStatus(data);
-    if (data.is_unlocked) loadTogetherAnswers();
-  }, [loadTogetherAnswers]);
-
   useEffect(() => {
     if (!person || !pwUnlocked) return;
     loadMyAnswers(person);
     loadPartnerAnswers(person);
-    loadStatus();
-    pollRef.current = setInterval(() => {
-      loadPartnerAnswers(person);
-      loadStatus();
-    }, 30_000);
+    pollRef.current = setInterval(() => loadPartnerAnswers(person), 20_000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [person, pwUnlocked, loadMyAnswers, loadPartnerAnswers, loadStatus]);
+  }, [person, pwUnlocked, loadMyAnswers, loadPartnerAnswers]);
 
+  // ── Save ──────────────────────────────────────────────────
   async function saveAnswer(qId: string, data: AnswerData) {
     if (!person) return;
     setAnswers((prev) => ({ ...prev, [qId]: { ...prev[qId], ...data } }));
@@ -133,39 +106,56 @@ export default function IntimacyPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ person, question_id: qId, ...data }),
     });
-    loadStatus();
+  }
+
+  // ── Derived ───────────────────────────────────────────────
+  const section = SECTIONS[sectionIdx] ?? SECTIONS[0];
+
+  const partnerSectionDone = section.questions.every((q) => {
+    const a = partnerAnswers[q.id];
+    return (a?.answer_text?.trim()) || a?.selected_option;
+  });
+
+  // Auto-advance waiting → reveal when partner finishes
+  useEffect(() => {
+    if (phase === "waiting" && partnerSectionDone) {
+      persist(sectionIdx, questionIdx, "reveal");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [partnerSectionDone, phase]);
+
+  // ── Navigation ────────────────────────────────────────────
+  function handleSectionDone() {
+    if (partnerSectionDone) {
+      persist(sectionIdx, questionIdx, "reveal");
+    } else {
+      persist(sectionIdx, questionIdx, "waiting");
+    }
   }
 
   function handleNext() {
-    if (currentIndex < TOTAL_INTIMACY - 1) {
-      goTo(currentIndex + 1);
+    if (questionIdx < section.questions.length - 1) {
+      persist(sectionIdx, questionIdx + 1, "answering");
     } else {
-      setShowComplete(true);
+      handleSectionDone();
     }
   }
 
   function handleBack() {
-    if (showComplete) {
-      setShowComplete(false);
-    } else {
-      goTo(currentIndex - 1);
+    if (phase === "waiting" || phase === "reveal") {
+      persist(sectionIdx, section.questions.length - 1, "answering");
+    } else if (questionIdx > 0) {
+      persist(sectionIdx, questionIdx - 1, "answering");
+    } else if (sectionIdx > 0) {
+      persist(sectionIdx - 1, SECTIONS[sectionIdx - 1].questions.length - 1, "reveal");
     }
   }
 
-  async function handleUnlock() {
-    if (!person) return;
-    setUnlocking(true);
-    const res = await fetch("/api/intimacy/unlock", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ person }),
-    });
-    setUnlocking(false);
-    if (res.ok) {
-      setShowUnlockAnim(true);
-      await loadTogetherAnswers();
-      await loadStatus();
-      setTimeout(() => setShowUnlockAnim(false), 2500);
+  function handleNextSection() {
+    if (sectionIdx >= SECTIONS.length - 1) {
+      persist(sectionIdx, questionIdx, "complete");
+    } else {
+      persist(sectionIdx + 1, 0, "answering");
     }
   }
 
@@ -177,27 +167,65 @@ export default function IntimacyPage() {
 
   const myName = person === "mary" ? "Mary" : "MD";
   const partnerName = person === "mary" ? "MD" : "Mary";
-  const partnerCount = status ? (person === "mary" ? status.md.count : status.mary.count) : null;
-  const myAnsweredCount = Object.values(answers).filter(
-    (a) => (a.answer_text && a.answer_text.trim()) || a.selected_option
-  ).length;
+  const isLastSection = sectionIdx === SECTIONS.length - 1;
 
-  // ── Together view ─────────────────────────────────────────
-  if (status?.is_unlocked && togetherAnswers) {
+  // ── Build reveal maps for current section ─────────────────
+  function buildRevealMaps() {
+    const maryMap: AnswerMap = {};
+    const mdMap: AnswerMap = {};
+    for (const q of section.questions) {
+      if (person === "mary") {
+        if (answers[q.id]) maryMap[q.id] = answers[q.id];
+        if (partnerAnswers[q.id]) mdMap[q.id] = partnerAnswers[q.id];
+      } else {
+        if (partnerAnswers[q.id]) maryMap[q.id] = partnerAnswers[q.id];
+        if (answers[q.id]) mdMap[q.id] = answers[q.id];
+      }
+    }
+    return { maryMap, mdMap };
+  }
+
+  // ── Complete ──────────────────────────────────────────────
+  if (phase === "complete") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 fade-up" style={{ background: I.bg }}>
+        <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: I.textFaint, marginBottom: 8 }}>✦ Intimacy</p>
+        <p className="font-display italic mb-3 text-center" style={{ fontSize: "clamp(28px, 7vw, 44px)", color: I.text }}>
+          All six sections ✦
+        </p>
+        <p style={{ fontSize: "13px", color: I.textMuted, marginBottom: 32, textAlign: "center", maxWidth: 280 }}>
+          You made it through all of Intimacy together.
+        </p>
+        <Link
+          href="/exploration"
+          style={{ display: "inline-block", padding: "12px 28px", background: "rgba(196,126,160,0.15)", border: `1px solid ${I.rose}`, color: I.text, fontSize: "13px", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", textDecoration: "none", borderRadius: 12, marginBottom: 24 }}
+        >
+          Go to Exploration Menu ✦
+        </Link>
+        <Link href="/" style={{ fontSize: "10px", color: I.textDim, letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase" }}>
+          ← Itinerary
+        </Link>
+      </div>
+    );
+  }
+
+  // ── Reveal ────────────────────────────────────────────────
+  if (phase === "reveal") {
+    const { maryMap, mdMap } = buildRevealMaps();
     return (
       <div className="min-h-screen" style={{ background: I.bg }}>
-        {showUnlockAnim && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center fade-up" style={{ background: "rgba(12,8,16,0.97)" }}>
-            <p className="font-display italic" style={{ fontSize: "clamp(32px, 8vw, 56px)", color: I.rose }}>Together ✦</p>
-            <p style={{ fontSize: "13px", color: I.textMuted, marginTop: 12 }}>Reading together now…</p>
-          </div>
-        )}
         <div style={{ borderBottom: `1px solid ${I.edge}` }}>
-          <div className="max-w-3xl mx-auto px-6 py-6">
-            <Link href="/" style={{ fontSize: "10px", color: I.textDim, letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20 }}>← Back</Link>
-            <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: I.textFaint, marginBottom: 4 }}>✦ Together</p>
-            <h1 className="font-display italic" style={{ fontSize: "clamp(32px, 8vw, 52px)", color: I.text }}>Intimacy</h1>
-            <p style={{ fontSize: "12px", color: I.textMuted, marginTop: 6 }}>Both of your answers, together.</p>
+          <div className="max-w-2xl mx-auto px-6 py-5">
+            <button onClick={handleBack} style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: I.textDim, background: "none", border: "none", cursor: "pointer", padding: 0, marginBottom: 20 }}>
+              ← Back
+            </button>
+            <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: I.textFaint, marginBottom: 4 }}>
+              ✦ Section {sectionIdx + 1} of {SECTIONS.length}
+            </p>
+            <h1 className="font-display italic" style={{ fontSize: "clamp(26px, 6vw, 40px)", color: I.text }}>
+              {section.name}
+            </h1>
+            <p style={{ fontSize: "12px", color: I.textMuted, marginTop: 6 }}>Both answers, side by side.</p>
             <div className="flex gap-4 mt-4">
               {(["mary", "md"] as const).map((p) => (
                 <div key={p} className="flex items-center gap-2">
@@ -208,21 +236,25 @@ export default function IntimacyPage() {
             </div>
           </div>
         </div>
-        <main className="max-w-3xl mx-auto px-6 py-10 fade-up">
+
+        <main className="max-w-2xl mx-auto px-6 py-8 fade-up">
           <TogetherReveal
-            questions={INTIMACY_QUESTIONS}
-            maryAnswers={togetherAnswers.mary}
-            mdAnswers={togetherAnswers.md}
+            questions={section.questions}
+            maryAnswers={maryMap}
+            mdAnswers={mdMap}
             palette="intimate"
           />
-          <div className="mt-12 rounded-xl p-6 text-center" style={{ background: "rgba(196,126,160,0.06)", border: `1px solid ${I.edgeHi}` }}>
-            <p className="font-display italic mb-2" style={{ fontSize: "18px", color: I.text }}>Ready to go deeper?</p>
-            <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 16 }}>The Exploration Menu is next.</p>
-            <Link href="/exploration" style={{ display: "inline-block", padding: "12px 28px", background: "rgba(196,126,160,0.15)", border: `1px solid ${I.rose}`, color: I.text, fontSize: "13px", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", textDecoration: "none", borderRadius: 12 }}>
-              Go to Exploration Menu ✦
-            </Link>
+          <div className="mt-10 flex justify-end">
+            <button
+              onClick={handleNextSection}
+              className="rounded-xl transition-all duration-150 active:scale-[0.98]"
+              style={{ padding: "12px 24px", background: "rgba(196,126,160,0.12)", border: `1px solid ${I.rose}`, color: I.text, fontSize: "13px", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", cursor: "pointer" }}
+            >
+              {isLastSection ? "Complete ✦" : `Next: ${SECTIONS[sectionIdx + 1].name} →`}
+            </button>
           </div>
         </main>
+
         <footer className="text-center py-8 border-t" style={{ borderColor: I.edge }}>
           <p className="font-display" style={{ fontSize: "18px", color: I.textDim }}>pecanandpoplar.com</p>
         </footer>
@@ -230,70 +262,56 @@ export default function IntimacyPage() {
     );
   }
 
-  // ── Completion screen ─────────────────────────────────────
-  if (showComplete) {
+  // ── Waiting ───────────────────────────────────────────────
+  if (phase === "waiting") {
+    const partnerCount = section.questions.filter((q) => {
+      const a = partnerAnswers[q.id];
+      return (a?.answer_text?.trim()) || a?.selected_option;
+    }).length;
     return (
       <div className="min-h-screen flex flex-col" style={{ background: I.bg }}>
-        {showUnlockAnim && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center fade-up" style={{ background: "rgba(12,8,16,0.97)" }}>
-            <p className="font-display italic" style={{ fontSize: "clamp(32px, 8vw, 56px)", color: I.rose }}>Together ✦</p>
-            <p style={{ fontSize: "13px", color: I.textMuted, marginTop: 12 }}>Reading together now…</p>
-          </div>
-        )}
         <div style={{ borderBottom: `1px solid ${I.edge}` }}>
           <div className="max-w-xl mx-auto px-6 py-4 flex items-center gap-4">
-            <button onClick={handleBack} style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: I.textDim, background: "none", border: "none", cursor: "pointer", padding: 0 }}>← Back</button>
-            <div className="flex-1">
-              <div className="rounded-full overflow-hidden" style={{ height: 2, background: I.edge }}>
-                <div className="h-full rounded-full" style={{ width: `${(myAnsweredCount / TOTAL_INTIMACY) * 100}%`, background: I.rose }} />
-              </div>
-              <span style={{ fontSize: "9px", color: I.textDim, letterSpacing: "0.1em", marginTop: 4, display: "block" }}>{myAnsweredCount} of {TOTAL_INTIMACY} answered</span>
-            </div>
+            <button onClick={handleBack} style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: I.textDim, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+              ← Back
+            </button>
+            <p style={{ fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase", color: I.textFaint }}>
+              {section.name} · {sectionIdx + 1} of {SECTIONS.length}
+            </p>
           </div>
         </div>
-
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 fade-up">
-          {myAnsweredCount < TOTAL_INTIMACY ? (
-            <>
-              <p className="font-display italic mb-2" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: I.text, textAlign: "center" }}>
-                {TOTAL_INTIMACY - myAnsweredCount} left
-              </p>
-              <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 24, textAlign: "center" }}>Go back and fill them in whenever you're ready.</p>
-              <button onClick={() => { setShowComplete(false); goTo(0); }} style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: I.textDim, background: "none", border: `1px solid ${I.edge}`, padding: "8px 18px", borderRadius: 8, cursor: "pointer" }}>
-                Review from the start
-              </button>
-            </>
-          ) : !status?.both_complete ? (
-            <>
-              <p className="font-display italic mb-2" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: I.text, textAlign: "center" }}>You&apos;re done ✓</p>
-              <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 6, textAlign: "center" }}>Waiting for {partnerName} to finish.</p>
-              <p style={{ fontSize: "11px", color: I.textDim, marginBottom: 24, textAlign: "center" }}>{partnerCount ?? 0}/{TOTAL_INTIMACY}</p>
-              <button onClick={() => { loadPartnerAnswers(person); loadStatus(); }} style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: I.textDim, background: "none", border: `1px solid ${I.edge}`, padding: "6px 14px", borderRadius: 6, cursor: "pointer" }}>
-                Refresh
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="font-display italic mb-2" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: I.text, textAlign: "center" }}>You both finished.</p>
-              <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 24, textAlign: "center" }}>Ready to read together?</p>
-              <button onClick={handleUnlock} disabled={unlocking} className="rounded-xl transition-all duration-200 active:scale-[0.98]" style={{ padding: "14px 32px", background: "rgba(196,126,160,0.12)", border: `1px solid ${I.rose}`, color: I.text, fontSize: "14px", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", cursor: unlocking ? "wait" : "pointer", opacity: unlocking ? 0.6 : 1 }}>
-                {unlocking ? "Opening…" : "We're ready to read together ✦"}
-              </button>
-            </>
-          )}
+          <p className="font-display italic mb-3" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: I.text, textAlign: "center" }}>
+            You&apos;re done ✓
+          </p>
+          <p style={{ fontSize: "13px", color: I.textMuted, marginBottom: 8, textAlign: "center" }}>
+            Waiting for {partnerName} to finish this section.
+          </p>
+          <p style={{ fontSize: "11px", color: I.textDim, marginBottom: 28, textAlign: "center" }}>
+            {partnerCount} of {section.questions.length} answered
+          </p>
+          <button
+            onClick={() => loadPartnerAnswers(person)}
+            style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: I.textDim, background: "none", border: `1px solid ${I.edge}`, padding: "6px 14px", borderRadius: 6, cursor: "pointer" }}
+          >
+            Refresh
+          </button>
         </div>
-
         <footer className="text-center py-6 border-t" style={{ borderColor: I.edge }}>
-          <Link href="/" style={{ fontSize: "10px", color: I.textDim, letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase" }}>← Itinerary</Link>
+          <Link href="/" style={{ fontSize: "10px", color: I.textDim, letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase" }}>
+            ← Itinerary
+          </Link>
         </footer>
       </div>
     );
   }
 
-  // ── Single-question view ──────────────────────────────────
-  const q = INTIMACY_QUESTIONS[currentIndex];
+  // ── Answering ─────────────────────────────────────────────
+  const q = section.questions[questionIdx];
   const myAns = answers[q.id] ?? {};
   const partnerAns = partnerAnswers[q.id];
+  const isLastQuestion = questionIdx === section.questions.length - 1;
+  const isVeryFirst = sectionIdx === 0 && questionIdx === 0;
 
   return (
     <div style={{ background: I.bg, minHeight: "100vh" }}>
@@ -303,22 +321,24 @@ export default function IntimacyPage() {
       <div className="absolute top-4 right-4 z-10">
         <span style={{ fontSize: "9px", color: I.textDim, letterSpacing: "0.1em" }}>{myName}</span>
       </div>
-      <AnimatedQuestion qKey={`${q.id}-${currentIndex}`}>
+      <div key={`${sectionIdx}-${questionIdx}`} className="fade-up" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <QuestionView
           question={q}
-          questionNumber={currentIndex + 1}
-          totalQuestions={TOTAL_INTIMACY}
+          questionNumber={questionIdx + 1}
+          totalQuestions={section.questions.length}
+          sectionLabel={`${section.name}  ·  ${sectionIdx + 1} of ${SECTIONS.length}`}
           myAnswer={myAns}
           partnerAnswer={partnerAns}
           partnerName={partnerName}
           onSave={saveAnswer}
           onNext={handleNext}
           onBack={handleBack}
-          isFirst={currentIndex === 0}
-          isLast={currentIndex === TOTAL_INTIMACY - 1}
+          isFirst={isVeryFirst}
+          isLast={isLastQuestion}
+          finishLabel="I'm done with this section →"
           palette="intimate"
         />
-      </AnimatedQuestion>
+      </div>
     </div>
   );
 }

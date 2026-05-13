@@ -21,6 +21,8 @@ interface QuestionViewProps {
   isFirst: boolean;
   isLast: boolean;
   palette?: "forest" | "intimate";
+  sectionLabel?: string;
+  finishLabel?: string;
 }
 
 const FOREST = {
@@ -108,6 +110,8 @@ export default function QuestionView({
   isFirst,
   isLast,
   palette = "forest",
+  sectionLabel,
+  finishLabel,
 }: QuestionViewProps) {
   const c = palette === "intimate" ? INTIMATE : FOREST;
   const [textVal, setTextVal] = useState(myAnswer.answer_text ?? "");
@@ -199,6 +203,11 @@ export default function QuestionView({
 
         {/* Progress bar + counter */}
         <div className="flex-1 flex flex-col gap-1.5">
+          {sectionLabel && (
+            <span style={{ fontSize: "8px", color: c.counterText, letterSpacing: "0.12em", textTransform: "uppercase", opacity: 0.7 }}>
+              {sectionLabel}
+            </span>
+          )}
           <div className="rounded-full overflow-hidden" style={{ height: 2, background: c.progressBg }}>
             <div
               className="h-full rounded-full transition-all duration-400"
@@ -400,7 +409,7 @@ export default function QuestionView({
             fontFamily: "var(--font-dm-mono), monospace",
           }}
         >
-          {isLast ? "Finish ✦" : isAnswered ? "Next →" : "Skip →"}
+          {isLast ? (finishLabel ?? "Finish ✦") : isAnswered ? "Next →" : "Skip →"}
         </button>
       </div>
     </div>
