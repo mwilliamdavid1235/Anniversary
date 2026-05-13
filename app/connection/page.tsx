@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import PersonSelector, { type Person } from "@/components/sections/PersonSelector";
 
 const SECTIONS = [
   {
@@ -50,39 +51,41 @@ const SECTIONS = [
   },
 ];
 
-function storageKey(questionId: string) {
-  return `connection-answer-${questionId}`;
-}
+const PARTNER: Record<Person, string> = { mary: "MD", md: "Mary" };
+
+// ── AnswerCard ────────────────────────────────────────────────
 
 function AnswerCard({
   question,
   sectionColor,
+  isOpen,
+  onToggle,
+  answer,
+  onAnswerChange,
+  locked,
 }: {
   question: { id: string; text: string };
   sectionColor: string;
+  isOpen: boolean;
+  onToggle: () => void;
+  answer: string;
+  onAnswerChange: (val: string) => void;
+  locked: boolean;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [answer, setAnswer] = useState("");
   const [saved, setSaved] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem(storageKey(question.id));
-    if (stored) setAnswer(stored);
-  }, [question.id]);
-
-  useEffect(() => {
-    if (isOpen && textareaRef.current && answer === "") {
+    if (isOpen && textareaRef.current && !answer) {
       textareaRef.current.focus();
     }
   }, [isOpen, answer]);
 
   function handleChange(val: string) {
-    setAnswer(val);
+    onAnswerChange(val);
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      localStorage.setItem(storageKey(question.id), val);
       setSaved(true);
       setTimeout(() => setSaved(false), 1800);
     }, 600);
@@ -99,11 +102,11 @@ function AnswerCard({
         transition: "background 0.2s ease, border-color 0.2s ease",
       }}
     >
-      {/* Question header */}
       <button
-        onClick={() => setIsOpen((v) => !v)}
+        onClick={locked ? undefined : onToggle}
+        disabled={locked}
         className="w-full text-left flex items-start justify-between gap-3"
-        style={{ padding: "16px 18px", background: "none", border: "none", cursor: "pointer" }}
+        style={{ padding: "16px 18px", background: "none", border: "none", cursor: locked ? "default" : "pointer" }}
       >
         <p
           className="font-display italic leading-snug"
@@ -118,13 +121,30 @@ function AnswerCard({
           )}
           {question.text}
         </p>
-        <span style={{ fontSize: "9px", color: "#2D4D28", flexShrink: 0, marginTop: 5 }}>
-          {isOpen ? "▲" : "▼"}
-        </span>
+        {!locked && (
+          <span style={{ fontSize: "9px", color: "#2D4D28", flexShrink: 0, marginTop: 5 }}>
+            {isOpen ? "▲" : "▼"}
+          </span>
+        )}
       </button>
 
-      {/* Answer area */}
-      {isOpen && (
+      {/* Answer preview when collapsed */}
+      {!isOpen && hasAnswer && (
+        <p
+          style={{
+            padding: "0 18px 14px",
+            fontSize: "12px",
+            color: "#4A6B50",
+            lineHeight: 1.5,
+            marginTop: -6,
+          }}
+        >
+          {answer.length > 90 ? answer.slice(0, 90) + "…" : answer}
+        </p>
+      )}
+
+      {/* Answer textarea when open */}
+      {isOpen && !locked && (
         <div style={{ padding: "0 18px 18px" }}>
           <textarea
             ref={textareaRef}
@@ -156,9 +176,264 @@ function AnswerCard({
   );
 }
 
+// ── DiscussScreen ─────────────────────────────────────────────
+
+function DiscussScreen({
+  section,
+  person,
+  myAnswers,
+  partnerAnswers,
+  summary,
+  isLastSection,
+  onNext,
+}: {
+  section: typeof SECTIONS[0];
+  person: Person;
+  myAnswers: Record<string, string>;
+  partnerAnswers: Record<string, string>;
+  summary: string;
+  isLastSection: boolean;
+  onNext: () => void;
+}) {
+  const myName = person === "mary" ? "Mary" : "MD";
+  const partnerName = PARTNER[person];
+
+  return (
+    <div className="fade-up">
+      {/* Summary card */}
+      <div
+        className="rounded-xl p-5 mb-6"
+        style={{
+          background: `${section.color}0D`,
+          border: `1px solid ${section.color}30`,
+        }}
+      >
+        <p
+          style={{
+            fontSize: "9px",
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: section.color,
+            marginBottom: 10,
+            opacity: 0.7,
+          }}
+        >
+          ✦ To discuss
+        </p>
+        <p
+          className="font-display italic leading-relaxed"
+          style={{ fontSize: "18px", color: "#E2D9C6" }}
+        >
+          {summary}
+        </p>
+      </div>
+
+      {/* Both sets of answers */}
+      <div className="space-y-5 mb-8">
+        {section.questions.map((q) => {
+          const myA = myAnswers[q.id]?.trim();
+          const partnerA = partnerAnswers[q.id]?.trim();
+          return (
+            <div key={q.id}>
+              <p
+                style={{
+                  fontSize: "11px",
+                  color: "#4A6B50",
+                  marginBottom: 8,
+                  lineHeight: 1.4,
+                  fontStyle: "italic",
+                }}
+              >
+                {q.text}
+              </p>
+              <div className="flex flex-col gap-2">
+                {myA && (
+                  <div
+                    className="rounded-lg px-3 py-2"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid #1E3319" }}
+                  >
+                    <p style={{ fontSize: "9px", letterSpacing: "0.12em", color: "#3A5040", marginBottom: 4, textTransform: "uppercase" }}>{myName}</p>
+                    <p style={{ fontSize: "13px", color: "#B8C8B8", lineHeight: 1.5 }}>{myA}</p>
+                  </div>
+                )}
+                {partnerA && (
+                  <div
+                    className="rounded-lg px-3 py-2"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid #1E3319" }}
+                  >
+                    <p style={{ fontSize: "9px", letterSpacing: "0.12em", color: "#3A5040", marginBottom: 4, textTransform: "uppercase" }}>{partnerName}</p>
+                    <p style={{ fontSize: "13px", color: "#B8C8B8", lineHeight: 1.5 }}>{partnerA}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Next section button */}
+      <button
+        onClick={onNext}
+        className="w-full rounded-xl py-4 transition-all duration-200 active:scale-95"
+        style={{
+          background: `${section.color}20`,
+          border: `1px solid ${section.color}50`,
+          color: section.color,
+          fontSize: "12px",
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+          cursor: "pointer",
+        }}
+      >
+        {isLastSection ? "That's all of them ✦" : "Next section →"}
+      </button>
+    </div>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────
+
 export default function ConnectionPage() {
-  const [activeSection, setActiveSection] = useState(SECTIONS[0].id);
-  const section = SECTIONS.find((s) => s.id === activeSection)!;
+  const [person, setPerson] = useState<Person | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+  const [activeSectionId, setActiveSectionId] = useState(SECTIONS[0].id);
+  const [openQuestionId, setOpenQuestionId] = useState<string | null>(null);
+  const [myAnswers, setMyAnswers] = useState<Record<string, string>>({});
+  const [partnerAnswers, setPartnerAnswers] = useState<Record<string, string>>({});
+  const [submittedSections, setSubmittedSections] = useState<Set<string>>(new Set());
+  const [summaries, setSummaries] = useState<Record<string, string>>({});
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const section = SECTIONS.find((s) => s.id === activeSectionId)!;
+  const sectionIdx = SECTIONS.findIndex((s) => s.id === activeSectionId);
+  const isLastSection = sectionIdx === SECTIONS.length - 1;
+
+  // ── Hydrate ──────────────────────────────────────────────
+  useEffect(() => {
+    const p = localStorage.getItem("connection_person") as Person | null;
+    const sid = localStorage.getItem("connection_section") ?? SECTIONS[0].id;
+    const submitted = JSON.parse(localStorage.getItem("connection_submitted") ?? "[]") as string[];
+    if (p) setPerson(p);
+    setActiveSectionId(SECTIONS.find((s) => s.id === sid) ? sid : SECTIONS[0].id);
+    setSubmittedSections(new Set(submitted));
+    setHydrated(true);
+  }, []);
+
+  // ── Load answers from Supabase ────────────────────────────
+  const loadMyAnswers = useCallback(async (p: Person) => {
+    const res = await fetch(`/api/connection/answers?person=${p}`);
+    if (!res.ok) return;
+    const { answers } = await res.json();
+    const map: Record<string, string> = {};
+    for (const a of answers ?? []) map[a.question_id] = a.answer_text ?? "";
+    setMyAnswers(map);
+  }, []);
+
+  const loadPartnerAnswers = useCallback(async (p: Person) => {
+    const partner = p === "mary" ? "md" : "mary";
+    const res = await fetch(`/api/connection/answers?person=${partner}`);
+    if (!res.ok) return;
+    const { answers } = await res.json();
+    const map: Record<string, string> = {};
+    for (const a of answers ?? []) map[a.question_id] = a.answer_text ?? "";
+    setPartnerAnswers(map);
+  }, []);
+
+  useEffect(() => {
+    if (!person || !hydrated) return;
+    loadMyAnswers(person);
+    loadPartnerAnswers(person);
+    pollRef.current = setInterval(() => loadPartnerAnswers(person), 15_000);
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [person, hydrated, loadMyAnswers, loadPartnerAnswers]);
+
+  // ── Save answer ───────────────────────────────────────────
+  function handleAnswerChange(questionId: string, val: string) {
+    setMyAnswers((prev) => ({ ...prev, [questionId]: val }));
+    if (saveTimers.current[questionId]) clearTimeout(saveTimers.current[questionId]);
+    saveTimers.current[questionId] = setTimeout(async () => {
+      if (!person) return;
+      await fetch("/api/connection/answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ person, question_id: questionId, answer_text: val }),
+      });
+    }, 800);
+  }
+
+  // ── Section state helpers ─────────────────────────────────
+  function sectionAllAnswered(sec: typeof SECTIONS[0], answers: Record<string, string>) {
+    return sec.questions.every((q) => answers[q.id]?.trim());
+  }
+
+  const myComplete = sectionAllAnswered(section, myAnswers);
+  const partnerComplete = sectionAllAnswered(section, partnerAnswers);
+  const isSubmitted = submittedSections.has(activeSectionId);
+  const hasSummary = !!summaries[activeSectionId];
+  const showDiscuss = isSubmitted && partnerComplete && hasSummary;
+
+  // ── Generate summary when both complete ──────────────────
+  useEffect(() => {
+    if (!isSubmitted || !partnerComplete || hasSummary || generatingSummary || !person) return;
+    setGeneratingSummary(true);
+    const partner = person === "mary" ? "md" : "mary";
+    const [maryMap, mdMap] =
+      person === "mary"
+        ? [myAnswers, partnerAnswers]
+        : [partnerAnswers, myAnswers];
+    fetch("/api/connection/discuss", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sectionLabel: section.label,
+        questions: section.questions,
+        maryAnswers: maryMap,
+        mdAnswers: mdMap,
+      }),
+    })
+      .then((r) => r.json())
+      .then(({ summary }) => {
+        if (summary) setSummaries((prev) => ({ ...prev, [activeSectionId]: summary }));
+      })
+      .finally(() => setGeneratingSummary(false));
+    void partner;
+  }, [isSubmitted, partnerComplete, hasSummary, generatingSummary, person, activeSectionId, section, myAnswers, partnerAnswers]);
+
+  // ── Submit section ────────────────────────────────────────
+  function handleSubmit() {
+    const next = new Set([...submittedSections, activeSectionId]);
+    setSubmittedSections(next);
+    localStorage.setItem("connection_submitted", JSON.stringify([...next]));
+    setOpenQuestionId(null);
+  }
+
+  // ── Select person ─────────────────────────────────────────
+  function selectPerson(p: Person) {
+    localStorage.setItem("connection_person", p);
+    setPerson(p);
+  }
+
+  // ── Navigate sections ─────────────────────────────────────
+  function goToSection(id: string) {
+    setActiveSectionId(id);
+    localStorage.setItem("connection_section", id);
+    setOpenQuestionId(null);
+  }
+
+  function goNextSection() {
+    const nextIdx = sectionIdx + 1;
+    if (nextIdx < SECTIONS.length) goToSection(SECTIONS[nextIdx].id);
+  }
+
+  // ── Toggle accordion ──────────────────────────────────────
+  function toggleQuestion(qid: string) {
+    setOpenQuestionId((prev) => (prev === qid ? null : qid));
+  }
+
+  if (!hydrated) return null;
+  if (!person) return <PersonSelector onSelect={selectPerson} />;
 
   return (
     <div className="min-h-screen" style={{ background: "#060E05", color: "#E2D9C6" }}>
@@ -180,7 +455,9 @@ export default function ConnectionPage() {
         <p style={{ fontSize: "9px", letterSpacing: "0.25em", textTransform: "uppercase", color: "#2D4D28" }}>
           Connection
         </p>
-        <div style={{ width: 40 }} />
+        <p style={{ fontSize: "10px", color: "#3A5040" }}>
+          {person === "mary" ? "Mary" : "MD"}
+        </p>
       </div>
 
       <div className="px-5 pt-8 pb-16 max-w-lg mx-auto">
@@ -197,31 +474,111 @@ export default function ConnectionPage() {
           {SECTIONS.map((s) => (
             <button
               key={s.id}
-              onClick={() => setActiveSection(s.id)}
+              onClick={() => goToSection(s.id)}
               style={{
                 fontSize: "10px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 padding: "6px 14px",
                 borderRadius: "4px",
-                border: `1px solid ${activeSection === s.id ? s.color : "#1E3319"}`,
-                background: activeSection === s.id ? `${s.color}20` : "rgba(255,255,255,0.02)",
-                color: activeSection === s.id ? s.color : "#3A5040",
+                border: `1px solid ${activeSectionId === s.id ? s.color : "#1E3319"}`,
+                background: activeSectionId === s.id ? `${s.color}20` : "rgba(255,255,255,0.02)",
+                color: activeSectionId === s.id ? s.color : "#3A5040",
                 cursor: "pointer",
                 transition: "all 0.15s ease",
+                position: "relative",
               }}
             >
               {s.label}
+              {submittedSections.has(s.id) && sectionAllAnswered(s, partnerAnswers) && (
+                <span style={{ position: "absolute", top: -4, right: -4, width: 8, height: 8, borderRadius: "50%", background: s.color, display: "block" }} />
+              )}
             </button>
           ))}
         </div>
 
-        {/* Questions */}
-        <div key={activeSection}>
-          {section.questions.map((q) => (
-            <AnswerCard key={q.id} question={q} sectionColor={section.color} />
-          ))}
-        </div>
+        {/* Section label */}
+        <p
+          className="font-display italic mb-5"
+          style={{ fontSize: "22px", color: section.color }}
+        >
+          {section.label}
+        </p>
+
+        {/* Main content */}
+        {showDiscuss ? (
+          <DiscussScreen
+            section={section}
+            person={person}
+            myAnswers={myAnswers}
+            partnerAnswers={partnerAnswers}
+            summary={summaries[activeSectionId]}
+            isLastSection={isLastSection}
+            onNext={goNextSection}
+          />
+        ) : (
+          <div key={activeSectionId}>
+            {/* Questions accordion */}
+            {section.questions.map((q) => (
+              <AnswerCard
+                key={q.id}
+                question={q}
+                sectionColor={section.color}
+                isOpen={openQuestionId === q.id}
+                onToggle={() => toggleQuestion(q.id)}
+                answer={myAnswers[q.id] ?? ""}
+                onAnswerChange={(val) => handleAnswerChange(q.id, val)}
+                locked={isSubmitted}
+              />
+            ))}
+
+            {/* Waiting / Submit area */}
+            {isSubmitted ? (
+              <div
+                className="mt-6 rounded-xl p-4 text-center"
+                style={{ background: "rgba(255,255,255,0.02)", border: "1px solid #1A2E18" }}
+              >
+                {generatingSummary ? (
+                  <>
+                    <p style={{ fontSize: "11px", color: "#4A6B50", marginBottom: 4 }}>Reading your answers…</p>
+                    <p style={{ fontSize: "10px", color: "#2D4D28" }}>Just a moment</p>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ fontSize: "11px", color: "#4A6B50", marginBottom: 4 }}>
+                      Your answers are in. Waiting for {PARTNER[person]}…
+                    </p>
+                    <p style={{ fontSize: "10px", color: "#2D4D28" }}>
+                      The discussion will open when they finish this section.
+                    </p>
+                  </>
+                )}
+              </div>
+            ) : myComplete ? (
+              <button
+                onClick={handleSubmit}
+                className="w-full mt-5 rounded-xl py-4 transition-all duration-200 active:scale-95"
+                style={{
+                  background: `${section.color}18`,
+                  border: `1px solid ${section.color}40`,
+                  color: section.color,
+                  fontSize: "11px",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                }}
+              >
+                Submit my answers
+              </button>
+            ) : (
+              <div className="mt-4">
+                <p style={{ fontSize: "10px", color: "#2D4D28", textAlign: "center" }}>
+                  {section.questions.filter((q) => myAnswers[q.id]?.trim()).length} / {section.questions.length} answered
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <div
