@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, DM_Mono } from "next/font/google";
+import { Barlow_Condensed, DM_Mono } from "next/font/google";
 import "./globals.css";
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument",
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-barlow",
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
+  weight: ["400", "600"],
 });
 
 const dmMono = DM_Mono({
@@ -26,7 +25,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${instrumentSerif.variable} ${dmMono.variable} h-full`}
+      className={`${barlowCondensed.variable} ${dmMono.variable} h-full`}
     >
       <body className="min-h-full antialiased">{children}</body>
     </html>

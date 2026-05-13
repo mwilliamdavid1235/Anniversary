@@ -45,7 +45,7 @@ export default function DayNav({ days, activeDay, onSelect }: DayNavProps) {
                   {day.label}
                 </span>
                 <span
-                  className="font-display italic block leading-none transition-colors"
+                  className="font-display block leading-none transition-colors"
                   style={{
                     fontSize: "22px",
                     color: active ? "#E2D9C6" : "#3A5040",

@@ -18,7 +18,7 @@
   --color-sage:         #6DB87E;
   --color-sage-dim:     #3D6B47;
 
-  --font-display:       var(--font-instrument);
+  --font-display:       var(--font-barlow);
   --font-mono:          var(--font-dm-mono);
 }
 
@@ -49,9 +49,10 @@ body {
 /* ── Selection ────────────────────────────────────────────── */
 ::selection { background: rgba(196,154,69,0.2); color: #E2D9C6; }
 
-/* ── Instrument Serif display class ──────────────────────── */
+/* ── Barlow Condensed display class ──────────────────────── */
 .font-display {
-  font-family: var(--font-instrument), Georgia, serif;
+  font-family: var(--font-barlow), 'Arial Narrow', sans-serif;
+  font-weight: 600;
 }
 
 /* ── Animated gold shimmer ────────────────────────────────── */
@@ -125,8 +126,8 @@ body {
 
 /* ── Watermark day number ─────────────────────────────────── */
 .day-watermark {
-  font-family: var(--font-instrument), Georgia, serif;
-  font-style: italic;
+  font-family: var(--font-barlow), 'Arial Narrow', sans-serif;
+  font-weight: 600;
   font-size: clamp(120px, 28vw, 220px);
   line-height: 0.85;
   color: rgba(196,154,69,0.04);
