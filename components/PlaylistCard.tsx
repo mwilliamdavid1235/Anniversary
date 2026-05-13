@@ -76,7 +76,7 @@ export default function PlaylistCard({ playlist }: PlaylistCardProps) {
           <p className="text-[9px] tracking-[0.18em] uppercase" style={{ color: "#6DB87E" }}>
             Playlist
           </p>
-          <p className="font-display italic leading-tight truncate" style={{ fontSize: "16px", color: "#E2D9C6" }}>
+          <p className="font-display leading-tight truncate" style={{ fontSize: "16px", color: "#E2D9C6" }}>
             {playlist.label}
           </p>
         </div>

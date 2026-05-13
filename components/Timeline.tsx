@@ -11,6 +11,7 @@ interface TimelineProps {
 function getNextEventId(day: TripDay): string | null {
   const now = new Date();
   for (const event of day.events) {
+    if (!event.time) continue;
     const [h, m] = event.time.split(":").map(Number);
     const dt = new Date(`${day.date}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00`);
     if (dt > now) return event.id;

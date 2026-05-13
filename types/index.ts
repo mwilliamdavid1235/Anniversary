@@ -1,9 +1,9 @@
-export type EventType = "travel" | "lodging" | "restaurant" | "activity";
+export type EventType = "travel" | "lodging" | "restaurant" | "activity" | "experience";
 
 export interface EventLink {
   label: string;
   href: string;
-  kind: "waze" | "website" | "menu" | "reserve" | "phone" | "tickets";
+  kind: "waze" | "website" | "menu" | "reserve" | "phone" | "tickets" | "connection";
 }
 
 export interface EventOption {
@@ -23,7 +23,7 @@ export interface Playlist {
 
 export interface TripEvent {
   id: string;
-  time: string;          // "15:00"
+  time?: string;         // "15:00" — omit for untimed events
   title: string;
   type: EventType;
   description: string;

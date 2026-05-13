@@ -12,20 +12,22 @@ interface EventCardProps {
 
 // ── Type config ──────────────────────────────────────────────
 const TYPE_CONFIG = {
-  travel:     { label: "Travel",    dot: "#6E8A74", accent: "#6E8A74" },
-  lodging:    { label: "Lodging",   dot: "#9B8FC4", accent: "#9B8FC4" },
-  restaurant: { label: "Dining",    dot: "#C49A45", accent: "#C49A45" },
-  activity:   { label: "Activity",  dot: "#6DB87E", accent: "#6DB87E" },
+  travel:     { label: "Travel",     dot: "#6E8A74", accent: "#6E8A74" },
+  lodging:    { label: "Lodging",    dot: "#9B8FC4", accent: "#9B8FC4" },
+  restaurant: { label: "Dining",     dot: "#C49A45", accent: "#C49A45" },
+  activity:   { label: "Activity",   dot: "#6DB87E", accent: "#6DB87E" },
+  experience: { label: "Experience", dot: "#C47A8A", accent: "#C47A8A" },
 } as const;
 
 // ── Link button config ───────────────────────────────────────
 const LINK_CONFIG = {
-  waze:    { bg: "rgba(51,64,160,0.15)",  border: "#2A3580",  color: "#8090E8", text: "▲ " },
-  website: { bg: "rgba(196,154,69,0.1)",  border: "#6B4F1E",  color: "#C49A45", text: "↗ " },
-  menu:    { bg: "rgba(109,184,126,0.1)", border: "#2D5038",  color: "#6DB87E", text: "≡ " },
-  reserve: { bg: "rgba(155,143,196,0.1)", border: "#4A4070",  color: "#9B8FC4", text: "◇ " },
-  phone:   { bg: "rgba(110,138,116,0.1)", border: "#2D4D28",  color: "#6E8A74", text: "○ " },
-  tickets: { bg: "rgba(196,167,69,0.1)",  border: "#5A4A10",  color: "#C4A745", text: "✦ " },
+  waze:       { bg: "rgba(51,64,160,0.15)",   border: "#2A3580",  color: "#8090E8", text: "▲ " },
+  website:    { bg: "rgba(196,154,69,0.1)",   border: "#6B4F1E",  color: "#C49A45", text: "↗ " },
+  menu:       { bg: "rgba(109,184,126,0.1)",  border: "#2D5038",  color: "#6DB87E", text: "≡ " },
+  reserve:    { bg: "rgba(155,143,196,0.1)",  border: "#4A4070",  color: "#9B8FC4", text: "◇ " },
+  phone:      { bg: "rgba(110,138,116,0.1)",  border: "#2D4D28",  color: "#6E8A74", text: "○ " },
+  tickets:    { bg: "rgba(196,167,69,0.1)",   border: "#5A4A10",  color: "#C4A745", text: "✦ " },
+  connection: { bg: "rgba(196,122,138,0.15)", border: "#7A3A4A",  color: "#C47A8A", text: "♡ " },
 } as const;
 
 function LinkButton({ link }: { link: EventLink }) {
@@ -33,8 +35,8 @@ function LinkButton({ link }: { link: EventLink }) {
   return (
     <a
       href={link.href}
-      target={link.kind === "phone" ? undefined : "_blank"}
-      rel="noopener noreferrer"
+      target={link.kind === "phone" || link.kind === "connection" ? undefined : "_blank"}
+      rel={link.kind === "phone" || link.kind === "connection" ? undefined : "noopener noreferrer"}
       className="inline-flex items-center gap-1 rounded transition-opacity duration-100 active:scale-95"
       style={{
         fontSize: "10px",
@@ -295,10 +297,14 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
 
 export default function EventCard({ event, isNext, isPast }: EventCardProps) {
   const cfg = TYPE_CONFIG[event.type];
-  const [h, m] = event.time.split(":").map(Number);
-  const period = h >= 12 ? "pm" : "am";
-  const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
-  const timeStr = `${hour12}:${String(m).padStart(2, "0")}`;
+  let timeStr = "—";
+  let period = "";
+  if (event.time) {
+    const [h, m] = event.time.split(":").map(Number);
+    period = h >= 12 ? "pm" : "am";
+    const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    timeStr = `${hour12}:${String(m).padStart(2, "0")}`;
+  }
 
   return (
     <div className={`event-row flex gap-0 mb-3 ${isPast ? "is-past" : ""}`}>
