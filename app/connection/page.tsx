@@ -271,22 +271,55 @@ function DiscussScreen({
         })}
       </div>
 
-      {/* Next section button */}
-      <button
-        onClick={onNext}
-        className="w-full rounded-xl py-4 transition-all duration-200 active:scale-95"
-        style={{
-          background: `${section.color}20`,
-          border: `1px solid ${section.color}50`,
-          color: section.color,
-          fontSize: "12px",
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          cursor: "pointer",
-        }}
-      >
-        {isLastSection ? "That's all of them ✦" : "Next section →"}
-      </button>
+      {/* Next section / intimacy teaser */}
+      {isLastSection ? (
+        <div
+          className="rounded-xl p-5 text-center"
+          style={{ background: "rgba(155,143,196,0.08)", border: "1px solid rgba(155,143,196,0.25)" }}
+        >
+          <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#9B8FC4", marginBottom: 10, opacity: 0.8 }}>
+            ✦ You finished Connection
+          </p>
+          <p className="font-display italic mb-2" style={{ fontSize: "22px", color: "#E2D9C6" }}>
+            Ready to go deeper?
+          </p>
+          <p style={{ fontSize: "13px", color: "#6B5A8A", marginBottom: 20, lineHeight: 1.5 }}>
+            Intimacy picks up where this left off — what you want, what you need, and what you haven&apos;t said yet.
+          </p>
+          <a
+            href="/intimacy"
+            className="block w-full rounded-xl py-4 transition-all duration-200 active:scale-95"
+            style={{
+              background: "rgba(155,143,196,0.15)",
+              border: "1px solid rgba(155,143,196,0.4)",
+              color: "#C4B8E8",
+              fontSize: "12px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+              display: "block",
+            }}
+          >
+            Begin Intimacy →
+          </a>
+        </div>
+      ) : (
+        <button
+          onClick={onNext}
+          className="w-full rounded-xl py-4 transition-all duration-200 active:scale-95"
+          style={{
+            background: `${section.color}20`,
+            border: `1px solid ${section.color}50`,
+            color: section.color,
+            fontSize: "12px",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+          }}
+        >
+          Next section →
+        </button>
+      )}
     </div>
   );
 }
