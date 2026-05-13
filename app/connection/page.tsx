@@ -335,7 +335,8 @@ export default function ConnectionPage() {
   const [partnerAnswers, setPartnerAnswers] = useState<Record<string, string>>({});
   const [submittedSections, setSubmittedSections] = useState<Set<string>>(new Set());
   const [summaries, setSummaries] = useState<Record<string, string>>({});
-  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [waitingForSummary, setWaitingForSummary] = useState(false);
+  const generatingRef = useRef(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
@@ -409,9 +410,9 @@ export default function ConnectionPage() {
 
   // ── Generate summary when both complete ──────────────────
   useEffect(() => {
-    if (!isSubmitted || !partnerComplete || hasSummary || generatingSummary || !person) return;
-    setGeneratingSummary(true);
-    const partner = person === "mary" ? "md" : "mary";
+    if (!isSubmitted || !partnerComplete || hasSummary || generatingRef.current || !person) return;
+    generatingRef.current = true;
+    setWaitingForSummary(true);
     const [maryMap, mdMap] =
       person === "mary"
         ? [myAnswers, partnerAnswers]
@@ -428,11 +429,22 @@ export default function ConnectionPage() {
     })
       .then((r) => r.json())
       .then(({ summary }) => {
-        if (summary) setSummaries((prev) => ({ ...prev, [activeSectionId]: summary }));
+        setSummaries((prev) => ({
+          ...prev,
+          [activeSectionId]: summary || "Talk through what stood out in this section together.",
+        }));
       })
-      .finally(() => setGeneratingSummary(false));
-    void partner;
-  }, [isSubmitted, partnerComplete, hasSummary, generatingSummary, person, activeSectionId, section, myAnswers, partnerAnswers]);
+      .catch(() => {
+        setSummaries((prev) => ({
+          ...prev,
+          [activeSectionId]: "Talk through what stood out in this section together.",
+        }));
+      })
+      .finally(() => {
+        generatingRef.current = false;
+        setWaitingForSummary(false);
+      });
+  }, [isSubmitted, partnerComplete, hasSummary, person, activeSectionId, section.label, myAnswers, partnerAnswers]);
 
   // ── Submit section ────────────────────────────────────────
   function handleSubmit() {
@@ -571,7 +583,7 @@ export default function ConnectionPage() {
                 className="mt-6 rounded-xl p-4 text-center"
                 style={{ background: "rgba(255,255,255,0.02)", border: "1px solid #1A2E18" }}
               >
-                {generatingSummary ? (
+                {waitingForSummary ? (
                   <>
                     <p style={{ fontSize: "11px", color: "#4A6B50", marginBottom: 4 }}>Reading your answers…</p>
                     <p style={{ fontSize: "10px", color: "#2D4D28" }}>Just a moment</p>

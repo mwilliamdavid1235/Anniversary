@@ -315,7 +315,8 @@ export default function IntimacyPage() {
   const [partnerAnswers, setPartnerAnswers] = useState<Record<string, string>>({});
   const [submittedSections, setSubmittedSections] = useState<Set<string>>(new Set());
   const [summaries, setSummaries] = useState<Record<string, string>>({});
-  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [waitingForSummary, setWaitingForSummary] = useState(false);
+  const generatingRef = useRef(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
@@ -395,8 +396,9 @@ export default function IntimacyPage() {
 
   // ── Generate summary when both complete ─────────────────
   useEffect(() => {
-    if (!isSubmitted || !partnerComplete || hasSummary || generatingSummary || !person) return;
-    setGeneratingSummary(true);
+    if (!isSubmitted || !partnerComplete || hasSummary || generatingRef.current || !person) return;
+    generatingRef.current = true;
+    setWaitingForSummary(true);
     const [maryMap, mdMap] =
       person === "mary"
         ? [myAnswers, partnerAnswers]
@@ -413,10 +415,22 @@ export default function IntimacyPage() {
     })
       .then((r) => r.json())
       .then(({ summary }) => {
-        if (summary) setSummaries((prev) => ({ ...prev, [activeSectionId]: summary }));
+        setSummaries((prev) => ({
+          ...prev,
+          [activeSectionId]: summary || "Talk through what stood out in this section together.",
+        }));
       })
-      .finally(() => setGeneratingSummary(false));
-  }, [isSubmitted, partnerComplete, hasSummary, generatingSummary, person, activeSectionId, section, myAnswers, partnerAnswers]);
+      .catch(() => {
+        setSummaries((prev) => ({
+          ...prev,
+          [activeSectionId]: "Talk through what stood out in this section together.",
+        }));
+      })
+      .finally(() => {
+        generatingRef.current = false;
+        setWaitingForSummary(false);
+      });
+  }, [isSubmitted, partnerComplete, hasSummary, person, activeSectionId, section.label, myAnswers, partnerAnswers]);
 
   // ── Submit section ───────────────────────────────────────
   function handleSubmit() {
@@ -561,7 +575,7 @@ export default function IntimacyPage() {
                 className="mt-6 rounded-xl p-4 text-center"
                 style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${PALETTE.edge}` }}
               >
-                {generatingSummary ? (
+                {waitingForSummary ? (
                   <>
                     <p style={{ fontSize: "11px", color: PALETTE.textFaint, marginBottom: 4 }}>Reading your answers…</p>
                     <p style={{ fontSize: "10px", color: PALETTE.textDim }}>Just a moment</p>
