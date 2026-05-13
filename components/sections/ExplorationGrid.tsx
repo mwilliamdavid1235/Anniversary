@@ -20,10 +20,9 @@ const I = {
 };
 
 const OPTION_COLORS: Record<GridResponse, { dot: string; border: string; textColor: string }> = {
-  yes:          { dot: "#C47EA0", border: "#C47EA0",    textColor: I.text },
+  strong:       { dot: "#C49A45", border: "#C49A45",   textColor: I.text },
+  yes:          { dot: "#C47EA0", border: "#C47EA0",   textColor: I.text },
   curious:      { dot: I.gold,   border: "#7A5F25",    textColor: I.text },
-  conditions:   { dot: "#8A9B6E", border: "#4A5E3A",   textColor: I.text },
-  need_info:    { dot: "#6E8AA0", border: "#3A5060",   textColor: I.text },
   fantasy_only: { dot: "#9B7FA8", border: "#4A2D5A",   textColor: I.text },
   no:           { dot: I.textDim, border: I.edge,      textColor: I.textMuted },
 };

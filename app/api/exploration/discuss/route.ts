@@ -1,40 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { EXPLORATION_ITEMS, EXPLORATION_OPTION_LABELS, getRevealTier, type GridResponse } from "@/lib/exploration-items";
+import {
+  EXPLORATION_SECTIONS,
+  EXPLORATION_OPTION_LABELS,
+  getRevealTier,
+  type GridResponse,
+} from "@/lib/exploration-items";
 
 const client = new Anthropic();
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { maryAnswers, mdAnswers } = body as {
+  const { sectionId, maryAnswers, mdAnswers } = body as {
+    sectionId: string;
     maryAnswers: Record<string, GridResponse>;
     mdAnswers: Record<string, GridResponse>;
   };
 
-  const sharedInterests: string[] = [];
-  const toExplore: string[] = [];
+  const section = EXPLORATION_SECTIONS.find((s) => s.id === sectionId);
+  if (!section) return NextResponse.json({ error: "Unknown section" }, { status: 400 });
 
-  for (const item of EXPLORATION_ITEMS) {
+  const shared: string[] = [];
+  for (const item of section.items) {
     const m = maryAnswers[item.id];
     const d = mdAnswers[item.id];
     if (!m || !d) continue;
     const tier = getRevealTier(m, d);
-    const mLabel = EXPLORATION_OPTION_LABELS[m]?.short ?? m;
-    const dLabel = EXPLORATION_OPTION_LABELS[d]?.short ?? d;
-    if (tier === "strong") sharedInterests.push(`${item.label} (Mary: ${mLabel}, MD: ${dLabel})`);
-    if (tier === "explore") toExplore.push(`${item.label} (Mary: ${mLabel}, MD: ${dLabel})`);
+    if (tier === "both_strong" || tier === "strong" || tier === "explore") {
+      const mLabel = EXPLORATION_OPTION_LABELS[m].short;
+      const dLabel = EXPLORATION_OPTION_LABELS[d].short;
+      shared.push(`${item.label} (Mary: ${mLabel}, MD: ${dLabel})`);
+    }
   }
 
-  const prompt = `Mary and MD just completed an exploration menu for their anniversary — rating 10 sexual experiences as yes, curious, conditions, need more info, fantasy only, or no.
+  if (shared.length === 0) {
+    return NextResponse.json({ summary: "You have different comfort levels here — that's useful to know. Talk through what stood out to each of you." });
+  }
 
-Strong alignment (both said yes): ${sharedInterests.length ? sharedInterests.join("; ") : "none"}
-Worth exploring (one yes + one curious/conditions): ${toExplore.length ? toExplore.join("; ") : "none"}
+  const prompt = `Mary and MD are on their anniversary trip going through an intimacy exploration together. They just both responded to items in the "${section.label}" category.
 
-Write 2–3 short, warm, direct sentences introducing what they should talk about. Lead with what they're both clearly excited about. Be matter-of-fact and real — not clinical, not overly romantic. No headers. Just a brief paragraph they read together before they go through the results.`;
+Items they both showed interest in: ${shared.join("; ")}
+
+Write one warm, direct sentence — nothing more — that simply names what they share and invites them to talk about it. Don't be clinical. Don't be overly romantic. Just a gentle, real pointer to what they have in common here.`;
 
   const message = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 180,
+    max_tokens: 80,
     messages: [{ role: "user", content: prompt }],
   });
 
