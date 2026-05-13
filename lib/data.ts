@@ -18,7 +18,6 @@ export const TRIP: Trip = {
       events: [
         {
           id: "d1-e1",
-          time: "10:00",
           title: "Depart Knoxville",
           type: "travel",
           description:
@@ -40,17 +39,29 @@ export const TRIP: Trip = {
 
         {
           id: "d1-e2",
-          time: "11:30",
           title: "Lunch in Townsend",
           type: "restaurant",
           description:
             "Ease into the mountains on the peaceful side of the Smokies before heading deeper into the park. Slower roads, river views, and a calmer pace than anything near the Parkway.",
           options: [
             {
+              id: "opt-peaceful-side-fri",
+              name: "Peaceful Side Social",
+              description:
+                "Modern casual spot with local beer, pizza, and open-air seating. Good if the day starts later.",
+              links: [
+                {
+                  label: "Waze",
+                  href: "https://waze.com/ul?q=Peaceful+Side+Social+Townsend+TN&navigate=yes",
+                  kind: "waze",
+                },
+              ],
+            },
+            {
               id: "opt-apple-valley",
               name: "Apple Valley Cafe",
               description:
-                "Relaxed mountain café with strong coffee, scratch breakfast, and garden patio seating. The recommended stop.",
+                "Relaxed mountain café with strong coffee, scratch breakfast, and garden patio seating.",
               links: [
                 {
                   label: "Waze",
@@ -85,25 +96,11 @@ export const TRIP: Trip = {
                 },
               ],
             },
-            {
-              id: "opt-peaceful-side-fri",
-              name: "Peaceful Side Social",
-              description:
-                "Modern casual spot with local beer, pizza, and open-air seating. Good if the day starts later.",
-              links: [
-                {
-                  label: "Waze",
-                  href: "https://waze.com/ul?q=Peaceful+Side+Social+Townsend+TN&navigate=yes",
-                  kind: "waze",
-                },
-              ],
-            },
           ],
         },
 
         {
           id: "d1-e3",
-          time: "13:30",
           title: "Porters Creek Trail",
           type: "activity",
           description:
@@ -131,11 +128,10 @@ export const TRIP: Trip = {
 
         {
           id: "d1-e4",
-          time: "16:30",
           title: "Provisions Stop",
           type: "activity",
           description:
-            "Pick up wine, snacks, breakfast things, and anything you want for a quiet evening at the cabin before heading to Stellara.",
+            "Pick up wine, snacks, breakfast things, and anything you want for a quiet evening at the cabin before heading to Stellara. Publix at Valley Forge is right on the route from Porters Creek — you'll pass it on the Parkway before turning toward Stellara.",
           links: [
             {
               label: "Waze",
@@ -163,7 +159,6 @@ export const TRIP: Trip = {
 
         {
           id: "d1-e5",
-          time: "18:00",
           title: "Check In — Stellara Resort",
           type: "lodging",
           description:
@@ -190,7 +185,6 @@ export const TRIP: Trip = {
 
         {
           id: "d1-e6",
-          time: "19:30",
           title: "Connection Activity",
           type: "experience",
           description:
@@ -206,7 +200,6 @@ export const TRIP: Trip = {
 
         {
           id: "d1-e7",
-          time: "21:00",
           title: "Dinner on the Deck",
           type: "experience",
           description:
@@ -215,12 +208,18 @@ export const TRIP: Trip = {
 
         {
           id: "d1-e8",
-          time: "22:30",
           title: "After Dark — A Night Among the Stars",
           type: "activity",
           description:
-            "Ten stops across the night sky — planets, stars, clusters, and galaxies — guided by a custom star tour built for this trip. Begins after dark. Runs roughly 90 minutes. The light arriving tonight from your anniversary star left in 1998.",
-          note: "Star tour launches from the Pecan & Poplar app. Begin after dark when the sky is fully dark.",
+            "Ten stops across the night sky — planets, stars, clusters, and galaxies — guided by a custom star tour built for this trip. Begins after dark.",
+          note: "Begin after dark when the sky is fully dark.",
+          links: [
+            {
+              label: "Launch Star Tour",
+              href: "#",
+              kind: "star-tour",
+            },
+          ],
           bailouts: [
             {
               id: "bail-star-move",
@@ -266,7 +265,6 @@ export const TRIP: Trip = {
 
         {
           id: "d2-e2",
-          time: "08:30",
           title: "Breakfast Before the Trail",
           type: "restaurant",
           description:
@@ -297,7 +295,6 @@ export const TRIP: Trip = {
 
         {
           id: "d2-e3",
-          time: "10:00",
           title: "Hen Wallow Falls — Gabes Mountain Trail",
           type: "activity",
           description:
@@ -352,7 +349,6 @@ export const TRIP: Trip = {
 
         {
           id: "d2-e4",
-          time: "13:00",
           title: "Greenbrier River Stop & Snack Lunch",
           type: "activity",
           description:
@@ -402,7 +398,6 @@ export const TRIP: Trip = {
 
         {
           id: "d2-e5",
-          time: "15:00",
           title: "Back at Stellara",
           type: "lodging",
           description:
@@ -455,11 +450,10 @@ export const TRIP: Trip = {
 
         {
           id: "d2-e6",
-          time: "17:45",
           title: "Depart for Dinner",
           type: "travel",
           description:
-            "Leave Stellara and head toward Sevierville with enough time for a relaxed drive before dinner.",
+            "Leave Stellara about 20 minutes before you want to arrive — it's a short drive to downtown Sevierville. Plan to pull up by 6:45 for your 7:00 PM reservation.",
           links: [
             {
               label: "Waze",
@@ -509,7 +503,6 @@ export const TRIP: Trip = {
 
         {
           id: "d2-e8",
-          time: "21:30",
           title: "Back Under the Stars",
           type: "experience",
           description:

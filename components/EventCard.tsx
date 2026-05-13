@@ -28,6 +28,7 @@ const LINK_CONFIG = {
   phone:      { bg: "rgba(110,138,116,0.1)",  border: "#2D4D28",  color: "#6E8A74", text: "○ " },
   tickets:    { bg: "rgba(196,167,69,0.1)",   border: "#5A4A10",  color: "#C4A745", text: "✦ " },
   connection: { bg: "rgba(196,122,138,0.15)", border: "#7A3A4A",  color: "#C47A8A", text: "♡ " },
+  "star-tour": { bg: "rgba(155,143,196,0.12)", border: "#4A3A70",  color: "#B8AADF", text: "✦ " },
 } as const;
 
 function LinkButton({ link }: { link: EventLink }) {

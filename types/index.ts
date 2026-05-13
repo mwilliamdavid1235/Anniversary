@@ -3,7 +3,7 @@ export type EventType = "travel" | "lodging" | "restaurant" | "activity" | "expe
 export interface EventLink {
   label: string;
   href: string;
-  kind: "waze" | "website" | "menu" | "reserve" | "phone" | "tickets" | "connection";
+  kind: "waze" | "website" | "menu" | "reserve" | "phone" | "tickets" | "connection" | "star-tour";
 }
 
 export interface EventOption {
