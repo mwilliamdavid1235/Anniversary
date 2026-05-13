@@ -16,11 +16,13 @@ interface UpNextBannerProps {
 function buildEventList(days: TripDay[]): EventWithMeta[] {
   return days
     .flatMap((day) =>
-      day.events.map((event) => {
-        const [h, m] = event.time.split(":").map(Number);
-        const dt = new Date(`${day.date}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00`);
-        return { event, day, dateTime: dt };
-      })
+      day.events
+        .filter((event) => !!event.time)
+        .map((event) => {
+          const [h, m] = event.time!.split(":").map(Number);
+          const dt = new Date(`${day.date}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00`);
+          return { event, day, dateTime: dt };
+        })
     )
     .sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime());
 }
