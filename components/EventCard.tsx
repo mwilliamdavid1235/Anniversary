@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { TripEvent, EventLink, EventOption } from "@/types";
 import PlaylistCard from "./PlaylistCard";
 
@@ -8,6 +8,7 @@ interface EventCardProps {
   event: TripEvent;
   isNext: boolean;
   isPast: boolean;
+  onLongPress?: () => void;
 }
 
 // ── Type config ──────────────────────────────────────────────
@@ -296,8 +297,11 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
   );
 }
 
-export default function EventCard({ event, isNext, isPast }: EventCardProps) {
+export default function EventCard({ event, isNext, isPast, onLongPress }: EventCardProps) {
   const cfg = TYPE_CONFIG[event.type];
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [dotPulse, setDotPulse] = useState(false);
+
   let timeStr = "—";
   let period = "";
   if (event.time) {
@@ -305,6 +309,17 @@ export default function EventCard({ event, isNext, isPast }: EventCardProps) {
     period = h >= 12 ? "pm" : "am";
     const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
     timeStr = `${hour12}:${String(m).padStart(2, "0")}`;
+  }
+
+  function startPress() {
+    pressTimer.current = setTimeout(() => {
+      setDotPulse(true);
+      setTimeout(() => setDotPulse(false), 600);
+      onLongPress?.();
+    }, 600);
+  }
+  function cancelPress() {
+    if (pressTimer.current) clearTimeout(pressTimer.current);
   }
 
   return (
@@ -325,8 +340,15 @@ export default function EventCard({ event, isNext, isPast }: EventCardProps) {
         <span className="block" style={{ color: "#2D4D28", fontSize: "9px", letterSpacing: "0.05em" }}>{period}</span>
       </div>
 
-      {/* Timeline dot */}
-      <div className="flex-shrink-0 relative" style={{ marginTop: 18, marginLeft: -5, zIndex: 1 }}>
+      {/* Timeline dot — long-press to flag as current */}
+      <div
+        className="flex-shrink-0 relative"
+        style={{ marginTop: 18, marginLeft: -5, zIndex: 1, padding: 6, margin: "12px -11px 0", cursor: "default" }}
+        onPointerDown={onLongPress ? startPress : undefined}
+        onPointerUp={onLongPress ? cancelPress : undefined}
+        onPointerCancel={onLongPress ? cancelPress : undefined}
+        onPointerLeave={onLongPress ? cancelPress : undefined}
+      >
         <div
           style={{
             width: 10,
@@ -334,7 +356,7 @@ export default function EventCard({ event, isNext, isPast }: EventCardProps) {
             borderRadius: "50%",
             background: isNext ? cfg.dot : "#1E3319",
             border: `1.5px solid ${isNext ? cfg.dot : "#2D4D28"}`,
-            outline: isNext ? `3px solid rgba(109,184,126,0.15)` : "none",
+            outline: dotPulse ? `5px solid rgba(109,184,126,0.35)` : isNext ? `3px solid rgba(109,184,126,0.15)` : "none",
             transition: "all 0.3s ease",
           }}
         />
