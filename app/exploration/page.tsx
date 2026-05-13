@@ -1,24 +1,21 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import PasswordGate from "@/components/sections/PasswordGate";
 import PersonSelector, { type Person } from "@/components/sections/PersonSelector";
-import ExplorationGrid from "@/components/sections/ExplorationGrid";
 import {
   EXPLORATION_ITEMS,
-  TOTAL_EXPLORATION,
   EXPLORATION_OPTION_LABELS,
+  EXPLORATION_RESPONSE_ORDER,
   getRevealTier,
   type GridResponse,
   type RevealTier,
 } from "@/lib/exploration-items";
 
-// ── Palette ───────────────────────────────────────────────────
-const I = {
+const PALETTE = {
   bg: "#0C0810",
   edge: "#2E1F40",
-  edgeHi: "#4A2D5A",
   text: "#EDE0E8",
   textMuted: "#9B7FA8",
   textFaint: "#6B4A7A",
@@ -27,490 +24,482 @@ const I = {
   gold: "#C49A45",
 };
 
-interface ExplorationAnswerData {
-  response: GridResponse;
-  comment?: string;
-}
-
-type AnswerMap = Record<string, ExplorationAnswerData>; // keyed by item_id
-
-interface StatusData {
-  mary: { count: number; total: number };
-  md: { count: number; total: number };
-  both_complete: boolean;
-  is_unlocked: boolean;
-}
-
-// ── Tier display config ────────────────────────────────────────
-const TIER_CONFIG: Record<
-  Exclude<RevealTier, "hidden">,
-  { label: string; accent: string; bg: string; border: string }
-> = {
-  strong:       { label: "Strong Alignment",  accent: I.rose,           bg: "rgba(196,126,160,0.10)", border: "#C47EA0" },
-  explore:      { label: "Worth Exploring",   accent: I.gold,           bg: "rgba(196,154,69,0.08)", border: "#7A5F25" },
-  conversation: { label: "Worth a Conversation", accent: "#8A9B6E",     bg: "rgba(138,155,110,0.07)", border: "#4A5E3A" },
-  mismatch:     { label: "Different Answers", accent: I.textFaint,      bg: "rgba(46,31,64,0.3)",    border: I.edge },
+const RESPONSE_COLORS: Record<GridResponse, string> = {
+  yes:          "#6DB87E",
+  curious:      "#C47EA0",
+  conditions:   "#C49A45",
+  need_info:    "#9B8FC4",
+  fantasy_only: "#C47A8A",
+  no:           "#3D2850",
 };
 
-// ── Reveal helpers ────────────────────────────────────────────
+const TIER_CONFIG: Record<Exclude<RevealTier, "hidden">, { label: string; color: string; bg: string; border: string }> = {
+  strong:       { label: "Strong Alignment",        color: PALETTE.rose,    bg: "rgba(196,126,160,0.08)", border: "#C47EA0" },
+  explore:      { label: "Worth Exploring",         color: PALETTE.gold,    bg: "rgba(196,154,69,0.07)",  border: "#7A5F25" },
+  conversation: { label: "Worth a Conversation",   color: "#8A9B6E",       bg: "rgba(138,155,110,0.07)", border: "#4A5E3A" },
+  mismatch:     { label: "Different Answers",       color: PALETTE.textFaint, bg: "rgba(46,31,64,0.3)",  border: PALETTE.edge },
+};
 
-function ResponsePill({ response, name }: { response: GridResponse | undefined; name: string }) {
-  if (!response) {
-    return (
-      <div className="rounded-lg p-3" style={{ background: "rgba(13,11,16,0.5)", border: `1px solid ${I.edge}` }}>
-        <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: I.textFaint, marginBottom: 4 }}>{name}</p>
-        <p style={{ fontSize: "13px", color: I.textDim, fontStyle: "italic" }}>—</p>
-      </div>
-    );
-  }
-  const label = EXPLORATION_OPTION_LABELS[response];
-  return (
-    <div className="rounded-lg p-3" style={{ background: "rgba(13,11,16,0.5)", border: `1px solid ${I.edgeHi}` }}>
-      <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: I.textFaint, marginBottom: 4 }}>{name}</p>
-      <p style={{ fontSize: "13px", color: I.text, marginBottom: 2 }}>
-        <span style={{ marginRight: 6, color: I.rose }}>◆</span>
-        {label.short}
-      </p>
-      <p style={{ fontSize: "11px", color: I.textFaint, paddingLeft: 19 }}>{label.description}</p>
-    </div>
-  );
-}
+// ── ItemCard ──────────────────────────────────────────────────
 
-function ResponsePillWithComment({
-  answer,
-  name,
+function ItemCard({
+  item,
+  isOpen,
+  onToggle,
+  response,
+  onSelect,
+  locked,
 }: {
-  answer: ExplorationAnswerData | undefined;
-  name: string;
+  item: typeof EXPLORATION_ITEMS[0];
+  isOpen: boolean;
+  onToggle: () => void;
+  response: GridResponse | null;
+  onSelect: (r: GridResponse) => void;
+  locked: boolean;
 }) {
-  if (!answer) return <ResponsePill response={undefined} name={name} />;
-  const label = EXPLORATION_OPTION_LABELS[answer.response];
+  const hasAnswer = !!response;
+  const accentColor = hasAnswer ? RESPONSE_COLORS[response!] : PALETTE.edge;
+
   return (
-    <div className="rounded-lg p-3" style={{ background: "rgba(13,11,16,0.5)", border: `1px solid ${I.edgeHi}` }}>
-      <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: I.textFaint, marginBottom: 4 }}>{name}</p>
-      <p style={{ fontSize: "13px", color: I.text, marginBottom: 2 }}>
-        <span style={{ marginRight: 6, color: I.rose }}>◆</span>
-        {label.short}
-      </p>
-      <p style={{ fontSize: "11px", color: I.textFaint, paddingLeft: 19, marginBottom: answer.comment ? 8 : 0 }}>{label.description}</p>
-      {answer.comment && answer.comment.trim() && (
-        <p style={{ fontSize: "12px", color: I.textMuted, paddingLeft: 19, fontStyle: "italic", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
-          {answer.comment}
-        </p>
+    <div
+      className="mb-3 rounded-xl overflow-hidden"
+      style={{
+        background: isOpen ? "rgba(196,126,160,0.05)" : "rgba(255,255,255,0.02)",
+        border: `1px solid ${isOpen ? PALETTE.rose + "40" : hasAnswer ? accentColor + "40" : PALETTE.edge}`,
+        transition: "background 0.2s ease, border-color 0.2s ease",
+      }}
+    >
+      {/* Header */}
+      <button
+        onClick={locked ? undefined : onToggle}
+        disabled={locked}
+        className="w-full text-left flex items-start justify-between gap-3"
+        style={{ padding: "16px 18px", background: "none", border: "none", cursor: locked ? "default" : "pointer" }}
+      >
+        <div className="flex-1">
+          <p
+            style={{
+              fontSize: isOpen ? "18px" : "16px",
+              color: isOpen ? PALETTE.text : hasAnswer ? PALETTE.textMuted : PALETTE.textFaint,
+              fontFamily: "var(--font-barlow), sans-serif",
+              fontWeight: 600,
+              fontStyle: "italic",
+              lineHeight: 1.3,
+              transition: "font-size 0.15s ease, color 0.15s ease",
+              marginBottom: hasAnswer && !isOpen ? 4 : 0,
+            }}
+          >
+            {hasAnswer && !isOpen && (
+              <span style={{ fontSize: "9px", color: accentColor, marginRight: 8, verticalAlign: "middle" }}>◆</span>
+            )}
+            {item.label}
+          </p>
+          {/* Response preview when collapsed */}
+          {hasAnswer && !isOpen && (
+            <p style={{ fontSize: "11px", color: accentColor, paddingLeft: 17 }}>
+              {EXPLORATION_OPTION_LABELS[response!].short}
+            </p>
+          )}
+          {/* Description when open */}
+          {isOpen && (
+            <p style={{ fontSize: "12px", color: PALETTE.textFaint, marginTop: 4, lineHeight: 1.5 }}>
+              {item.description}
+            </p>
+          )}
+        </div>
+        {!locked && (
+          <span style={{ fontSize: "9px", color: PALETTE.textDim, flexShrink: 0, marginTop: 4 }}>
+            {isOpen ? "▲" : "▼"}
+          </span>
+        )}
+      </button>
+
+      {/* Response options when open */}
+      {isOpen && !locked && (
+        <div style={{ padding: "0 18px 18px" }} className="flex flex-col gap-2">
+          {EXPLORATION_RESPONSE_ORDER.map((opt) => {
+            const label = EXPLORATION_OPTION_LABELS[opt];
+            const selected = response === opt;
+            const color = RESPONSE_COLORS[opt];
+            return (
+              <button
+                key={opt}
+                onClick={() => onSelect(opt)}
+                className="text-left rounded-lg px-4 py-3 transition-all duration-150"
+                style={{
+                  background: selected ? `${color}18` : "rgba(255,255,255,0.02)",
+                  border: `1px solid ${selected ? color + "60" : PALETTE.edge}`,
+                  cursor: "pointer",
+                }}
+              >
+                <span style={{ fontSize: "8px", marginRight: 10, color: selected ? color : PALETTE.textDim }}>
+                  {selected ? "◆" : "◇"}
+                </span>
+                <span style={{ fontSize: "13px", color: selected ? PALETTE.text : PALETTE.textMuted }}>
+                  {label.short}
+                </span>
+                <span style={{ fontSize: "11px", color: PALETTE.textFaint, display: "block", paddingLeft: 18, marginTop: 2 }}>
+                  {label.description}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       )}
     </div>
   );
 }
 
-function RevealSection({
-  tier,
-  items,
-  maryAnswers,
-  mdAnswers,
+// ── DiscussScreen ─────────────────────────────────────────────
+
+function DiscussScreen({
+  person,
+  myAnswers,
+  partnerAnswers,
+  summary,
 }: {
-  tier: Exclude<RevealTier, "hidden">;
-  items: typeof EXPLORATION_ITEMS;
-  maryAnswers: AnswerMap;
-  mdAnswers: AnswerMap;
+  person: Person;
+  myAnswers: Record<string, GridResponse>;
+  partnerAnswers: Record<string, GridResponse>;
+  summary: string;
 }) {
-  const cfg = TIER_CONFIG[tier];
-  if (items.length === 0) return null;
+  const myName = person === "mary" ? "Mary" : "MD";
+  const partnerName = person === "mary" ? "MD" : "Mary";
+
+  const tiers: Record<Exclude<RevealTier, "hidden">, typeof EXPLORATION_ITEMS> = {
+    strong: [], explore: [], conversation: [], mismatch: [],
+  };
+  for (const item of EXPLORATION_ITEMS) {
+    const m = myAnswers[item.id];
+    const p = partnerAnswers[item.id];
+    if (!m || !p) continue;
+    const [maryR, mdR] = person === "mary" ? [m, p] : [p, m];
+    const tier = getRevealTier(maryR, mdR);
+    if (tier !== "hidden") tiers[tier].push(item);
+  }
 
   return (
-    <div className="mb-10">
-      {/* Tier header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="rounded-lg px-3 py-1.5" style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}>
-          <span style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: cfg.accent }}>
-            ✦ {cfg.label}
-          </span>
-        </div>
-        <span style={{ fontSize: "10px", color: I.textDim }}>{items.length} item{items.length !== 1 ? "s" : ""}</span>
+    <div className="fade-up">
+      {/* AI summary */}
+      <div
+        className="rounded-xl p-5 mb-6"
+        style={{ background: "rgba(196,126,160,0.08)", border: `1px solid ${PALETTE.rose}30` }}
+      >
+        <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: PALETTE.rose, marginBottom: 10, opacity: 0.7 }}>
+          ✦ To discuss
+        </p>
+        <p className="font-display italic leading-relaxed" style={{ fontSize: "18px", color: PALETTE.text }}>
+          {summary}
+        </p>
       </div>
 
-      <div className="flex flex-col gap-5">
-        {items.map((item) => {
-          const mAns = maryAnswers[item.id];
-          const dAns = mdAnswers[item.id];
-          return (
-            <div key={item.id} className="rounded-xl p-4" style={{ background: "rgba(13,11,16,0.3)", border: `1px solid ${I.edge}` }}>
-              <p style={{ fontSize: "14px", color: I.text, fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, marginBottom: 2 }}>
-                {item.label}
-              </p>
-              <p style={{ fontSize: "11px", color: I.textFaint, marginBottom: 12, lineHeight: 1.5 }}>
-                {item.description}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <ResponsePillWithComment answer={mAns} name="Mary" />
-                <ResponsePillWithComment answer={dAns} name="MD" />
+      {/* Tiered results */}
+      {(["strong", "explore", "conversation", "mismatch"] as const).map((tier) => {
+        const items = tiers[tier];
+        if (items.length === 0) return null;
+        const cfg = TIER_CONFIG[tier];
+        return (
+          <div key={tier} className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="rounded-lg px-3 py-1" style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}>
+                <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: cfg.color }}>
+                  ✦ {cfg.label}
+                </span>
               </div>
+              <span style={{ fontSize: "10px", color: PALETTE.textDim }}>{items.length}</span>
             </div>
-          );
-        })}
+            <div className="flex flex-col gap-3">
+              {items.map((item) => {
+                const myR = myAnswers[item.id];
+                const partnerR = partnerAnswers[item.id];
+                return (
+                  <div key={item.id} className="rounded-xl p-4" style={{ background: "rgba(13,11,16,0.3)", border: `1px solid ${PALETTE.edge}` }}>
+                    <p style={{ fontSize: "14px", color: PALETTE.text, fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", marginBottom: 4 }}>
+                      {item.label}
+                    </p>
+                    <div className="flex gap-3 mt-2">
+                      {myR && (
+                        <div className="flex-1 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${PALETTE.edge}` }}>
+                          <p style={{ fontSize: "9px", letterSpacing: "0.1em", color: PALETTE.textDim, marginBottom: 3, textTransform: "uppercase" }}>{myName}</p>
+                          <p style={{ fontSize: "12px", color: RESPONSE_COLORS[myR] }}>{EXPLORATION_OPTION_LABELS[myR].short}</p>
+                        </div>
+                      )}
+                      {partnerR && (
+                        <div className="flex-1 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${PALETTE.edge}` }}>
+                          <p style={{ fontSize: "9px", letterSpacing: "0.1em", color: PALETTE.textDim, marginBottom: 3, textTransform: "uppercase" }}>{partnerName}</p>
+                          <p style={{ fontSize: "12px", color: RESPONSE_COLORS[partnerR] }}>{EXPLORATION_OPTION_LABELS[partnerR].short}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* End card */}
+      <div
+        className="rounded-xl p-5 text-center mt-4"
+        style={{ background: "rgba(196,154,69,0.06)", border: "1px solid rgba(196,154,69,0.2)" }}
+      >
+        <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: PALETTE.gold, marginBottom: 10, opacity: 0.8 }}>
+          ✦ That's everything
+        </p>
+        <p className="font-display italic mb-4" style={{ fontSize: "20px", color: PALETTE.text }}>
+          Now talk about it.
+        </p>
+        <Link
+          href="/"
+          style={{
+            display: "block",
+            padding: "14px",
+            background: "rgba(196,154,69,0.1)",
+            border: "1px solid rgba(196,154,69,0.3)",
+            color: PALETTE.gold,
+            fontSize: "12px",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            textDecoration: "none",
+            borderRadius: 12,
+          }}
+        >
+          ← Back to itinerary
+        </Link>
       </div>
     </div>
   );
 }
 
+// ── Main page ─────────────────────────────────────────────────
+
 export default function ExplorationPage() {
   const [pwUnlocked, setPwUnlocked] = useState(false);
   const [person, setPerson] = useState<Person | null>(null);
   const [hydrated, setHydrated] = useState(false);
-  const [answers, setAnswers] = useState<AnswerMap>({});
-  const [partnerAnswers, setPartnerAnswers] = useState<AnswerMap>({});
-  const [status, setStatus] = useState<StatusData | null>(null);
-  const [togetherAnswers, setTogetherAnswers] = useState<{ mary: AnswerMap; md: AnswerMap } | null>(null);
-  const [showComplete, setShowComplete] = useState(false);
-  const [unlocking, setUnlocking] = useState(false);
-  const [showUnlockAnim, setShowUnlockAnim] = useState(false);
+  const [openItemId, setOpenItemId] = useState<string | null>(null);
+  const [myAnswers, setMyAnswers] = useState<Record<string, GridResponse>>({});
+  const [partnerAnswers, setPartnerAnswers] = useState<Record<string, GridResponse>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const [summary, setSummary] = useState("");
+  const [generatingSummary, setGeneratingSummary] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
+  const allAnswered = EXPLORATION_ITEMS.every((i) => myAnswers[i.id]);
+  const partnerAllAnswered = EXPLORATION_ITEMS.every((i) => partnerAnswers[i.id]);
+  const showDiscuss = submitted && partnerAllAnswered && !!summary;
+
+  // ── Hydrate ──────────────────────────────────────────────
   useEffect(() => {
     const pw = localStorage.getItem("intimacy_unlocked");
     const p = localStorage.getItem("intimacy_person") as Person | null;
+    const sub = localStorage.getItem("exploration_submitted") === "true";
     if (pw === "true") setPwUnlocked(true);
     if (p) setPerson(p);
+    setSubmitted(sub);
     setHydrated(true);
   }, []);
 
-  function selectPerson(p: Person) {
-    localStorage.setItem("intimacy_person", p);
-    setPerson(p);
-  }
-
-  function rowsToMap(rows: { item_id: string; response: GridResponse; comment?: string }[]): AnswerMap {
-    const m: AnswerMap = {};
-    for (const r of rows ?? []) m[r.item_id] = { response: r.response, comment: r.comment };
-    return m;
-  }
-
+  // ── Load answers ─────────────────────────────────────────
   const loadMyAnswers = useCallback(async (p: Person) => {
     const res = await fetch(`/api/exploration/answers?person=${p}`);
     if (!res.ok) return;
-    const { answers: rows } = await res.json();
-    setAnswers(rowsToMap(rows));
+    const { answers } = await res.json();
+    const map: Record<string, GridResponse> = {};
+    for (const a of answers ?? []) map[a.item_id] = a.response;
+    setMyAnswers(map);
   }, []);
 
   const loadPartnerAnswers = useCallback(async (p: Person) => {
     const partner = p === "mary" ? "md" : "mary";
     const res = await fetch(`/api/exploration/answers?person=${partner}`);
     if (!res.ok) return;
-    const { answers: rows } = await res.json();
-    setPartnerAnswers(rowsToMap(rows));
+    const { answers } = await res.json();
+    const map: Record<string, GridResponse> = {};
+    for (const a of answers ?? []) map[a.item_id] = a.response;
+    setPartnerAnswers(map);
   }, []);
-
-  const loadTogetherAnswers = useCallback(async () => {
-    const [mRes, dRes] = await Promise.all([
-      fetch("/api/exploration/answers?person=mary"),
-      fetch("/api/exploration/answers?person=md"),
-    ]);
-    const [{ answers: mRows }, { answers: dRows }] = await Promise.all([mRes.json(), dRes.json()]);
-    setTogetherAnswers({ mary: rowsToMap(mRows), md: rowsToMap(dRows) });
-  }, []);
-
-  const loadStatus = useCallback(async () => {
-    const res = await fetch("/api/exploration/status");
-    if (!res.ok) return;
-    const data: StatusData = await res.json();
-    setStatus(data);
-    if (data.is_unlocked) loadTogetherAnswers();
-  }, [loadTogetherAnswers]);
 
   useEffect(() => {
     if (!person || !pwUnlocked) return;
     loadMyAnswers(person);
     loadPartnerAnswers(person);
-    loadStatus();
-    pollRef.current = setInterval(() => {
-      loadPartnerAnswers(person);
-      loadStatus();
-    }, 30_000);
+    pollRef.current = setInterval(() => loadPartnerAnswers(person), 15_000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [person, pwUnlocked, loadMyAnswers, loadPartnerAnswers, loadStatus]);
+  }, [person, pwUnlocked, loadMyAnswers, loadPartnerAnswers]);
 
-  function saveAnswer(itemId: string, data: Partial<ExplorationAnswerData>) {
-    if (!person) return;
-    setAnswers((prev) => {
-      const existing = prev[itemId] ?? { response: "no" as GridResponse };
-      return { ...prev, [itemId]: { ...existing, ...data } };
-    });
-    const key = `${itemId}`;
-    if (saveTimers.current[key]) clearTimeout(saveTimers.current[key]);
-    saveTimers.current[key] = setTimeout(async () => {
-      const current = { ...answers[itemId], ...data };
-      await fetch("/api/exploration/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ person, item_id: itemId, response: current.response, comment: current.comment ?? null }),
-      });
-      loadStatus();
-    }, 300);
-  }
-
-  function handleResponseChange(itemId: string, response: GridResponse) {
-    const existing = answers[itemId];
-    const updated = { response, comment: existing?.comment };
-    setAnswers((prev) => ({ ...prev, [itemId]: updated }));
-    if (saveTimers.current[itemId]) clearTimeout(saveTimers.current[itemId]);
-    saveTimers.current[itemId] = setTimeout(async () => {
-      await fetch("/api/exploration/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ person, item_id: itemId, response, comment: updated.comment ?? null }),
-      });
-      loadStatus();
-    }, 300);
-  }
-
-  function handleCommentChange(itemId: string, comment: string) {
-    setAnswers((prev) => {
-      const existing = prev[itemId];
-      if (!existing) return prev;
-      return { ...prev, [itemId]: { ...existing, comment } };
-    });
-    const key = `comment_${itemId}`;
-    if (saveTimers.current[key]) clearTimeout(saveTimers.current[key]);
-    saveTimers.current[key] = setTimeout(async () => {
-      const current = answers[itemId];
-      if (!current) return;
-      await fetch("/api/exploration/answers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ person, item_id: itemId, response: current.response, comment }),
-      });
-    }, 800);
-  }
-
-  async function handleUnlock() {
-    if (!person) return;
-    setUnlocking(true);
-    const res = await fetch("/api/exploration/unlock", {
+  // ── Generate summary ─────────────────────────────────────
+  useEffect(() => {
+    if (!submitted || !partnerAllAnswered || summary || generatingSummary || !person) return;
+    setGeneratingSummary(true);
+    const [maryMap, mdMap] =
+      person === "mary" ? [myAnswers, partnerAnswers] : [partnerAnswers, myAnswers];
+    fetch("/api/exploration/discuss", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ person }),
-    });
-    setUnlocking(false);
-    if (res.ok) {
-      setShowUnlockAnim(true);
-      await loadTogetherAnswers();
-      await loadStatus();
-      setTimeout(() => setShowUnlockAnim(false), 2500);
-    }
+      body: JSON.stringify({ maryAnswers: maryMap, mdAnswers: mdMap }),
+    })
+      .then((r) => r.json())
+      .then(({ summary: s }) => { if (s) setSummary(s); })
+      .finally(() => setGeneratingSummary(false));
+  }, [submitted, partnerAllAnswered, summary, generatingSummary, person, myAnswers, partnerAnswers]);
+
+  // ── Save answer ──────────────────────────────────────────
+  function handleSelect(itemId: string, response: GridResponse) {
+    setMyAnswers((prev) => ({ ...prev, [itemId]: response }));
+    setOpenItemId(null);
+    if (saveTimers.current[itemId]) clearTimeout(saveTimers.current[itemId]);
+    saveTimers.current[itemId] = setTimeout(async () => {
+      if (!person) return;
+      await fetch("/api/exploration/answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ person, item_id: itemId, response }),
+      });
+    }, 400);
+  }
+
+  // ── Submit ───────────────────────────────────────────────
+  function handleSubmit() {
+    setSubmitted(true);
+    localStorage.setItem("exploration_submitted", "true");
+    setOpenItemId(null);
+  }
+
+  // ── Person / unlock ──────────────────────────────────────
+  function selectPerson(p: Person) {
+    localStorage.setItem("intimacy_person", p);
+    setPerson(p);
   }
 
   if (!hydrated) return null;
-  if (!pwUnlocked) return <PasswordGate onUnlock={() => setPwUnlocked(true)} />;
+  if (!pwUnlocked) return <PasswordGate onUnlock={() => { localStorage.setItem("intimacy_unlocked", "true"); setPwUnlocked(true); }} />;
   if (!person) {
-    return <div style={{ background: I.bg, minHeight: "100vh" }}><PersonSelector onSelect={selectPerson} /></div>;
-  }
-
-  const myName = person === "mary" ? "Mary" : "MD";
-  const partnerName = person === "mary" ? "MD" : "Mary";
-  const myAnsweredCount = Object.keys(answers).length;
-  const partnerCount = status ? (person === "mary" ? status.md.count : status.mary.count) : null;
-
-  // ── Together / Reveal view ────────────────────────────────
-  if (status?.is_unlocked && togetherAnswers) {
-    // Build tiered item lists
-    const tiers: Record<Exclude<RevealTier, "hidden">, typeof EXPLORATION_ITEMS> = {
-      strong: [], explore: [], conversation: [], mismatch: [],
-    };
-    for (const item of EXPLORATION_ITEMS) {
-      const mAns = togetherAnswers.mary[item.id];
-      const dAns = togetherAnswers.md[item.id];
-      if (!mAns || !dAns) continue;
-      const tier = getRevealTier(mAns.response, dAns.response);
-      if (tier !== "hidden") tiers[tier].push(item);
-    }
-    const totalShown = tiers.strong.length + tiers.explore.length + tiers.conversation.length + tiers.mismatch.length;
-
     return (
-      <div className="min-h-screen" style={{ background: I.bg }}>
-        {showUnlockAnim && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center fade-up" style={{ background: "rgba(12,8,16,0.97)" }}>
-            <p className="font-display italic" style={{ fontSize: "clamp(32px, 8vw, 56px)", color: I.rose }}>Together ✦</p>
-            <p style={{ fontSize: "13px", color: I.textMuted, marginTop: 12 }}>Reading together now…</p>
-          </div>
-        )}
-        <div style={{ borderBottom: `1px solid ${I.edge}` }}>
-          <div className="max-w-3xl mx-auto px-6 py-6">
-            <Link href="/intimacy" style={{ fontSize: "10px", color: I.textDim, letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 20 }}>
-              ← Intimacy
-            </Link>
-            <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: I.textFaint, marginBottom: 4 }}>✦ Together</p>
-            <h1 className="font-display italic" style={{ fontSize: "clamp(32px, 8vw, 52px)", color: I.text }}>Exploration Menu</h1>
-            <p style={{ fontSize: "12px", color: I.textMuted, marginTop: 6 }}>
-              {totalShown} item{totalShown !== 1 ? "s" : ""} to talk about, grouped by alignment.
-            </p>
-          </div>
-        </div>
-
-        <main className="max-w-3xl mx-auto px-6 py-10 fade-up">
-          <RevealSection tier="strong"       items={tiers.strong}       maryAnswers={togetherAnswers.mary} mdAnswers={togetherAnswers.md} />
-          <RevealSection tier="explore"      items={tiers.explore}      maryAnswers={togetherAnswers.mary} mdAnswers={togetherAnswers.md} />
-          <RevealSection tier="conversation" items={tiers.conversation} maryAnswers={togetherAnswers.mary} mdAnswers={togetherAnswers.md} />
-          <RevealSection tier="mismatch"     items={tiers.mismatch}     maryAnswers={togetherAnswers.mary} mdAnswers={togetherAnswers.md} />
-
-          <div className="mt-12 rounded-xl p-6 text-center" style={{ background: "rgba(196,126,160,0.06)", border: `1px solid ${I.edgeHi}` }}>
-            <p className="font-display italic mb-2" style={{ fontSize: "18px", color: I.text }}>Ready for the guided experience?</p>
-            <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 16 }}>The real-time experience is waiting.</p>
-            <Link href="/intimacy/together-experience" style={{ display: "inline-block", padding: "12px 28px", background: "rgba(196,126,160,0.15)", border: `1px solid ${I.rose}`, color: I.text, fontSize: "13px", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", textDecoration: "none", borderRadius: 12 }}>
-              Begin the Experience ✦
-            </Link>
-          </div>
-        </main>
-
-        <footer className="text-center py-8 border-t" style={{ borderColor: I.edge }}>
-          <p className="font-display" style={{ fontSize: "18px", color: I.textDim }}>pecanandpoplar.com</p>
-        </footer>
+      <div style={{ background: PALETTE.bg, minHeight: "100vh" }}>
+        <PersonSelector onSelect={selectPerson} />
       </div>
     );
   }
 
-  // ── Completion screen ─────────────────────────────────────
-  if (showComplete) {
-    return (
-      <div className="min-h-screen flex flex-col" style={{ background: I.bg }}>
-        <div style={{ borderBottom: `1px solid ${I.edge}` }}>
-          <div className="max-w-xl mx-auto px-6 py-4 flex items-center gap-4">
-            <button onClick={() => setShowComplete(false)} style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: I.textDim, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-              ← Back
-            </button>
-            <div className="flex-1">
-              <div className="rounded-full overflow-hidden" style={{ height: 2, background: I.edge }}>
-                <div className="h-full rounded-full" style={{ width: `${(myAnsweredCount / TOTAL_EXPLORATION) * 100}%`, background: I.rose }} />
-              </div>
-              <span style={{ fontSize: "9px", color: I.textDim, letterSpacing: "0.1em", marginTop: 4, display: "block" }}>
-                {myAnsweredCount} of {TOTAL_EXPLORATION} answered
-              </span>
-            </div>
-          </div>
-        </div>
+  const answeredCount = EXPLORATION_ITEMS.filter((i) => myAnswers[i.id]).length;
 
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 fade-up">
-          {myAnsweredCount < TOTAL_EXPLORATION ? (
-            <>
-              <p className="font-display italic mb-2" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: I.text, textAlign: "center" }}>
-                {TOTAL_EXPLORATION - myAnsweredCount} left
-              </p>
-              <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 24, textAlign: "center" }}>
-                Go back and respond to the remaining items.
-              </p>
-              <button onClick={() => setShowComplete(false)} style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: I.textDim, background: "none", border: `1px solid ${I.edge}`, padding: "8px 18px", borderRadius: 8, cursor: "pointer" }}>
-                Review
-              </button>
-            </>
-          ) : !status?.both_complete ? (
-            <>
-              <p className="font-display italic mb-2" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: I.text, textAlign: "center" }}>
-                You&apos;re done ✓
-              </p>
-              <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 6, textAlign: "center" }}>
-                Waiting for {partnerName} to finish.
-              </p>
-              <p style={{ fontSize: "11px", color: I.textDim, marginBottom: 24, textAlign: "center" }}>
-                {partnerCount ?? 0}/{TOTAL_EXPLORATION} answered
-              </p>
-              <button onClick={() => { loadPartnerAnswers(person); loadStatus(); }} style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: I.textDim, background: "none", border: `1px solid ${I.edge}`, padding: "6px 14px", borderRadius: 6, cursor: "pointer" }}>
-                Refresh
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="font-display italic mb-2" style={{ fontSize: "clamp(24px, 6vw, 36px)", color: I.text, textAlign: "center" }}>
-                You both finished.
-              </p>
-              <p style={{ fontSize: "12px", color: I.textMuted, marginBottom: 24, textAlign: "center" }}>
-                Ready to see where you align?
-              </p>
-              <button
-                onClick={handleUnlock}
-                disabled={unlocking}
-                className="rounded-xl transition-all duration-200 active:scale-[0.98]"
-                style={{ padding: "14px 32px", background: "rgba(196,126,160,0.12)", border: `1px solid ${I.rose}`, color: I.text, fontSize: "14px", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", cursor: unlocking ? "wait" : "pointer", opacity: unlocking ? 0.6 : 1 }}
-              >
-                {unlocking ? "Opening…" : "Reveal together ✦"}
-              </button>
-            </>
-          )}
-        </div>
-
-        <footer className="text-center py-6 border-t" style={{ borderColor: I.edge }}>
-          <Link href="/" style={{ fontSize: "10px", color: I.textDim, letterSpacing: "0.12em", textDecoration: "none", textTransform: "uppercase" }}>
-            ← Itinerary
-          </Link>
-        </footer>
-      </div>
-    );
-  }
-
-  // ── Main answering view ───────────────────────────────────
   return (
-    <div style={{ background: I.bg, minHeight: "100vh" }}>
+    <div className="min-h-screen" style={{ background: PALETTE.bg, color: PALETTE.text }}>
       {/* Header */}
-      <div style={{ borderBottom: `1px solid ${I.edge}` }}>
-        <div className="max-w-xl mx-auto px-6 py-4 flex items-center gap-4">
-          <Link href="/intimacy" style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: I.textDim, textDecoration: "none", flexShrink: 0 }}>
-            ← Intimacy
-          </Link>
-          <div className="flex-1">
-            <div className="rounded-full overflow-hidden" style={{ height: 2, background: I.edge }}>
-              <div className="h-full rounded-full transition-all duration-400" style={{ width: `${(myAnsweredCount / TOTAL_EXPLORATION) * 100}%`, background: I.rose }} />
-            </div>
-            <div className="flex justify-between mt-1">
-              <span style={{ fontSize: "9px", color: I.textDim, letterSpacing: "0.1em" }}>{myAnsweredCount} of {TOTAL_EXPLORATION}</span>
-              <span style={{ fontSize: "9px", color: I.textDim, letterSpacing: "0.1em" }}>{myName}</span>
-            </div>
-          </div>
-        </div>
+      <div
+        className="sticky top-0 z-10 flex items-center justify-between px-5 py-4"
+        style={{
+          background: "rgba(12,8,16,0.92)",
+          backdropFilter: "blur(8px)",
+          borderBottom: `1px solid ${PALETTE.edge}`,
+        }}
+      >
+        <Link
+          href="/intimacy"
+          style={{ fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: PALETTE.textFaint, textDecoration: "none" }}
+        >
+          ← Intimacy
+        </Link>
+        <p style={{ fontSize: "9px", letterSpacing: "0.25em", textTransform: "uppercase", color: PALETTE.textDim }}>
+          Exploration
+        </p>
+        <p style={{ fontSize: "10px", color: PALETTE.textFaint }}>
+          {person === "mary" ? "Mary" : "MD"}
+        </p>
       </div>
 
-      <main className="max-w-xl mx-auto px-6 py-8">
-        <p style={{ fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: I.textFaint, marginBottom: 8 }}>
-          ✦ Exploration Menu
-        </p>
-        <h1 className="font-display italic mb-3" style={{ fontSize: "clamp(26px, 6vw, 38px)", color: I.text }}>
-          What are you open to?
+      <div className="px-5 pt-8 pb-16 max-w-lg mx-auto">
+        {/* Title */}
+        <h1 className="font-display italic mb-1" style={{ fontSize: "34px", color: PALETTE.text, lineHeight: 1.1 }}>
+          What Are You Open To?
         </h1>
-        <p style={{ fontSize: "12px", color: I.textMuted, lineHeight: 1.6, marginBottom: 32 }}>
-          Go through each item privately. Your answers stay hidden until you both reveal together — only mutual matches will be highlighted.
+        <p className="mb-8 leading-relaxed" style={{ fontSize: "13px", color: PALETTE.textFaint }}>
+          Go through each one privately. Your answers stay hidden until you both submit — then you see where you align.
         </p>
 
-        <ExplorationGrid
-          items={EXPLORATION_ITEMS}
-          values={answers}
-          onResponseChange={handleResponseChange}
-          onCommentChange={handleCommentChange}
-        />
+        {/* Main content */}
+        {showDiscuss ? (
+          <DiscussScreen
+            person={person}
+            myAnswers={myAnswers}
+            partnerAnswers={partnerAnswers}
+            summary={summary}
+          />
+        ) : (
+          <>
+            {/* Progress */}
+            {!submitted && (
+              <div className="mb-5">
+                <div className="rounded-full overflow-hidden mb-1" style={{ height: 2, background: PALETTE.edge }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-400"
+                    style={{ width: `${(answeredCount / EXPLORATION_ITEMS.length) * 100}%`, background: PALETTE.rose }}
+                  />
+                </div>
+                <p style={{ fontSize: "10px", color: PALETTE.textDim }}>
+                  {answeredCount} of {EXPLORATION_ITEMS.length}
+                </p>
+              </div>
+            )}
 
-        {/* Done button */}
-        <div className="mt-10 flex justify-center">
-          <button
-            onClick={() => setShowComplete(true)}
-            className="rounded-xl transition-all duration-150 active:scale-[0.98]"
-            style={{
-              padding: "13px 28px",
-              background: myAnsweredCount === TOTAL_EXPLORATION ? "rgba(196,126,160,0.12)" : "transparent",
-              border: `1px solid ${myAnsweredCount === TOTAL_EXPLORATION ? I.rose : I.edge}`,
-              color: myAnsweredCount === TOTAL_EXPLORATION ? I.text : I.textDim,
-              fontSize: "13px",
-              fontFamily: "var(--font-barlow), sans-serif",
-              fontWeight: 600,
-              fontStyle: "italic",
-              cursor: "pointer",
-            }}
-          >
-            {myAnsweredCount === TOTAL_EXPLORATION
-              ? "I'm done with this section ✦"
-              : `${myAnsweredCount}/${TOTAL_EXPLORATION} — I'm done for now`}
-          </button>
-        </div>
-      </main>
+            {/* Items */}
+            {EXPLORATION_ITEMS.map((item) => (
+              <ItemCard
+                key={item.id}
+                item={item}
+                isOpen={openItemId === item.id}
+                onToggle={() => setOpenItemId((prev) => (prev === item.id ? null : item.id))}
+                response={myAnswers[item.id] ?? null}
+                onSelect={(r) => handleSelect(item.id, r)}
+                locked={submitted}
+              />
+            ))}
 
-      <footer className="text-center py-10 border-t mt-10" style={{ borderColor: I.edge }}>
-        <p className="font-display" style={{ fontSize: "18px", color: I.textDim }}>pecanandpoplar.com</p>
-      </footer>
+            {/* Submit / waiting */}
+            {submitted ? (
+              <div
+                className="mt-6 rounded-xl p-4 text-center"
+                style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${PALETTE.edge}` }}
+              >
+                {generatingSummary ? (
+                  <>
+                    <p style={{ fontSize: "11px", color: PALETTE.textFaint, marginBottom: 4 }}>Reading your answers…</p>
+                    <p style={{ fontSize: "10px", color: PALETTE.textDim }}>Just a moment</p>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ fontSize: "11px", color: PALETTE.textFaint, marginBottom: 4 }}>
+                      Your answers are locked in. Waiting for {person === "mary" ? "MD" : "Mary"}…
+                    </p>
+                    <p style={{ fontSize: "10px", color: PALETTE.textDim }}>
+                      The reveal opens when they finish.
+                    </p>
+                  </>
+                )}
+              </div>
+            ) : allAnswered ? (
+              <button
+                onClick={handleSubmit}
+                className="w-full mt-5 rounded-xl py-4 transition-all duration-200 active:scale-95"
+                style={{
+                  background: "rgba(196,126,160,0.12)",
+                  border: `1px solid ${PALETTE.rose}40`,
+                  color: PALETTE.rose,
+                  fontSize: "11px",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                }}
+              >
+                Submit my answers
+              </button>
+            ) : null}
+          </>
+        )}
+      </div>
     </div>
   );
 }
