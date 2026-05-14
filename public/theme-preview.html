@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Theme Preview — Among the Stars</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,500;1,9..144,700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
   <style>
 
     /* ══════════════════════════════════════════
@@ -140,15 +140,59 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Barlow', sans-serif;
-      font-weight: 300;
+      font-family: var(--font-body);
+      font-weight: var(--body-weight);
       min-height: 100vh;
       transition: background 0.4s ease, color 0.4s ease;
     }
 
-    /* ── Typography ── */
-    .font-display { font-family: 'Cormorant Garamond', serif; }
-    .font-mono    { font-family: 'DM Mono', monospace; }
+    /* ── Font stacks ── */
+    :root {
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'Barlow', system-ui, sans-serif;
+      --font-mono:    'DM Mono', monospace;
+      --display-style:  italic;
+      --display-weight: 300;
+      --title-size-base: 22px;
+      --title-size-header: 32px;
+      --body-weight: 300;
+    }
+    :root[data-font="playfair"] {
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --display-style:  italic;
+      --display-weight: 600;
+      --title-size-base: 21px;
+      --title-size-header: 30px;
+      --body-weight: 400;
+    }
+    :root[data-font="fraunces"] {
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+      --display-style:  italic;
+      --display-weight: 500;
+      --title-size-base: 21px;
+      --title-size-header: 30px;
+      --body-weight: 400;
+    }
+    :root[data-font="lora"] {
+      --font-display: 'Lora', Georgia, serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+      --display-style:  italic;
+      --display-weight: 600;
+      --title-size-base: 20px;
+      --title-size-header: 28px;
+      --body-weight: 400;
+    }
+    :root[data-font="sans"] {
+      --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-body:    'Plus Jakarta Sans', system-ui, sans-serif;
+      --display-style:  normal;
+      --display-weight: 600;
+      --title-size-base: 18px;
+      --title-size-header: 26px;
+      --body-weight: 400;
+    }
 
     /* ── Theme toggle bar (fixed top) ── */
     .theme-bar {
@@ -234,6 +278,51 @@
       color: var(--gold);
     }
 
+    /* ── Font switcher bar ── */
+    .font-bar {
+      background: var(--toggle-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      transition: background 0.4s, border-color 0.4s;
+    }
+    .font-bar::-webkit-scrollbar { display: none; }
+    .font-bar-label {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      flex-shrink: 0;
+      margin-right: 4px;
+      transition: color 0.4s;
+    }
+    .font-btn {
+      flex-shrink: 0;
+      padding: 5px 12px;
+      border-radius: 16px;
+      border: 1px solid var(--toggle-border);
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 11px;
+      font-family: var(--font-body);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .font-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(109,184,126,0.08);
+    }
+    [data-theme="day"] .font-btn.active {
+      background: rgba(46,107,58,0.08);
+    }
+
     /* ── App shell ── */
     .app { padding-top: 53px; }
 
@@ -254,17 +343,16 @@
       transition: color 0.4s;
     }
     .header-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 32px;
-      font-weight: 300;
-      font-style: italic;
+      font-family: var(--font-display);
+      font-size: var(--title-size-header);
+      font-weight: var(--display-weight);
+      font-style: var(--display-style);
       color: var(--text);
       line-height: 1.1;
-      transition: color 0.4s;
+      transition: color 0.4s, font-size 0.3s;
     }
     [data-theme="day"] .header-title {
-      font-size: 34px;
-      font-weight: 400;
+      font-size: calc(var(--title-size-header) + 2px);
     }
     .header-subtitle {
       font-size: 10px;
@@ -393,8 +481,8 @@
       margin-bottom: 20px;
     }
     .section-label {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
+      font-family: var(--font-display);
+      font-style: var(--display-style);
       font-size: 13px;
       color: var(--text-dim);
       letter-spacing: 0.04em;
@@ -501,18 +589,17 @@
 
     /* Card title */
     .card-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 22px;
-      font-weight: 300;
-      line-height: 1.15;
+      font-family: var(--font-display);
+      font-style: var(--display-style);
+      font-size: var(--title-size-base);
+      font-weight: var(--display-weight);
+      line-height: 1.2;
       color: var(--text);
       margin-bottom: 4px;
-      transition: color 0.4s;
+      transition: color 0.4s, font-size 0.3s;
     }
     [data-theme="day"] .card-title {
-      font-size: 23px;
-      font-weight: 400;
+      font-size: calc(var(--title-size-base) + 1px);
     }
 
     /* Card body */
@@ -637,9 +724,10 @@
       text-decoration: none;
     }
     .footer-link-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 22px;
+      font-family: var(--font-display);
+      font-style: var(--display-style);
+      font-weight: var(--display-weight);
+      font-size: 20px;
       color: var(--text);
       transition: color 0.4s;
     }
@@ -657,8 +745,8 @@
       transition: background 0.4s;
     }
     .footer-site {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
+      font-family: var(--font-display);
+      font-style: var(--display-style);
       font-size: 18px;
       color: var(--footer-text);
       transition: color 0.4s;
@@ -721,6 +809,16 @@
       <button class="toggle-btn" id="btn-night" onclick="setTheme('night')">☽ Night</button>
       <div class="override-chip" id="override-chip" onclick="toggleOverride()">Auto</div>
     </div>
+  </div>
+
+  <!-- ── Font switcher ── -->
+  <div class="font-bar">
+    <span class="font-bar-label">Type</span>
+    <button class="font-btn active" id="font-cormorant" onclick="setFont('cormorant')">Cormorant</button>
+    <button class="font-btn" id="font-playfair"   onclick="setFont('playfair')">Playfair</button>
+    <button class="font-btn" id="font-fraunces"   onclick="setFont('fraunces')">Fraunces</button>
+    <button class="font-btn" id="font-lora"       onclick="setFont('lora')">Lora</button>
+    <button class="font-btn" id="font-sans"       onclick="setFont('sans')">Sans Only</button>
   </div>
 
   <!-- ── App ── -->
@@ -964,8 +1062,19 @@
     }
   }
 
+  // ── Font switching ───────────────────────────────────────────
+  const fonts = ['cormorant', 'playfair', 'fraunces', 'lora', 'sans'];
+
+  function setFont(f) {
+    document.documentElement.setAttribute('data-font', f === 'cormorant' ? '' : f);
+    fonts.forEach(id => {
+      document.getElementById('font-' + id).classList.toggle('active', id === f);
+    });
+  }
+
   // ── Init ─────────────────────────────────────────────────────
   applyTheme(getAutoTheme());
+  setFont('cormorant');
   updateTimeDisplay();
   setInterval(updateTimeDisplay, 30000);
 </script>
