@@ -324,11 +324,35 @@ function DiscussScreen({
   );
 }
 
+// ── Locked screen ─────────────────────────────────────────────
+const LOCKED_MSGS = [
+  "Easy, tiger. That one's for later tonight. ♡",
+  "Good things come to those who wait — and tonight has very good things. ♡",
+  "Build the anticipation a little. Trust the process. ♡",
+  "Not yet. Pour a drink first. Then we'll talk. ♡",
+];
+
+function LockedScreen() {
+  const msg = LOCKED_MSGS[Math.floor(Math.random() * LOCKED_MSGS.length)];
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center" style={{ background: "#0B1309" }}>
+      <div style={{ fontSize: 36, marginBottom: 20 }}>🔒</div>
+      <h1 className="font-display italic mb-4" style={{ fontSize: "clamp(26px,7vw,38px)", color: "#E2D9C6", lineHeight: 1.2 }}>
+        Not quite yet.
+      </h1>
+      <p style={{ fontSize: "14px", color: "#6E8A74", maxWidth: 300, lineHeight: 1.75, fontStyle: "italic" }}>
+        {msg}
+      </p>
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────
 
 export default function ConnectionPage() {
   const [person, setPerson] = useState<Person | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [locked, setLocked] = useState(false);
   const [activeSectionId, setActiveSectionId] = useState(SECTIONS[0].id);
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null);
   const [myAnswers, setMyAnswers] = useState<Record<string, string>>({});
@@ -346,6 +370,7 @@ export default function ConnectionPage() {
 
   // ── Hydrate ──────────────────────────────────────────────
   useEffect(() => {
+    if (localStorage.getItem("connection_locked") === "true") { setLocked(true); setHydrated(true); return; }
     const p = localStorage.getItem("connection_person") as Person | null;
     const sid = localStorage.getItem("connection_section") ?? SECTIONS[0].id;
     const submitted = JSON.parse(localStorage.getItem("connection_submitted") ?? "[]") as string[];
@@ -478,6 +503,7 @@ export default function ConnectionPage() {
   }
 
   if (!hydrated) return null;
+  if (locked) return <LockedScreen />;
   if (!person) return <PersonSelector onSelect={selectPerson} />;
 
   return (

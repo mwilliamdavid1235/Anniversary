@@ -32,14 +32,67 @@ const LINK_CONFIG = {
   "star-tour": { bg: "rgba(155,143,196,0.12)", border: "#4A3A70",  color: "#B8AADF", text: "✦ " },
 } as const;
 
+const LOCK_MESSAGES: Record<string, string[]> = {
+  "star-tour": [
+    "Not yet, love. The stars will still be there. ✦",
+    "Save the best for when the sky is truly dark. ☽",
+    "Some things are worth the wait. This is one of them. ✦",
+    "The universe has been patient for 13 billion years. You can manage a little longer. ☽",
+  ],
+  "connection": [
+    "Easy, tiger. That one's for later tonight. ♡",
+    "Good things come to those who wait — and tonight has very good things. ♡",
+    "Build the anticipation a little. Trust the process. ♡",
+    "Not yet. Pour a drink first. Then we'll talk. ♡",
+  ],
+};
+
 function LinkButton({ link }: { link: EventLink }) {
   const cfg = LINK_CONFIG[link.kind] ?? LINK_CONFIG.website;
   const isInternal = link.kind === "phone" || link.kind === "connection" || link.kind === "star-tour";
+  const [teaseMsg, setTeaseMsg] = useState<string | null>(null);
+
+  function handleClick(e: React.MouseEvent) {
+    const lockKey =
+      link.kind === "star-tour"  ? "star_tour_locked" :
+      link.kind === "connection" ? "connection_locked" : null;
+
+    if (lockKey && localStorage.getItem(lockKey) === "true") {
+      e.preventDefault();
+      const msgs = LOCK_MESSAGES[link.kind] ?? ["Not yet. ♡"];
+      const msg = msgs[Math.floor(Math.random() * msgs.length)];
+      setTeaseMsg(msg);
+      setTimeout(() => setTeaseMsg(null), 3200);
+    }
+  }
+
+  if (teaseMsg) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded"
+        style={{
+          fontSize: "10px",
+          letterSpacing: "0.06em",
+          padding: "4px 10px",
+          background: cfg.bg,
+          border: `1px solid ${cfg.border}`,
+          color: cfg.color,
+          whiteSpace: "normal",
+          fontStyle: "italic",
+          animation: "fadeUp 0.2s ease both",
+        }}
+      >
+        {teaseMsg}
+      </span>
+    );
+  }
+
   return (
     <a
       href={link.href}
       target={isInternal ? undefined : "_blank"}
       rel={isInternal ? undefined : "noopener noreferrer"}
+      onClick={handleClick}
       className="inline-flex items-center gap-1 rounded transition-opacity duration-100 active:scale-95"
       style={{
         fontSize: "10px",

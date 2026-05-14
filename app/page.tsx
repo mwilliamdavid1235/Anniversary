@@ -146,6 +146,13 @@ export default function Home() {
         <p className="text-[10px] tracking-[0.15em] uppercase" style={{ color: "#2D4D28" }}>
           Made with love · Private itinerary
         </p>
+        <Link
+          href="/settings"
+          className="mt-6 inline-block text-[9px] tracking-[0.15em] uppercase transition-opacity hover:opacity-60"
+          style={{ color: "#1E3319", textDecoration: "none" }}
+        >
+          ⚙ Settings
+        </Link>
       </footer>
     </div>
   );
