@@ -141,10 +141,10 @@ export default function Home() {
           className="font-display mb-1"
           style={{ fontSize: "20px", color: "#3A5040" }}
         >
-          pecanandpoplar.com
+          28.pecanandpoplar.com
         </p>
         <p className="text-[10px] tracking-[0.15em] uppercase" style={{ color: "#2D4D28" }}>
-          Made with love · Private itinerary
+          Made with love · Twenty-eight years
         </p>
         <Link
           href="/settings"

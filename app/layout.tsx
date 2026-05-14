@@ -22,8 +22,8 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Our Anniversary Getaway",
-  description: "A private itinerary for two.",
+  title: "Among the Stars — 28 Years",
+  description: "A private anniversary itinerary. Twenty-eight years.",
 };
 
 export default function RootLayout({
