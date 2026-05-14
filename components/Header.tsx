@@ -1,5 +1,7 @@
 "use client";
 
+import { useTheme } from "./ThemeProvider";
+
 interface HeaderProps {
   title: string;
   subtitle?: string;
@@ -17,37 +19,71 @@ function formatDateRange(start: string, end: string): string {
 
 export default function Header({ title, subtitle, startDate, endDate }: HeaderProps) {
   const dateRange = formatDateRange(startDate, endDate);
+  const { theme, toggle, isOverride } = useTheme();
+  const isDay = theme === "day";
 
   return (
-    <header className="relative overflow-hidden border-b border-[#1E3319]">
-      {/* Background texture — faint grid */}
+    <header className="relative overflow-hidden" style={{ borderBottom: "1px solid var(--t-border-mid)" }}>
+      {/* Background texture */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(196,154,69,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(196,154,69,0.04) 1px, transparent 1px)
+            linear-gradient(var(--t-grid-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--t-grid-line) 1px, transparent 1px)
           `,
           backgroundSize: "40px 40px",
+          transition: "background-image 0.4s",
         }}
       />
 
       <div className="relative max-w-2xl mx-auto px-6 pt-12 pb-10">
-        {/* Eyebrow */}
-        <p
-          className="text-[10px] tracking-[0.2em] uppercase mb-4"
-          style={{ color: "#C49A45", fontFamily: "var(--font-dm-mono)" }}
-        >
-          Pecan &amp; Poplar &nbsp;·&nbsp; Private Itinerary
-        </p>
+        {/* Top row: eyebrow + theme toggle */}
+        <div className="flex items-center justify-between mb-4">
+          <p
+            className="text-[10px] tracking-[0.2em] uppercase"
+            style={{ color: "var(--t-gold)", fontFamily: "var(--font-dm-mono)" }}
+          >
+            Pecan &amp; Poplar &nbsp;·&nbsp; Private Itinerary
+          </p>
+
+          {/* Theme toggle pill */}
+          <button
+            onClick={toggle}
+            title={isOverride ? "Override active — tap to auto" : "Tap to switch theme"}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              padding: "4px 10px",
+              borderRadius: 20,
+              border: `1px solid var(--t-border-hi)`,
+              background: "var(--t-surface)",
+              color: "var(--t-text-muted)",
+              fontSize: "10px",
+              letterSpacing: "0.08em",
+              cursor: "pointer",
+              fontFamily: "var(--font-dm-mono)",
+              transition: "all 0.2s",
+              flexShrink: 0,
+            }}
+          >
+            <span>{isDay ? "☽" : "☀"}</span>
+            <span>{isDay ? "Night" : "Day"}</span>
+            {isOverride && (
+              <span style={{ opacity: 0.5, fontSize: 8, marginLeft: 2 }}>●</span>
+            )}
+          </button>
+        </div>
 
         {/* Title */}
         <h1
-          className="font-display leading-none mb-2"
+          className="font-display italic leading-none mb-2"
           style={{
             fontSize: "clamp(42px, 10vw, 72px)",
-            color: "#E2D9C6",
+            color: "var(--t-text)",
             letterSpacing: "-0.02em",
+            transition: "color 0.4s",
           }}
         >
           {title}
@@ -55,17 +91,24 @@ export default function Header({ title, subtitle, startDate, endDate }: HeaderPr
 
         {/* Subtitle row */}
         <div className="flex items-center gap-3 mt-4">
-          <div className="h-px flex-1" style={{ background: "linear-gradient(90deg, #C49A45 0%, transparent 100%)", maxWidth: "60px" }} />
+          <div
+            className="h-px flex-1"
+            style={{
+              background: `linear-gradient(90deg, var(--t-gold) 0%, transparent 100%)`,
+              maxWidth: "60px",
+              transition: "background 0.4s",
+            }}
+          />
           <span
             className="text-[11px] tracking-[0.12em] uppercase"
-            style={{ color: "#6E8A74" }}
+            style={{ color: "var(--t-text-muted)", transition: "color 0.4s" }}
           >
             {subtitle ?? "A weekend for two"}
           </span>
-          <span className="text-[10px]" style={{ color: "#3A5040" }}>·</span>
+          <span className="text-[10px]" style={{ color: "var(--t-text-dim)" }}>·</span>
           <span
             className="text-[11px] tracking-[0.06em]"
-            style={{ color: "#6E8A74" }}
+            style={{ color: "var(--t-text-muted)", transition: "color 0.4s" }}
           >
             {dateRange}
           </span>

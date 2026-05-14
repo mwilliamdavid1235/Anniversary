@@ -49,31 +49,35 @@ export default function UpNextBanner({ days }: UpNextBannerProps) {
 
   return (
     <div
-      className="border-b border-[#1E3319] px-6 py-3"
-      style={{ background: "rgba(109,184,126,0.07)" }}
+      className="px-6 py-3"
+      style={{
+        background: "var(--t-banner-bg)",
+        borderBottom: "1px solid var(--t-border-mid)",
+        transition: "background 0.4s, border-color 0.4s",
+      }}
     >
       <div className="max-w-2xl mx-auto flex items-center gap-4">
         <div className="relative flex-shrink-0 pulse-dot" style={{ width: 8, height: 8 }}>
-          <div className="absolute inset-0 rounded-full" style={{ background: "#6DB87E" }} />
+          <div className="absolute inset-0 rounded-full" style={{ background: "var(--t-accent)" }} />
         </div>
 
         <div className="flex-1 min-w-0">
-          <span className="text-[9px] tracking-[0.18em] uppercase mr-2" style={{ color: "#6DB87E" }}>
+          <span className="text-[9px] tracking-[0.18em] uppercase mr-2" style={{ color: "var(--t-accent)" }}>
             Up next
           </span>
-          <span className="text-[10px] tracking-[0.1em] uppercase" style={{ color: "#3D6B47" }}>
+          <span className="text-[10px] tracking-[0.1em] uppercase" style={{ color: "var(--t-accent-dim)" }}>
             {TYPE_BADGE[event.type] ?? event.type}
           </span>
           <p
             className="font-display italic truncate leading-tight mt-0.5"
-            style={{ fontSize: "18px", color: "#E2D9C6" }}
+            style={{ fontSize: "18px", color: "var(--t-text)" }}
           >
             {event.title}
           </p>
         </div>
 
         <div className="text-right flex-shrink-0">
-          <p className="text-[10px] tracking-[0.08em]" style={{ color: "#6E8A74" }}>
+          <p className="text-[10px] tracking-[0.08em]" style={{ color: "var(--t-text-muted)" }}>
             {DAY_NAMES[day.dayNumber]}
           </p>
         </div>

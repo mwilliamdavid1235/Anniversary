@@ -30,7 +30,7 @@ export default function Home() {
   const currentDay = TRIP.days.find((d) => d.dayNumber === resolvedDay) ?? TRIP.days[0];
 
   return (
-    <div className="min-h-screen" style={{ background: "#0B1309" }}>
+    <div className="min-h-screen" style={{ background: "var(--t-bg)", transition: "background 0.4s" }}>
       <Header
         title={TRIP.title}
         subtitle={TRIP.subtitle}
@@ -61,12 +61,12 @@ export default function Home() {
         <div className="relative z-10 mb-6 flex items-center gap-3">
           <span
             className="font-display"
-            style={{ fontSize: "13px", color: "#3A5040", letterSpacing: "0.04em" }}
+            style={{ fontSize: "13px", color: "var(--t-text-dim)", letterSpacing: "0.04em" }}
           >
             {currentDay.label}
           </span>
-          <div className="flex-1 h-px" style={{ background: "#1E3319" }} />
-          <span className="text-[10px] tracking-[0.12em] uppercase" style={{ color: "#2D4D28" }}>
+          <div className="flex-1 h-px" style={{ background: "var(--t-border-mid)" }} />
+          <span className="text-[10px] tracking-[0.12em] uppercase" style={{ color: "var(--t-text-faint)" }}>
             {currentDay.events.length} stops
           </span>
         </div>
@@ -80,7 +80,7 @@ export default function Home() {
       {/* Footer */}
       <footer
         className="text-center py-10 border-t"
-        style={{ borderColor: "#1E3319" }}
+        style={{ borderColor: "var(--t-border-mid)", transition: "border-color 0.4s" }}
       >
         {/* Section links */}
         <div className="flex items-center justify-center gap-6 mb-8 flex-wrap">
@@ -91,16 +91,16 @@ export default function Home() {
           >
             <span
               className="font-display italic"
-              style={{ fontSize: "22px", color: "#E2D9C6" }}
+              style={{ fontSize: "22px", color: "var(--t-text)" }}
             >
               Connection
             </span>
-            <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#3A5040" }}>
+            <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--t-text-dim)" }}>
               28 questions
             </span>
           </Link>
 
-          <div style={{ width: 1, height: 36, background: "#1E3319" }} />
+          <div style={{ width: 1, height: 36, background: "var(--t-border-mid)" }} />
 
           <Link
             href="/intimacy"
@@ -109,16 +109,16 @@ export default function Home() {
           >
             <span
               className="font-display italic"
-              style={{ fontSize: "22px", color: "#E2D9C6" }}
+              style={{ fontSize: "22px", color: "var(--t-text)" }}
             >
               Intimacy
             </span>
-            <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#3A5040" }}>
+            <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--t-text-dim)" }}>
               Private ✦
             </span>
           </Link>
 
-          <div style={{ width: 1, height: 36, background: "#1E3319" }} />
+          <div style={{ width: 1, height: 36, background: "var(--t-border-mid)" }} />
 
           <Link
             href="/exploration"
@@ -127,11 +127,11 @@ export default function Home() {
           >
             <span
               className="font-display italic"
-              style={{ fontSize: "22px", color: "#E2D9C6" }}
+              style={{ fontSize: "22px", color: "var(--t-text)" }}
             >
               Exploration
             </span>
-            <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#3A5040" }}>
+            <span style={{ fontSize: "9px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--t-text-dim)" }}>
               Private ✦
             </span>
           </Link>
@@ -139,17 +139,17 @@ export default function Home() {
 
         <p
           className="font-display mb-1"
-          style={{ fontSize: "20px", color: "#3A5040" }}
+          style={{ fontSize: "20px", color: "var(--t-text-dim)" }}
         >
           28.pecanandpoplar.com
         </p>
-        <p className="text-[10px] tracking-[0.15em] uppercase" style={{ color: "#2D4D28" }}>
+        <p className="text-[10px] tracking-[0.15em] uppercase" style={{ color: "var(--t-text-faint)" }}>
           Made with love · Twenty-eight years
         </p>
         <Link
           href="/settings"
           className="mt-6 inline-block text-[9px] tracking-[0.15em] uppercase transition-opacity hover:opacity-60"
-          style={{ color: "#1E3319", textDecoration: "none" }}
+          style={{ color: "var(--t-border-hi)", textDecoration: "none" }}
         >
           ⚙ Settings
         </Link>

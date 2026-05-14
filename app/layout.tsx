@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lora, Inter, DM_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import ThemeProvider from "@/components/ThemeProvider";
 import "./globals.css";
 
 const lora = Lora({
@@ -34,9 +35,16 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${lora.variable} ${inter.variable} ${dmMono.variable} h-full`}
+      suppressHydrationWarning
     >
+      {/* Anti-flash: sets data-theme before React hydrates */}
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var o=localStorage.getItem('theme_override');var h=new Date().getHours();var a=(h>=20||h<7)?'night':'day';document.documentElement.setAttribute('data-theme',o||a);}catch(e){}})();` }} />
+      </head>
       <body className="min-h-full antialiased">
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

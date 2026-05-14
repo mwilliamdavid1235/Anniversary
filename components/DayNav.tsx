@@ -11,8 +11,13 @@ interface DayNavProps {
 export default function DayNav({ days, activeDay, onSelect }: DayNavProps) {
   return (
     <nav
-      className="sticky top-0 z-20 border-b border-[#1E3319]"
-      style={{ background: "rgba(11,19,9,0.92)", backdropFilter: "blur(16px)" }}
+      className="sticky top-0 z-20"
+      style={{
+        background: "var(--t-nav-bg)",
+        backdropFilter: "blur(16px)",
+        borderBottom: "1px solid var(--t-border-mid)",
+        transition: "background 0.4s, border-color 0.4s",
+      }}
     >
       <div className="max-w-2xl mx-auto px-6">
         <div className="flex">
@@ -29,33 +34,28 @@ export default function DayNav({ days, activeDay, onSelect }: DayNavProps) {
                 className="flex-1 py-4 text-left transition-colors duration-150 relative group"
                 style={{ background: "none", border: "none", cursor: "pointer" }}
               >
-                {/* Active indicator */}
                 <div
                   className="absolute bottom-0 left-0 right-0 h-[1.5px] transition-opacity duration-200"
                   style={{
-                    background: "linear-gradient(90deg, transparent, #C49A45, transparent)",
+                    background: `linear-gradient(90deg, transparent, var(--t-gold), transparent)`,
                     opacity: active ? 1 : 0,
                   }}
                 />
-
                 <span
                   className="block text-[9px] tracking-[0.18em] uppercase mb-0.5 transition-colors"
-                  style={{ color: active ? "#C49A45" : "#3A5040" }}
+                  style={{ color: active ? "var(--t-gold)" : "var(--t-text-dim)" }}
                 >
                   {day.label}
                 </span>
                 <span
                   className="font-display block leading-none transition-colors"
-                  style={{
-                    fontSize: "22px",
-                    color: active ? "#E2D9C6" : "#3A5040",
-                  }}
+                  style={{ fontSize: "22px", color: active ? "var(--t-text)" : "var(--t-text-dim)" }}
                 >
                   {dateNum}
                 </span>
                 <span
                   className="block text-[9px] tracking-[0.1em] uppercase mt-0.5 transition-colors"
-                  style={{ color: active ? "#6E8A74" : "#2D4D28" }}
+                  style={{ color: active ? "var(--t-text-muted)" : "var(--t-text-faint)" }}
                 >
                   {monthAbbr}
                 </span>

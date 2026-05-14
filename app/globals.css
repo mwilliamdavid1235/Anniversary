@@ -23,18 +23,64 @@
   --font-mono:          var(--font-dm-mono);
 }
 
+/* ── Theme tokens — night (default) ───────────────────── */
+:root {
+  --t-bg:           #0B1309;
+  --t-surface:      rgba(255,255,255,0.025);
+  --t-surface-next: rgba(109,184,126,0.05);
+  --t-border:       #1A2E18;
+  --t-border-mid:   #1E3319;
+  --t-border-hi:    #2D5038;
+  --t-text:         #E2D9C6;
+  --t-text-muted:   #6E8A74;
+  --t-text-dim:     #3A5040;
+  --t-text-faint:   #2D4D28;
+  --t-accent:       #6DB87E;
+  --t-accent-dim:   #3D6B47;
+  --t-gold:         #C49A45;
+  --t-gold-dim:     #7A5F25;
+  --t-nav-bg:       rgba(11,19,9,0.92);
+  --t-banner-bg:    rgba(109,184,126,0.07);
+  --t-watermark:    rgba(196,154,69,0.04);
+  --t-grid-line:    rgba(196,154,69,0.04);
+  --t-card-shadow:  none;
+}
+
+/* ── Theme tokens — day ────────────────────────────────── */
+[data-theme="day"] {
+  --t-bg:           #F0EBE0;
+  --t-surface:      rgba(255,255,255,0.72);
+  --t-surface-next: rgba(45,100,58,0.07);
+  --t-border:       #CDD8C5;
+  --t-border-mid:   #BFD0B8;
+  --t-border-hi:    #4A8A5A;
+  --t-text:         #1A2219;
+  --t-text-muted:   #3D5C42;
+  --t-text-dim:     #7A9A80;
+  --t-text-faint:   #A8C0AA;
+  --t-accent:       #2E6B3A;
+  --t-accent-dim:   #4A8A5A;
+  --t-gold:         #8B6215;
+  --t-gold-dim:     #B8881E;
+  --t-nav-bg:       rgba(240,235,224,0.95);
+  --t-banner-bg:    rgba(46,107,58,0.08);
+  --t-watermark:    rgba(139,98,21,0.05);
+  --t-grid-line:    rgba(139,98,21,0.06);
+  --t-card-shadow:  0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+}
+
 /* ── Base ────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
-  background: #0B1309;
-  color-scheme: dark;
+  background: var(--t-bg);
   scroll-behavior: smooth;
+  transition: background 0.4s ease;
 }
 
 body {
-  background: #0B1309;
-  color: #E2D9C6;
+  background: var(--t-bg);
+  color: var(--t-text);
   font-family: var(--font-inter), system-ui, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -107,17 +153,16 @@ body {
 
 /* ── Card hover effect ────────────────────────────────────── */
 .event-card {
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.4s ease;
 }
 .event-card:hover {
-  border-color: #2D4D28;
-  background: rgba(255,255,255,0.035);
+  border-color: var(--t-border-mid);
 }
 
 /* ── Next event highlight ─────────────────────────────────── */
 .event-card.is-next {
-  border-color: #3D6B47;
-  background: rgba(109,184,126,0.05);
+  border-color: var(--t-border-hi) !important;
+  background: var(--t-surface-next) !important;
 }
 
 /* ── Past event dim ───────────────────────────────────────── */

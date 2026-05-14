@@ -390,8 +390,8 @@ export default function EventCard({ event, isNext, isPast, onLongPress }: EventC
           fontVariantNumeric: "tabular-nums",
         }}
       >
-        <span className="block" style={{ color: isNext ? cfg.accent : "#3A5040" }}>{timeStr}</span>
-        <span className="block" style={{ color: "#2D4D28", fontSize: "9px", letterSpacing: "0.05em" }}>{period}</span>
+        <span className="block" style={{ color: isNext ? cfg.accent : "var(--t-text-dim)" }}>{timeStr}</span>
+        <span className="block" style={{ color: "var(--t-text-faint)", fontSize: "9px", letterSpacing: "0.05em" }}>{period}</span>
       </div>
 
       {/* Timeline dot — long-press to flag as current */}
@@ -408,8 +408,8 @@ export default function EventCard({ event, isNext, isPast, onLongPress }: EventC
             width: 10,
             height: 10,
             borderRadius: "50%",
-            background: isNext ? cfg.dot : "#1E3319",
-            border: `1.5px solid ${isNext ? cfg.dot : "#2D4D28"}`,
+            background: isNext ? cfg.dot : "var(--t-border-mid)",
+            border: `1.5px solid ${isNext ? cfg.dot : "var(--t-border-hi)"}`,
             outline: dotPulse ? `5px solid rgba(109,184,126,0.35)` : isNext ? `3px solid rgba(109,184,126,0.15)` : "none",
             transition: "all 0.3s ease",
           }}
@@ -420,10 +420,10 @@ export default function EventCard({ event, isNext, isPast, onLongPress }: EventC
       <div
         className="event-card flex-1 rounded-xl p-4 ml-3 mb-0"
         style={{
-          background: isNext
-            ? "rgba(109,184,126,0.05)"
-            : "rgba(255,255,255,0.025)",
-          border: `1px solid ${isNext ? "#2D5038" : "#1A2E18"}`,
+          background: "var(--t-surface)",
+          border: `1px solid var(--t-border)`,
+          boxShadow: "var(--t-card-shadow)",
+          transition: "background 0.4s, border-color 0.4s, box-shadow 0.4s",
         }}
       >
         {/* Type badge */}
@@ -442,13 +442,13 @@ export default function EventCard({ event, isNext, isPast, onLongPress }: EventC
         {/* Title */}
         <h3
           className="font-display italic leading-tight mb-1"
-          style={{ fontSize: "22px", color: "#E2D9C6" }}
+          style={{ fontSize: "22px", color: "var(--t-text)", transition: "color 0.4s" }}
         >
           {event.title}
         </h3>
 
         {/* Description */}
-        <p className="leading-relaxed mb-0" style={{ fontSize: "12px", color: "#6E8A74" }}>
+        <p className="leading-relaxed mb-0" style={{ fontSize: "12px", color: "var(--t-text-muted)", transition: "color 0.4s" }}>
           {event.description}
         </p>
 
@@ -470,9 +470,9 @@ export default function EventCard({ event, isNext, isPast, onLongPress }: EventC
             className="mt-3 rounded-r-lg px-3 py-2 leading-relaxed"
             style={{
               fontSize: "11px",
-              color: "#6DB87E",
-              background: "rgba(61,107,71,0.15)",
-              borderLeft: "2px solid #3D6B47",
+              color: "var(--t-accent)",
+              background: "var(--t-surface-next)",
+              borderLeft: "2px solid var(--t-accent-dim)",
             }}
           >
             {event.note}
