@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Lora, Inter, DM_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const lora = Lora({
@@ -34,7 +35,10 @@ export default function RootLayout({
       lang="en"
       className={`${lora.variable} ${inter.variable} ${dmMono.variable} h-full`}
     >
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
