@@ -71,7 +71,7 @@ function ExplorationItem({
       }}
     >
       {/* Item label + description */}
-      <p style={{ fontSize: "14px", color: I.text, fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, marginBottom: 4 }}>
+      <p style={{ fontSize: "14px", color: I.text, fontFamily: "var(--font-display), sans-serif", fontWeight: 600, marginBottom: 4 }}>
         {item.label}
       </p>
       <p style={{ fontSize: "11px", color: I.textFaint, lineHeight: 1.5, marginBottom: 14 }}>

@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, DM_Mono } from "next/font/google";
+import { Lora, Inter, DM_Mono } from "next/font/google";
 import "./globals.css";
 
-const barlowCondensed = Barlow_Condensed({
-  variable: "--font-barlow",
+const lora = Lora({
+  variable: "--font-lora",
   subsets: ["latin"],
-  weight: ["400", "600"],
+  style: ["normal", "italic"],
+  weight: ["400", "600", "700"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
 });
 
 const dmMono = DM_Mono({
@@ -25,7 +32,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${barlowCondensed.variable} ${dmMono.variable} h-full`}
+      className={`${lora.variable} ${inter.variable} ${dmMono.variable} h-full`}
     >
       <body className="min-h-full antialiased">{children}</body>
     </html>

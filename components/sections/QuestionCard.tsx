@@ -126,7 +126,7 @@ export default function QuestionCard({
       {/* Question text */}
       <p
         className="leading-snug mb-4"
-        style={{ fontSize: "16px", color: c.questionText, fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600 }}
+        style={{ fontSize: "16px", color: c.questionText, fontFamily: "var(--font-display), serif", fontWeight: 400, fontStyle: "italic" }}
       >
         {question.text}
       </p>

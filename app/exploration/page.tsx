@@ -100,7 +100,7 @@ function ItemCard({
             style={{
               fontSize: "15px",
               color: isOpen ? PALETTE.text : hasAnswer ? PALETTE.textMuted : PALETTE.textFaint,
-              fontFamily: "var(--font-barlow), sans-serif",
+              fontFamily: "var(--font-display), serif",
               fontWeight: 600,
               fontStyle: "italic",
               lineHeight: 1.3,
@@ -289,7 +289,7 @@ function DiscussScreen({
                   const partnerC = partnerComments[item.id]?.trim();
                   return (
                     <div key={item.id} className="rounded-xl p-4" style={{ background: "rgba(13,11,16,0.3)", border: `1px solid ${PALETTE.edge}` }}>
-                      <p style={{ fontSize: "14px", color: PALETTE.text, fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600, fontStyle: "italic", marginBottom: 2 }}>
+                      <p style={{ fontSize: "14px", color: PALETTE.text, fontFamily: "var(--font-display), serif", fontWeight: 600, fontStyle: "italic", marginBottom: 2 }}>
                         {item.label}
                       </p>
                       <p style={{ fontSize: "11px", color: PALETTE.textFaint, marginBottom: 8, lineHeight: 1.4 }}>

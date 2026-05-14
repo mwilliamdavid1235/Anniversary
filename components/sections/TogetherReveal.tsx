@@ -72,7 +72,7 @@ export default function TogetherReveal({
                   </span>
                   <p
                     className="leading-snug"
-                    style={{ fontSize: "15px", color: isIntimate ? "#EDE0E8" : "#E2D9C6", fontFamily: "var(--font-barlow), sans-serif", fontWeight: 600 }}
+                    style={{ fontSize: "15px", color: isIntimate ? "#EDE0E8" : "#E2D9C6", fontFamily: "var(--font-display), serif", fontWeight: 400, fontStyle: "italic" }}
                   >
                     {q.text}
                   </p>
