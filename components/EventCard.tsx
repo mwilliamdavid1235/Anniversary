@@ -34,11 +34,12 @@ const LINK_CONFIG = {
 
 function LinkButton({ link }: { link: EventLink }) {
   const cfg = LINK_CONFIG[link.kind] ?? LINK_CONFIG.website;
+  const isInternal = link.kind === "phone" || link.kind === "connection" || link.kind === "star-tour";
   return (
     <a
       href={link.href}
-      target={link.kind === "phone" || link.kind === "connection" ? undefined : "_blank"}
-      rel={link.kind === "phone" || link.kind === "connection" ? undefined : "noopener noreferrer"}
+      target={isInternal ? undefined : "_blank"}
+      rel={isInternal ? undefined : "noopener noreferrer"}
       className="inline-flex items-center gap-1 rounded transition-opacity duration-100 active:scale-95"
       style={{
         fontSize: "10px",

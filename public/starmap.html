@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>A Night Among the Stars — 28 Years</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;600&display=swap');
+
+    :root {
+      --gold: #e8c97a;
+      --gold-dim: #a8873a;
+      --star-white: #f0f0ff;
+      --deep-blue: #0a0e1a;
+      --mid-blue: #0d1428;
+      --panel: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --text: #c8cde8;
+      --text-dim: #7880a0;
+      --planet-color: #7ecfff;
+      --planet-dim: #4a8aaa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--deep-blue);
+      color: var(--text);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Star field ── */
+    #starfield {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--dur,3s) ease-in-out infinite var(--delay,0s);
+    }
+    @keyframes twinkle {
+      0%,100% { opacity: var(--min-op,0.2); transform: scale(1); }
+      50%      { opacity: 1; transform: scale(1.4); }
+    }
+
+    /* ── App shell ── */
+    .app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ════════════════════════════════
+       WELCOME
+    ════════════════════════════════ */
+    #welcome {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100vh; padding: 48px 24px; text-align: center;
+    }
+    .welcome-badge {
+      font-size: 10px; letter-spacing: 5px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 28px; opacity: 0.85;
+    }
+    .welcome-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(44px,9vw,76px); font-weight: 300;
+      line-height: 1.05; color: var(--star-white); margin-bottom: 14px;
+    }
+    .welcome-subtitle {
+      font-family: 'Cormorant Garamond', serif; font-style: italic;
+      font-size: clamp(18px,4vw,24px); color: var(--gold); margin-bottom: 44px;
+    }
+    .divider {
+      width: 80px; height: 1px;
+      background: linear-gradient(90deg,transparent,var(--gold),transparent);
+      margin: 28px auto;
+    }
+    .welcome-details {
+      display: flex; gap: 28px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 44px;
+    }
+    .welcome-detail-label {
+      font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 5px;
+    }
+    .welcome-detail-value {
+      font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--star-white);
+    }
+    .welcome-note {
+      max-width: 460px; font-size: 13px; line-height: 1.85;
+      color: var(--text-dim); margin-bottom: 44px;
+    }
+
+    /* Journey map */
+    .journey-map {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 48px; flex-wrap: wrap; justify-content: center;
+      max-width: 480px;
+    }
+    .journey-phase {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 6px; padding: 12px 14px;
+      border: 1px solid var(--border);
+      flex: 1; min-width: 90px;
+    }
+    .journey-phase-icon { font-size: 18px; }
+    .journey-phase-label {
+      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .journey-phase-detail {
+      font-family: 'Cormorant Garamond', serif; font-size: 13px; color: var(--text);
+    }
+    .journey-arrow {
+      font-size: 12px; color: var(--text-dim); padding: 0 4px; flex-shrink: 0;
+    }
+
+    .btn-begin {
+      background: transparent; border: 1px solid var(--gold);
+      color: var(--gold); font-family: 'Montserrat', sans-serif;
+      font-size: 11px; font-weight: 600; letter-spacing: 4px;
+      text-transform: uppercase; padding: 18px 52px; cursor: pointer;
+      transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .btn-begin::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--gold); opacity: 0; transition: opacity 0.3s;
+    }
+    .btn-begin:hover::before { opacity: 0.1; }
+    .btn-begin:active::before { opacity: 0.2; }
+    .tour-count { margin-top: 20px; font-size: 10px; color: var(--text-dim); letter-spacing: 2px; }
+
+    /* ════════════════════════════════
+       TOUR SHELL
+    ════════════════════════════════ */
+    #tour { display: none; flex-direction: column; min-height: 100vh; }
+
+    .tour-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,14,26,0.92);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .tour-stop-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
+    .tour-stop-name {
+      font-family: 'Cormorant Garamond', serif; font-size: 20px;
+      color: var(--star-white); max-width: 220px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tour-time-badge {
+      font-size: 11px; font-weight: 600; letter-spacing: 2px;
+      color: var(--gold);
+      background: rgba(232,201,122,0.08);
+      border: 1px solid rgba(232,201,122,0.2);
+      padding: 6px 12px;
+    }
+
+    /* Progress */
+    .progress-bar-wrap {
+      padding: 12px 24px 14px;
+      background: rgba(10,14,26,0.92);
+    }
+    .progress-steps { display: flex; gap: 4px; align-items: center; }
+    .progress-step { flex: 1; height: 2px; background: var(--border); transition: background 0.4s; }
+    .progress-step.done   { background: var(--gold-dim); }
+    .progress-step.active { background: var(--gold); }
+    .progress-step.planet-done   { background: var(--planet-dim); }
+    .progress-step.planet-active { background: var(--planet-color); }
+    .progress-label {
+      display: flex; justify-content: space-between;
+      font-size: 9px; color: var(--text-dim); letter-spacing: 1px; margin-top: 6px;
+    }
+
+    /* Stop card */
+    .stop-card { flex: 1; padding: 28px 24px 130px; animation: fadeUp 0.45s ease forwards; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Type pill */
+    .stop-type-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--text-dim); border: 1px solid var(--border);
+      padding: 6px 14px; margin-bottom: 18px;
+    }
+    .stop-type-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-dim); }
+
+    /* Planet pill override */
+    .planet-card .stop-type-pill { border-color: rgba(126,207,255,0.25); color: var(--planet-color); }
+    .planet-card .stop-type-pill .dot { background: var(--planet-color); }
+
+    /* Names */
+    .stop-main-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(34px,8vw,54px); font-weight: 300;
+      line-height: 1.1; color: var(--star-white); margin-bottom: 8px;
+    }
+    .stop-alt-name {
+      font-family: 'Cormorant Garamond', serif; font-style: italic;
+      font-size: 15px; color: var(--text-dim); margin-bottom: 26px;
+    }
+
+    /* Urgency banner */
+    .urgency-banner {
+      display: flex; align-items: center; gap: 12px;
+      background: rgba(126,207,255,0.06);
+      border: 1px solid rgba(126,207,255,0.2);
+      border-left: 3px solid var(--planet-color);
+      padding: 12px 16px; margin-bottom: 24px;
+      font-size: 12px; line-height: 1.6; color: var(--text);
+    }
+    .urgency-icon { font-size: 18px; flex-shrink: 0; }
+
+    /* Stats grid */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; }
+    .stat-card { background: var(--panel); border: 1px solid var(--border); padding: 13px 15px; }
+    .stat-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+    .stat-value { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--star-white); line-height: 1.2; }
+    .stat-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+    /* Planet card stat overrides */
+    .planet-card .stat-card { border-color: rgba(126,207,255,0.1); }
+
+    /* Find it */
+    .find-section {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-left: 2px solid var(--gold-dim); padding: 16px 18px; margin-bottom: 26px;
+    }
+    .planet-card .find-section { border-left-color: var(--planet-dim); }
+    .find-section-header {
+      font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--gold-dim); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .planet-card .find-section-header { color: var(--planet-dim); }
+    .find-section-header::before { content: '⌖'; font-size: 14px; }
+    .find-step { display: flex; gap: 11px; margin-bottom: 10px; }
+    .find-step:last-child { margin-bottom: 0; }
+    .find-step-num {
+      min-width: 20px; height: 20px; border: 1px solid var(--border);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: var(--text-dim); margin-top: 1px; flex-shrink: 0;
+    }
+    .find-step-text { font-size: 13px; line-height: 1.65; color: var(--text); }
+    .find-step-text code {
+      background: rgba(255,255,255,0.08); padding: 1px 6px;
+      font-family: monospace; font-size: 11px; color: var(--gold);
+    }
+    .planet-card .find-step-text code { color: var(--planet-color); }
+
+    /* Narrative */
+    .narrative {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(17px,4vw,20px); line-height: 1.9; color: var(--text);
+      margin-bottom: 20px;
+    }
+    .narrative em { color: var(--star-white); font-style: italic; }
+    .narrative p { margin-bottom: 16px; }
+    .narrative p:last-child { margin-bottom: 0; }
+
+    /* ── Anniversary special ── */
+    .anniversary-card .stop-main-name {
+      color: var(--gold);
+      text-shadow: 0 0 60px rgba(232,201,122,0.25);
+    }
+    .anniversary-card .stop-type-pill { border-color: rgba(232,201,122,0.3); color: var(--gold-dim); }
+    .anniversary-card .stop-type-pill .dot { background: var(--gold); }
+    .anniversary-marquee {
+      background: linear-gradient(135deg,rgba(232,201,122,0.08),rgba(232,201,122,0.02));
+      border: 1px solid rgba(232,201,122,0.2);
+      padding: 22px; margin-bottom: 26px; text-align: center;
+    }
+    .anniversary-marquee .yr-label {
+      font-size: 9px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--gold-dim); margin-bottom: 8px;
+    }
+    .anniversary-marquee .yr-number {
+      font-family: 'Cormorant Garamond', serif; font-size: 76px;
+      font-weight: 300; color: var(--gold); line-height: 1; opacity: 0.9;
+    }
+    .anniversary-marquee .yr-sub {
+      font-family: 'Cormorant Garamond', serif; font-style: italic;
+      font-size: 15px; color: var(--text-dim); margin-top: 8px;
+    }
+    .anniversary-card .find-section { border-left-color: var(--gold); }
+    .anniversary-card .find-section-header { color: var(--gold-dim); }
+    .anniversary-card .stat-card {
+      background: rgba(232,201,122,0.04); border-color: rgba(232,201,122,0.15);
+    }
+
+    /* Nav */
+    .tour-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(10,14,26,0.96); backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 14px 24px 32px; display: flex; gap: 10px; z-index: 10;
+    }
+    .btn-back {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-dim); font-family: 'Montserrat', sans-serif;
+      font-size: 11px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; padding: 16px 18px; cursor: pointer;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .btn-back:hover { border-color: var(--text-dim); color: var(--text); }
+    .btn-next {
+      flex: 1; background: transparent; border: 1px solid var(--gold);
+      color: var(--gold); font-family: 'Montserrat', sans-serif;
+      font-size: 11px; font-weight: 600; letter-spacing: 3px;
+      text-transform: uppercase; padding: 16px 24px; cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-next.planet-next { border-color: var(--planet-color); color: var(--planet-color); }
+    .btn-next:hover { background: rgba(232,201,122,0.08); }
+    .btn-next.planet-next:hover { background: rgba(126,207,255,0.08); }
+
+    /* Closing */
+    #closing {
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100vh; padding: 60px 24px; text-align: center;
+    }
+    .closing-icon { font-size: 44px; margin-bottom: 28px; opacity: 0.8; }
+    .closing-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px,7vw,52px); font-weight: 300;
+      color: var(--star-white); margin-bottom: 14px;
+    }
+    .closing-subtitle {
+      font-family: 'Cormorant Garamond', serif; font-style: italic;
+      font-size: 20px; color: var(--gold); margin-bottom: 36px;
+    }
+    .closing-text {
+      max-width: 500px; font-family: 'Cormorant Garamond', serif;
+      font-size: 18px; line-height: 1.95; color: var(--text); margin-bottom: 44px;
+    }
+    .btn-restart {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-dim); font-family: 'Montserrat', sans-serif;
+      font-size: 10px; font-weight: 600; letter-spacing: 3px;
+      text-transform: uppercase; padding: 14px 32px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-restart:hover { border-color: var(--text); color: var(--text); }
+
+    /* Horizon indicator */
+    .horizon-bar {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 18px;
+    }
+    .horizon-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); width: 110px; flex-shrink: 0; }
+    .horizon-track { flex: 1; height: 6px; background: var(--border); position: relative; }
+    .horizon-fill { height: 100%; transition: width 0.5s; }
+    .horizon-value { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--star-white); width: 48px; text-align: right; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div id="starfield"></div>
+<div class="app">
+
+  <!-- ══ WELCOME ══ -->
+  <div id="welcome">
+    <div class="welcome-badge">✦ A Guided Tour of the Night Sky ✦</div>
+    <h1 class="welcome-title">Among the Stars</h1>
+    <p class="welcome-subtitle">Twenty-Eight Years of Light</p>
+    <div class="divider"></div>
+    <div class="welcome-details">
+      <div class="welcome-detail">
+        <div class="welcome-detail-label">Date</div>
+        <div class="welcome-detail-value">May 15–16, 2026</div>
+      </div>
+      <div class="welcome-detail">
+        <div class="welcome-detail-label">Begins</div>
+        <div class="welcome-detail-value">9:30 PM</div>
+      </div>
+      <div class="welcome-detail">
+        <div class="welcome-detail-label">Conditions</div>
+        <div class="welcome-detail-value">New Moon · Dark Sky</div>
+      </div>
+      <div class="welcome-detail">
+        <div class="welcome-detail-label">Telescope</div>
+        <div class="welcome-detail-value">Unistellar eQuinox 2</div>
+      </div>
+    </div>
+
+    <div class="journey-map">
+      <div class="journey-phase">
+        <div class="journey-phase-icon">🪐</div>
+        <div class="journey-phase-label">Planets</div>
+        <div class="journey-phase-detail">Minutes away</div>
+      </div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-phase">
+        <div class="journey-phase-icon">✦</div>
+        <div class="journey-phase-label">Stars</div>
+        <div class="journey-phase-detail">25–37 light years</div>
+      </div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-phase">
+        <div class="journey-phase-icon">⊕</div>
+        <div class="journey-phase-label">Clusters</div>
+        <div class="journey-phase-detail">25,000 light years</div>
+      </div>
+      <div class="journey-arrow">→</div>
+      <div class="journey-phase">
+        <div class="journey-phase-icon">◌</div>
+        <div class="journey-phase-label">Galaxies</div>
+        <div class="journey-phase-detail">53 million light years</div>
+      </div>
+    </div>
+
+    <p class="welcome-note">
+      Ten stops, beginning in our own solar system and carrying you outward — stop by
+      stop — to the edge of what a telescope can touch. The light arriving tonight from
+      your anniversary star left in 1998. It has been traveling to reach you ever since.
+    </p>
+
+    <button class="btn-begin" onclick="startTour()">Begin the Tour</button>
+    <div class="tour-count">10 stops · ~3.5 hours · new moon · no constellation knowledge required</div>
+  </div>
+
+  <!-- ══ TOUR ══ -->
+  <div id="tour">
+    <div class="tour-header">
+      <div>
+        <div class="tour-stop-label">Stop <span id="hdr-num">1</span> of 10</div>
+        <div class="tour-stop-name" id="hdr-name">Venus</div>
+      </div>
+      <div class="tour-time-badge" id="hdr-time">9:30 PM</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-steps" id="progress-steps"></div>
+      <div class="progress-label">
+        <span>Planets</span>
+        <span>28 ly ✦</span>
+        <span>Clusters</span>
+        <span>Galaxies</span>
+      </div>
+    </div>
+    <div class="stop-card" id="stop-card"></div>
+    <div class="tour-nav">
+      <button class="btn-back" id="btn-back" onclick="prevStop()">← Back</button>
+      <button class="btn-next" id="btn-next" onclick="nextStop()">
+        <span id="next-label">Next Stop</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ CLOSING ══ -->
+  <div id="closing">
+    <div class="closing-icon">✦</div>
+    <h2 class="closing-title">Tour Complete</h2>
+    <p class="closing-subtitle">Twenty-eight years. Fifty-three million light years.</p>
+    <p class="closing-text">
+      You began tonight just a few light-minutes from home, watching Venus set over
+      the western hills. You end here, in a galaxy 53 million years away, having
+      crossed more distance in one evening than the mind can honestly hold.
+      <br><br>
+      Somewhere between those two points, a star you'll never visit sent you a gift —
+      light it released the year you married, arriving on this exact night, for you.
+      <br><br>
+      The universe is vast and mostly empty and magnificently indifferent.
+      But you are here, and you found it, and that is everything.
+      <br><br>
+      <em>Happy Anniversary.</em>
+    </p>
+    <button class="btn-restart" onclick="restartTour()">Start Over ↺</button>
+  </div>
+
+</div>
+
+<script>
+// ── Starfield ────────────────────────────────────────────────
+const sf = document.getElementById('starfield');
+for (let i = 0; i < 240; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2.2 + 0.4;
+  s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${(Math.random()*4+2).toFixed(1)}s;--delay:-${(Math.random()*5).toFixed(1)}s;--min-op:${(Math.random()*0.3+0.1).toFixed(2)};`;
+  sf.appendChild(s);
+}
+
+// ── Tour data ────────────────────────────────────────────────
+const stops = [
+
+  // ══ STOP 1: Venus ══
+  {
+    time: '9:30 PM',
+    type: 'Planet · Solar System',
+    name: 'Venus',
+    altName: 'Our nearest planetary neighbor — the Evening Star',
+    isPlanet: true,
+    isAnniversary: false,
+    urgent: 'Venus sets around 11:00 PM tonight. Observe it first — it won\'t wait.',
+    horizonAlt: 16.9,
+    horizonDir: 'West-Northwest',
+    horizonNote: 'At 16.9° — about two fist-widths above the horizon. Check for trees or ridges to the WNW before you start.',
+    stats: [
+      { label: 'Distance Tonight', value: '203M km', sub: '1.36 AU from Earth' },
+      { label: 'Light Travel Time', value: '~7 min', sub: 'that light left at 9:23 PM' },
+      { label: 'Altitude', value: '16.9°', sub: 'West-Northwest' },
+      { label: 'Sets At', value: '~11:00 PM', sub: 'tonight from your site' },
+    ],
+    find: [
+      { text: 'Face west-northwest — the direction of the fading sunset glow. Venus is the <em>brightest object in the sky tonight</em> other than the Moon (which is new and invisible). If you see one blazing light low in the western sky, that\'s it. You cannot miss it.' },
+      { text: '<strong>eQuinox 2:</strong> Open the Unistellar app → tap <strong>GoTo</strong> → select <strong>Solar System</strong> → tap <strong>Venus</strong>. The telescope locks on and tracks it automatically.' },
+      { text: 'In the eyepiece: Venus shows a disc — not a star-like point. Tonight it\'s roughly 85% illuminated, appearing nearly full but noticeably round. Try <strong>Enhanced Vision</strong> mode for more detail in the cloud structure.' },
+    ],
+    narrative: `<p>Start here. Venus is the closest planet to Earth right now — 203 million kilometers away, which sounds enormous until you consider that the next stop on this tour is 860 million kilometers further. In cosmic terms, Venus is practically in your living room.</p>
+    <p>The light you're seeing left Venus at <em>9:23 this evening</em>. Seven minutes ago. It crossed 203 million kilometers of space while you were probably still figuring out which direction is west.</p>
+    <p>Venus is almost exactly the same size as Earth — close enough that early astronomers called it our twin. But it is the furthest thing from a twin: surface temperatures of 465°C, an atmospheric pressure 90 times that of Earth, clouds of sulfuric acid, and a day longer than its year. <em>Our nearest neighbor is also our most inhospitable one.</em> From here, it is beautiful. That is, perhaps, the appropriate distance from which to appreciate it.</p>`,
+  },
+
+  // ══ STOP 2: Jupiter ══
+  {
+    time: '9:50 PM',
+    type: 'Planet · Solar System',
+    name: 'Jupiter',
+    altName: 'The largest world in our solar system',
+    isPlanet: true,
+    isAnniversary: false,
+    urgent: null,
+    horizonAlt: 36.9,
+    horizonDir: 'Due West',
+    horizonNote: 'At 36.9° — nearly four fist-widths up, well clear of most treelines. Comfortable viewing through about 11:30 PM.',
+    stats: [
+      { label: 'Distance Tonight', value: '861M km', sub: '5.76 AU from Earth' },
+      { label: 'Light Travel Time', value: '~48 min', sub: 'that light left at 9:02 PM' },
+      { label: 'Altitude', value: '36.9°', sub: 'Due West' },
+      { label: 'Sets At', value: '~12:30 AM', sub: 'tonight from your site' },
+    ],
+    find: [
+      { text: 'Jupiter is about 25° to the left (east) of Venus and much higher up — a steady cream-colored light about four fist-widths above the western horizon. It doesn\'t twinkle the way stars do; it glows with a steady, confident light.' },
+      { text: '<strong>eQuinox 2:</strong> Open the Unistellar app → <strong>GoTo</strong> → <strong>Solar System</strong> → tap <strong>Jupiter</strong>. The telescope will slew to it and track automatically.' },
+      { text: 'In the eyepiece: look for the <strong>cloud bands</strong> — parallel brown and tan stripes running across the disc. Look for up to four small bright dots on either side of the planet — those are the <strong>Galilean moons</strong> (Io, Europa, Ganymede, Callisto), each one a world of its own.' },
+      { text: 'Tip: Jupiter is best viewed at this stop while it\'s still high. You can always return to it later, but the cloud detail is sharpest with more atmosphere between you and it now.' },
+    ],
+    narrative: `<p>Whatever you saw in Venus\'s eyepiece, Jupiter erases it and starts over. This is the <em>great showpiece of the solar system</em>, and the eQuinox 2 is perfectly sized to show you why.</p>
+    <p>Jupiter is so large that all the other planets in the solar system could fit inside it with room to spare. Its famous cloud bands are continent-sized weather systems that have persisted for centuries. The Great Red Spot — a storm wider than Earth itself — has been raging for at least 350 years. What you're seeing through the eyepiece is <em>not calm</em>. It is violent and beautiful and operating on a scale that our intuitions simply weren't built to grasp.</p>
+    <p>And those four tiny dots of light around it: in 1610, Galileo turned a crude telescope toward Jupiter and noticed four small stars that moved. He watched them for weeks and realized they were orbiting Jupiter — not Earth. <em>This observation helped end a thousand years of the belief that everything in the sky revolved around us.</em> Those moons are still there, still moving, still waiting to quietly rearrange someone's understanding of the universe.</p>`,
+  },
+
+  // ══ STOP 3: Arcturus ══
+  {
+    time: '10:15 PM',
+    type: 'Star · 36.7 Light Years',
+    name: 'Arcturus',
+    altName: 'Alpha Boötis — the Bear Driver',
+    isPlanet: false,
+    isAnniversary: false,
+    urgent: null,
+    horizonAlt: 62,
+    horizonDir: 'South-Southeast',
+    horizonNote: 'At ~62° — nearly overhead and to the south. One of the easiest bright stars in the sky tonight.',
+    stats: [
+      { label: 'Distance', value: '36.7 ly', sub: 'light left: ~1989' },
+      { label: 'Type', value: 'K1.5 III', sub: 'Orange giant' },
+      { label: 'Luminosity', value: '170×', sub: 'brighter than our Sun' },
+      { label: 'Magnitude', value: '−0.05', sub: '4th brightest star' },
+    ],
+    find: [
+      { text: 'Turn to face roughly south. Arcturus is the <em>brilliant warm-orange star burning high in the southern sky</em> — it\'s so bright it\'s one of the first stars you\'ll notice as the sky darkens. The orange tint is visible to the naked eye.' },
+      { text: '<strong>eQuinox 2:</strong> <strong>GoTo</strong> → search <code>Arcturus</code>. At higher magnification you\'ll see its amber color deepen. Try comparing the warmth of its light against Vega at the next stop — night and day.' },
+    ],
+    narrative: `<p>We have left the solar system. The light reaching your eyes right now departed Arcturus in <em>approximately 1989</em> — while you were living a version of your life that had no idea what 2026 would look like.</p>
+    <p>Arcturus is an orange giant — 25 times the diameter of our sun, burning 170 times as bright. If you placed it where our sun sits, it would extend nearly to the orbit of Venus. And yet from 36 light years away, it fits in the palm of your eye.</p>
+    <p>Here is the thing about Arcturus that most people don't know: it is not from here. It is a <em>visitor from a different part of the galaxy</em> — a member of an ancient stream of stars that formed elsewhere, billions of years ago, and have been passing through our neighborhood ever since. It is moving so fast relative to our local stars that in a few thousand years it will fade from easy visibility. Catch it while it's here. As with most beautiful things, it doesn't stay.</p>`,
+  },
+
+  // ══ STOP 4: Vega ══
+  {
+    time: '10:35 PM',
+    type: 'Star · 25 Light Years',
+    name: 'Vega',
+    altName: 'Alpha Lyrae — the Falling Eagle',
+    isPlanet: false,
+    isAnniversary: false,
+    urgent: null,
+    horizonAlt: 42,
+    horizonDir: 'East-Northeast',
+    horizonNote: 'At ~42° and climbing all night — Vega rises higher as the tour progresses. No rush here.',
+    stats: [
+      { label: 'Distance', value: '25.0 ly', sub: 'light left: 2001' },
+      { label: 'Type', value: 'A0Va', sub: 'Blue-white main sequence' },
+      { label: 'Size', value: '2.4×', sub: 'wider than our Sun' },
+      { label: 'Magnitude', value: '0.03', sub: '5th brightest star' },
+    ],
+    find: [
+      { text: 'Turn to face northeast. Vega is the <em>blazing blue-white star rising in that direction</em> — the brightest thing on the northeastern horizon and unmistakable for its cold, electric color versus the warm orange of Arcturus you just left.' },
+      { text: '<strong>eQuinox 2:</strong> <strong>GoTo</strong> → search <code>Vega</code>. The contrast in color between Arcturus and Vega is what the telescope reveals most dramatically — from warm amber to icy white-blue in one slew.' },
+    ],
+    narrative: `<p>The light you're seeing left Vega in 2001 — this photon has been traveling for 25 years through empty space. In 2001 you were already three years into your marriage. The light was already on its way.</p>
+    <p>Vega is the color of something electric. Next to Arcturus it looks almost blue — that's real. Color in stars is temperature: Arcturus's orange means about 4,300°C at the surface; Vega's blue-white means about 9,600°C. These are real fires with real temperatures, and the night sky is a spectrum of them if you know what you're seeing.</p>
+    <p>Vega holds a strange distinction: it was the <em>first star ever photographed</em>, in 1850, by pointing a daguerreotype camera down a telescope at Harvard. Before that, no star's image had ever been captured. For a brief, strange moment, Vega was the only star whose portrait existed. It has since become the standard by which all other stars' brightness is measured. Nearly every magnitude number you will read tonight is calibrated against this one star. <em>Everything is measured from here.</em></p>`,
+  },
+
+  // ══ STOP 5: 61 Virginis — THE ANNIVERSARY STAR ══
+  {
+    time: '11:00 PM',
+    type: '✦ The Anniversary Star · 28 Light Years ✦',
+    name: '61 Virginis',
+    altName: 'HD 115617 — a quiet sun, not unlike our own',
+    isPlanet: false,
+    isAnniversary: true,
+    urgent: null,
+    horizonAlt: 32,
+    horizonDir: 'South',
+    horizonNote: 'At ~32° in the south — comfortably visible. Magnitude 4.74, at the edge of naked-eye visibility under truly dark skies.',
+    anniversaryYear: '1998',
+    stats: [
+      { label: 'Distance', value: '27.9 ly', sub: '≈ 28 light years' },
+      { label: 'Light Departed', value: '1998', sub: 'the year you married' },
+      { label: 'Type', value: 'G5V', sub: 'Sun-like star' },
+      { label: 'Confirmed Planets', value: '3', sub: 'super-Earths in orbit' },
+      { label: 'Altitude', value: '32°', sub: 'Due South' },
+      { label: 'Coordinates', value: 'RA 13h 18m', sub: 'Dec −18° 18′' },
+    ],
+    find: [
+      { text: 'Face due south. 61 Virginis sits in the southern sky at about 32° up — roughly three fist-widths above the horizon. It is a faint star, just at the limit of naked-eye visibility on a dark night. Don\'t worry about finding it visually; let the telescope do it.' },
+      { text: '<strong>eQuinox 2:</strong> <strong>GoTo</strong> → search <code>61 Virginis</code>. The telescope will find it precisely. In the eyepiece it appears as a quiet, steady, faintly yellow-white point — which is exactly what it is: a sun, like ours, at 28 light years.' },
+      { text: 'Once the telescope is locked: <em>take a breath. Just look.</em> The photons landing on that sensor right now left that star in 1998.' },
+      { text: 'Optional: under excellent dark skies with fully adapted eyes, try spotting it naked-eye. Look slightly to the side of where you expect it — this averted vision technique reveals faint stars your direct vision misses.' },
+    ],
+    narrative: `<p>This is the stop the whole tour was built around.</p>
+    <p>61 Virginis is not famous. It does not have a common name. It does not appear in mythology. It is a quiet G5 star — the same spectral class as our sun, slightly cooler, slightly smaller, burning the same soft yellow-white. It has at least three confirmed planets orbiting it. If any of those worlds have skies, our sun is one of their stars.</p>
+    <p>The distance is 27.9 light years. <em>Call it 28.</em></p>
+    <p>This means the light now entering the telescope, tonight, on your 28th anniversary, departed that star in <em>1998</em> — the year you married. While you were exchanging vows, photons were launching outward from this star in every direction, including yours. They have crossed 165 trillion miles of vacuum, through the dark, for 28 years, with nothing to mark their passage except time.</p>
+    <p>And tonight they arrived. Here. For this moment.</p>
+    <p><em>The universe doesn't plan. It doesn't care. And yet: here is the light, and here are you, and they got here at exactly the same time.</em> Some things are too precise to be called coincidence and too beautiful to need an explanation beyond themselves.</p>`,
+  },
+
+  // ══ STOP 6: M3 ══
+  {
+    time: '11:35 PM',
+    type: 'Globular Cluster · 33,900 Light Years',
+    name: 'Messier 3',
+    altName: '500,000 suns, older than the Milky Way\'s spiral arms',
+    isPlanet: false,
+    isAnniversary: false,
+    urgent: null,
+    horizonAlt: 70,
+    horizonDir: 'South-Southwest',
+    horizonNote: 'At ~70° — nearly overhead. One of the best-placed objects of the night.',
+    stats: [
+      { label: 'Distance', value: '33,900 ly', sub: 'light left: ~31,900 BC' },
+      { label: 'Stars', value: '~500,000', sub: 'in a 180 ly sphere' },
+      { label: 'Age', value: '11.4 billion yrs', sub: 'older than Earth' },
+      { label: 'Magnitude', value: '6.2', sub: 'resolves beautifully' },
+    ],
+    find: [
+      { text: '<strong>eQuinox 2:</strong> <strong>GoTo</strong> → search <code>M3</code>. It\'s nearly overhead tonight — one of the best-placed objects on the tour. The telescope will find it without any horizon concerns.' },
+      { text: 'Use <strong>Enhanced Vision</strong> mode and give it 30–60 seconds to accumulate light. The cluster will resolve from a fuzzy glow into thousands of individual stars — dense at the core, scattering outward into a halo.' },
+      { text: 'Notice how the light increases toward the center: the stars there are packed so tightly that from inside the cluster, night would never truly be dark.' },
+    ],
+    narrative: `<p>We have made the leap. From 28 light years to 33,900 — a factor of 1,200, crossed in a single telescope slew. The scale of what you're looking at has changed utterly.</p>
+    <p>M3 is a globular cluster: 500,000 stars packed by gravity into a sphere 180 light years wide. It formed 11.4 billion years ago — before our sun existed, before Earth existed, when the universe was less than 3 billion years old. The stars in this cluster are among the oldest objects you can see with your own eyes. They were ancient when our solar system was clouds of gas.</p>
+    <p>The light reaching the telescope tonight left M3 roughly 33,900 years ago — in the Upper Paleolithic era. Humans were painting horses on cave walls in what is now France. There were no cities, no writing, no agriculture. <em>This light was already on its way before any of that began.</em></p>
+    <p>And yet here it is, perfectly punctual, landing on a telescope in Tennessee because two people decided to spend their anniversary looking up.</p>`,
+  },
+
+  // ══ STOP 7: M13 ══
+  {
+    time: '12:05 AM',
+    type: 'Globular Cluster · 25,100 Light Years',
+    name: 'Messier 13',
+    altName: 'The Great Hercules Cluster — target of the Arecibo message',
+    isPlanet: false,
+    isAnniversary: false,
+    urgent: null,
+    horizonAlt: 55,
+    horizonDir: 'East-Southeast',
+    horizonNote: 'At ~55° and still climbing — Hercules rises through the night. Good viewing.',
+    stats: [
+      { label: 'Distance', value: '25,100 ly', sub: 'light left: ~23,000 BC' },
+      { label: 'Stars', value: '~300,000', sub: 'in a 145 ly sphere' },
+      { label: 'Magnitude', value: '5.8', sub: 'just naked-eye at limit' },
+      { label: 'Famous For', value: 'Arecibo 1974', sub: 'humanity\'s message to space' },
+    ],
+    find: [
+      { text: '<strong>eQuinox 2:</strong> <strong>GoTo</strong> → search <code>M13</code>. Hercules is climbing well in the east. M13 sits on the side of a four-star pattern that forms the body of Hercules — the telescope knows exactly where to look.' },
+      { text: 'With Enhanced Vision, M13 resolves beautifully — it is one of the finest globular clusters in the northern hemisphere. Stars radiate from a dense core into a loose outer halo. The outer stars almost appear to be escaping.' },
+    ],
+    narrative: `<p>If M3 was the opening act, M13 is the headline. The Great Hercules Cluster is the finest globular visible from northern latitudes — 300,000 stars arranged in a sphere 145 light years wide, the whole structure slowly orbiting the center of the Milky Way as its own private satellite.</p>
+    <p>In 1974, scientists pointed the Arecibo radio telescope directly at M13 and broadcast a signal into space: a 1,679-bit binary message encoding our DNA structure, our solar system, our mathematics, a picture of a human being. They chose M13 because 300,000 target stars seemed like good odds. <em>That message is still traveling.</em> It won't arrive for another 25,000 years. Whether anyone is listening is, as yet, unresolved.</p>
+    <p>Consider what it means that we sent it at all. Not because we expected an answer in our lifetimes, but because we wanted to be <em>known</em>. We looked at the dark and said: we are here. We exist. We have mathematics and spiraling DNA and a drawing of ourselves and we are sending it to you across 25,000 light years because the alternative — silence — was unthinkable.</p>`,
+  },
+
+  // ══ STOP 8: M51 ══
+  {
+    time: '12:35 AM',
+    type: 'Interacting Galaxies · 23 Million Light Years',
+    name: 'M51 — The Whirlpool',
+    altName: 'NGC 5194 + NGC 5195 · Two galaxies that cannot let go',
+    isPlanet: false,
+    isAnniversary: false,
+    urgent: null,
+    horizonAlt: 65,
+    horizonDir: 'North-Northwest',
+    horizonNote: 'At ~65° and nearly overhead — M51 is high all night from this latitude. No horizon concerns.',
+    stats: [
+      { label: 'Distance', value: '23 million ly', sub: 'light left: Miocene epoch' },
+      { label: 'Diameter', value: '60,000 ly', sub: 'primary galaxy' },
+      { label: 'Stars (M51)', value: '~160 billion', sub: 'in the main galaxy' },
+      { label: 'Magnitude', value: '8.4', sub: 'both galaxies visible' },
+    ],
+    find: [
+      { text: '<strong>eQuinox 2:</strong> <strong>GoTo</strong> → search <code>M51</code>. The Whirlpool sits high in the northwest — look for a soft, two-part glow as the telescope settles.' },
+      { text: 'Use Enhanced Vision and accumulate for 30–60 seconds. You should see <em>two distinct glowing patches</em>: M51 (larger, rounder) and NGC 5195 (smaller, caught in the gravitational embrace). Look for the faint tendril of a spiral arm reaching toward the companion.' },
+    ],
+    narrative: `<p>We have left the Milky Way. That deserves a moment.</p>
+    <p>Everything up to this point — the planets, the stars, the clusters — was inside our own galaxy. M51 is 23 million light years away. The light entering the telescope right now left this galaxy during the Miocene epoch on Earth. The continents were in almost their current positions. The seas were warm. There were no humans — not even the distant ancestors of humans as we'd recognize them. <em>The light was already 10 million years into its journey before our genus existed.</em></p>
+    <p>What you're looking at is a gravitational love story: M51 and its companion NGC 5195, locked in a slow spiral orbit. The smaller galaxy has already passed through M51's disc once and is being drawn back. The collision is not destructive — it is generative. The gravitational compression is triggering waves of star formation throughout the larger galaxy: blue-hot infant suns igniting by the millions.</p>
+    <p><em>Two galaxies, pulled together by gravity, incapable of separating.</em> The universe keeps returning to this story in different scales.</p>`,
+  },
+
+  // ══ STOP 9: M81 & M82 ══
+  {
+    time: '1:05 AM',
+    type: 'Galaxy Pair · 12 Million Light Years',
+    name: 'M81 & M82',
+    altName: "Bode's Galaxy and the Cigar Galaxy — the odd couple",
+    isPlanet: false,
+    isAnniversary: false,
+    urgent: null,
+    horizonAlt: 55,
+    horizonDir: 'North',
+    horizonNote: 'At ~55° in the north — these galaxies are circumpolar from your latitude and available all night.',
+    stats: [
+      { label: 'Distance', value: '~12 million ly', sub: 'light left: Pleistocene' },
+      { label: 'M81 Diameter', value: '90,000 ly', sub: 'grand spiral' },
+      { label: 'M82 Activity', value: 'Starburst', sub: '10× our star formation rate' },
+      { label: 'Magnitudes', value: '6.9 / 8.4', sub: 'M81 / M82' },
+    ],
+    find: [
+      { text: '<strong>eQuinox 2:</strong> <strong>GoTo</strong> → search <code>M81</code> first. M82 may appear in the same field of view — if not, search <code>M82</code> separately. Compare them side by side if you can.' },
+      { text: 'M81 shows as a smooth oval glow, symmetrical, with a bright nucleus. M82 looks completely different: elongated, irregular, visibly disturbed. These two have clearly been through something together.' },
+    ],
+    narrative: `<p>An odd couple. M81 — Bode's Galaxy — is a picture of order: a grand, sweeping spiral, its arms winding outward in textbook symmetry. It is one of the brightest galaxies in the sky, the anchor of its own little galaxy group, a model of how a spiral galaxy is supposed to look.</p>
+    <p>M82 — the Cigar Galaxy — is in complete chaos. A gravitational encounter with M81 millions of years ago compressed M82's gas clouds so severely that it triggered a firestorm of star birth that continues today. M82 is currently forming stars at ten times the rate of our entire Milky Way. The superwinds from those rapidly dying massive stars are blasting filaments of glowing red hydrogen thousands of light years above and below the galactic disc — a structure invisible to the naked eye but caught in long-exposure photographs as something almost violent in its beauty.</p>
+    <p><em>Two galaxies. One serene, one in upheaval.</em> One encounter, millions of years ago, changed them both forever. Gravity has a long memory.</p>`,
+  },
+
+  // ══ STOP 10: M87 ══
+  {
+    time: '1:35 AM',
+    type: 'Giant Elliptical Galaxy · 53.5 Million Light Years',
+    name: 'Messier 87',
+    altName: 'Virgo A — the galaxy with the first photographed black hole',
+    isPlanet: false,
+    isAnniversary: false,
+    urgent: null,
+    horizonAlt: 38,
+    horizonDir: 'South-Southwest',
+    horizonNote: 'At ~38° in the south — well clear of the horizon at this hour. Best viewed at this time slot.',
+    stats: [
+      { label: 'Distance', value: '53.5 million ly', sub: 'light left: Eocene epoch' },
+      { label: 'Stars', value: '~1 trillion', sub: 'in a vast elliptical halo' },
+      { label: 'Black Hole', value: '6.5 billion M☉', sub: 'first ever photographed' },
+      { label: 'Magnitude', value: '8.6', sub: 'brightest in Virgo cluster' },
+    ],
+    find: [
+      { text: '<strong>eQuinox 2:</strong> <strong>GoTo</strong> → search <code>M87</code>. It sits in the southwestern sky at a comfortable altitude — the telescope has a clean path to it.' },
+      { text: 'M87 appears as a large, smooth, oval glow — no spiral arms, no disc, no structure. Just a vast sphere of ancient stars fading toward the edges. At the very center, invisible to us but photographed by a planet-sized telescope array in 2019, is the black hole.' },
+      { text: 'Spend a moment here. This is the furthest light of the evening — the end of the journey.' },
+    ],
+    narrative: `<p>This is as far as tonight takes you: 53.5 million light years. The photons now entering the telescope left M87 during the <em>Eocene epoch</em> — a warm, lush era when horses were the size of dogs, Antarctica had forests, and the ancestors of human beings were small tree-dwelling primates with no particular promise. Nothing called a human would exist for another 50 million years. This light has been crossing the universe since before our entire lineage was a thought.</p>
+    <p>At the center of M87 — behind that smooth, featureless glow — is a black hole whose mass equals six and a half billion suns. In 2019, astronomers linked radio telescopes across the entire surface of the Earth, turning the planet itself into a single instrument, and captured the first photograph of it: a small orange ring, the glow of superheated matter at the edge of the event horizon. <em>We now know what the boundary of oblivion looks like.</em> It looks like a ring of fire. It looks, a little, like something burning.</p>
+    <p>One trillion stars. A black hole five billion times the mass of our sun. Light that's been traveling since before our kind existed. The universe is impossibly vast and almost entirely empty and it does not know you are here.</p>
+    <p>But you are here. And you looked. And that is not nothing — <em>that is, in fact, everything.</em></p>
+    <p>Happy Anniversary.</p>`,
+  },
+
+];
+
+// ── State & render ───────────────────────────────────────────
+let current = 0;
+
+function startTour() {
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('tour').style.display = 'flex';
+  renderStop();
+}
+
+function horizonColor(alt) {
+  if (alt >= 40) return '#6bc87a';
+  if (alt >= 20) return '#e8c97a';
+  return '#e87a7a';
+}
+
+function renderStop() {
+  const s = stops[current];
+
+  document.getElementById('hdr-num').textContent = current + 1;
+  document.getElementById('hdr-name').textContent = s.name;
+  document.getElementById('hdr-time').textContent = s.time;
+
+  // Progress
+  const ps = document.getElementById('progress-steps');
+  ps.innerHTML = '';
+  stops.forEach((stop, i) => {
+    const d = document.createElement('div');
+    const isPl = stop.isPlanet;
+    if (i < current)       d.className = 'progress-step ' + (isPl ? 'planet-done' : 'done');
+    else if (i === current) d.className = 'progress-step ' + (isPl ? 'planet-active' : 'active');
+    else                    d.className = 'progress-step';
+    ps.appendChild(d);
+  });
+
+  // Back
+  document.getElementById('btn-back').style.display = current === 0 ? 'none' : '';
+
+  // Next button
+  const btnNext = document.getElementById('btn-next');
+  btnNext.className = 'btn-next' + (s.isPlanet ? ' planet-next' : '');
+  document.getElementById('next-label').textContent =
+    current === stops.length - 1 ? 'Finish Tour' : 'Next Stop';
+
+  // Build card HTML
+  const card = document.getElementById('stop-card');
+  card.className = 'stop-card' +
+    (s.isPlanet ? ' planet-card' : '') +
+    (s.isAnniversary ? ' anniversary-card' : '');
+
+  let html = '';
+
+  // Type pill
+  html += `<div class="stop-type-pill"><span class="dot"></span>${s.type}</div>`;
+
+  // Names
+  html += `<h2 class="stop-main-name">${s.name}</h2>`;
+  html += `<div class="stop-alt-name">${s.altName}</div>`;
+
+  // Anniversary marquee
+  if (s.isAnniversary) {
+    html += `<div class="anniversary-marquee">
+      <div class="yr-label">Light departed</div>
+      <div class="yr-number">${s.anniversaryYear}</div>
+      <div class="yr-sub">the year you married — arriving tonight</div>
+    </div>`;
+  }
+
+  // Urgency
+  if (s.urgent) {
+    html += `<div class="urgency-banner">
+      <div class="urgency-icon">⏱</div>
+      <div>${s.urgent}</div>
+    </div>`;
+  }
+
+  // Horizon bar
+  const pct = Math.min(100, (s.horizonAlt / 90) * 100);
+  const col = horizonColor(s.horizonAlt);
+  html += `<div class="horizon-bar">
+    <div class="horizon-label">Horizon altitude</div>
+    <div class="horizon-track">
+      <div class="horizon-fill" style="width:${pct}%;background:${col};"></div>
+    </div>
+    <div class="horizon-value" style="color:${col};">${s.horizonAlt}°</div>
+  </div>`;
+  html += `<div style="font-size:11px;color:var(--text-dim);margin-bottom:20px;line-height:1.6;">${s.horizonNote}</div>`;
+
+  // Stats
+  html += `<div class="stats-grid">`;
+  s.stats.forEach(st => {
+    html += `<div class="stat-card">
+      <div class="stat-label">${st.label}</div>
+      <div class="stat-value">${st.value}</div>
+      <div class="stat-sub">${st.sub}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Find it
+  html += `<div class="find-section">
+    <div class="find-section-header">How to Find It</div>`;
+  s.find.forEach((f, i) => {
+    html += `<div class="find-step">
+      <div class="find-step-num">${i + 1}</div>
+      <div class="find-step-text">${f.text}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Narrative
+  html += `<div class="narrative">${s.narrative}</div>`;
+
+  card.innerHTML = html;
+  window.scrollTo(0, 0);
+}
+
+function nextStop() {
+  if (current < stops.length - 1) {
+    current++;
+    renderStop();
+  } else {
+    document.getElementById('tour').style.display = 'none';
+    document.getElementById('closing').style.display = 'flex';
+  }
+}
+
+function prevStop() {
+  if (current > 0) { current--; renderStop(); }
+}
+
+function restartTour() {
+  current = 0;
+  document.getElementById('closing').style.display = 'none';
+  document.getElementById('welcome').style.display = 'flex';
+}
+</script>
+</body>
+</html>

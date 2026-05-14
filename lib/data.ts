@@ -216,7 +216,7 @@ export const TRIP: Trip = {
           links: [
             {
               label: "Launch Star Tour",
-              href: "#",
+              href: "/starmap.html",
               kind: "star-tour",
             },
           ],
