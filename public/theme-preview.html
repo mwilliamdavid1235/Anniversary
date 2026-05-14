@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Preview — Among the Stars</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Barlow:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+
+    /* ══════════════════════════════════════════
+       NIGHT THEME (current — default)
+    ══════════════════════════════════════════ */
+    :root[data-theme="night"] {
+      --bg:           #0B1309;
+      --bg-card:      rgba(255,255,255,0.025);
+      --bg-card-next: rgba(109,184,126,0.05);
+      --bg-note:      rgba(61,107,71,0.15);
+      --bg-badge:     transparent;
+
+      --text:         #E2D9C6;
+      --text-muted:   #6E8A74;
+      --text-dim:     #3A5040;
+      --text-faint:   #2D4D28;
+
+      --border:       #1A2E18;
+      --border-mid:   #1E3319;
+      --border-next:  #2D5038;
+      --border-note:  #3D6B47;
+
+      --dot-inactive: #1E3319;
+      --dot-border:   #2D4D28;
+
+      --accent:       #6DB87E;
+      --accent-dim:   #3D6B47;
+      --gold:         #C49A45;
+      --gold-dim:     #6B4F1E;
+      --rose:         #C47A8A;
+      --lavender:     #9B8FC4;
+      --blue:         #8090E8;
+
+      --type-travel:     #6E8A74;
+      --type-lodging:    #9B8FC4;
+      --type-restaurant: #C49A45;
+      --type-activity:   #6DB87E;
+      --type-experience: #C47A8A;
+
+      --link-star-bg:     rgba(155,143,196,0.12);
+      --link-star-border: #4A3A70;
+      --link-star-text:   #B8AADF;
+      --link-conn-bg:     rgba(196,122,138,0.15);
+      --link-conn-border: #7A3A4A;
+      --link-conn-text:   #C47A8A;
+      --link-waze-bg:     rgba(51,64,160,0.15);
+      --link-waze-border: #2A3580;
+      --link-waze-text:   #8090E8;
+      --link-web-bg:      rgba(196,154,69,0.1);
+      --link-web-border:  #6B4F1E;
+      --link-web-text:    #C49A45;
+
+      --watermark:    #0F1F0D;
+      --divider:      #1E3319;
+      --header-bg:    rgba(11,19,9,0.92);
+      --banner-bg:    rgba(45,80,56,0.3);
+      --banner-border:#2D5038;
+      --footer-border:#1E3319;
+      --footer-text:  #3A5040;
+      --toggle-bg:    rgba(255,255,255,0.04);
+      --toggle-border:rgba(255,255,255,0.08);
+    }
+
+    /* ══════════════════════════════════════════
+       DAY THEME (new — adventure / morning)
+    ══════════════════════════════════════════ */
+    :root[data-theme="day"] {
+      --bg:           #F0EBE0;
+      --bg-card:      rgba(255,255,255,0.72);
+      --bg-card-next: rgba(45,100,58,0.07);
+      --bg-note:      rgba(45,100,58,0.09);
+      --bg-badge:     rgba(255,255,255,0.5);
+
+      --text:         #1A2219;
+      --text-muted:   #3D5C42;
+      --text-dim:     #7A9A80;
+      --text-faint:   #A8C0AA;
+
+      --border:       #CDD8C5;
+      --border-mid:   #BFD0B8;
+      --border-next:  #4A8A5A;
+      --border-note:  #4A8A5A;
+
+      --dot-inactive: #C5D5BF;
+      --dot-border:   #A8C0AA;
+
+      --accent:       #2E6B3A;
+      --accent-dim:   #4A8A5A;
+      --gold:         #8B6215;
+      --gold-dim:     #B8881E;
+      --rose:         #8B3A50;
+      --lavender:     #5A4A8A;
+      --blue:         #2A4098;
+
+      --type-travel:     #4A7052;
+      --type-lodging:    #5A4A8A;
+      --type-restaurant: #8B6215;
+      --type-activity:   #2E6B3A;
+      --type-experience: #8B3A50;
+
+      --link-star-bg:     rgba(90,74,138,0.1);
+      --link-star-border: #8070B8;
+      --link-star-text:   #4A3A88;
+      --link-conn-bg:     rgba(139,58,80,0.08);
+      --link-conn-border: #C47A8A;
+      --link-conn-text:   #8B3A50;
+      --link-waze-bg:     rgba(42,64,152,0.08);
+      --link-waze-border: #6080C8;
+      --link-waze-text:   #2A4098;
+      --link-web-bg:      rgba(139,98,21,0.08);
+      --link-web-border:  #C4A050;
+      --link-web-text:    #8B6215;
+
+      --watermark:    #E0D8CA;
+      --divider:      #BFD0B8;
+      --header-bg:    rgba(240,235,224,0.95);
+      --banner-bg:    rgba(46,107,58,0.08);
+      --banner-border:#4A8A5A;
+      --footer-border:#CDD8C5;
+      --footer-text:  #7A9A80;
+      --toggle-bg:    rgba(0,0,0,0.04);
+      --toggle-border:rgba(0,0,0,0.1);
+    }
+
+    /* ══════════════════════════════════════════
+       BASE STYLES
+    ══════════════════════════════════════════ */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { transition: background 0.4s ease; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    /* ── Typography ── */
+    .font-display { font-family: 'Cormorant Garamond', serif; }
+    .font-mono    { font-family: 'DM Mono', monospace; }
+
+    /* ── Theme toggle bar (fixed top) ── */
+    .theme-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border-mid);
+      backdrop-filter: blur(16px);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+    .theme-label {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      transition: color 0.4s;
+    }
+    .theme-meta {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: 'DM Mono', monospace;
+      transition: color 0.4s;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--toggle-border);
+      background: var(--toggle-bg);
+      cursor: pointer;
+      font-size: 11px;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    [data-theme="night"] .toggle-btn.active {
+      background: var(--lavender);
+      border-color: var(--lavender);
+    }
+    .override-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      border: 1px solid var(--toggle-border);
+      background: var(--toggle-bg);
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .override-chip.active {
+      border-color: var(--gold-dim);
+      color: var(--gold);
+      background: rgba(196,154,69,0.08);
+    }
+    [data-theme="day"] .override-chip.active {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ── App shell ── */
+    .app { padding-top: 53px; }
+
+    /* ── Header ── */
+    .header {
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border-mid);
+      backdrop-filter: blur(12px);
+      padding: 20px 20px 16px;
+      transition: background 0.4s, border-color 0.4s;
+    }
+    .header-eyebrow {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+      transition: color 0.4s;
+    }
+    .header-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.1;
+      transition: color 0.4s;
+    }
+    [data-theme="day"] .header-title {
+      font-size: 34px;
+      font-weight: 400;
+    }
+    .header-subtitle {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 2px;
+      transition: color 0.4s;
+    }
+    .header-dates {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      transition: border-color 0.4s;
+    }
+    .header-date-item {}
+    .header-date-label {
+      font-size: 8px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 2px;
+      transition: color 0.4s;
+    }
+    .header-date-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: color 0.4s;
+    }
+
+    /* ── Up Next banner ── */
+    .banner {
+      background: var(--banner-bg);
+      border-bottom: 1px solid var(--banner-border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.4s, border-color 0.4s;
+    }
+    .banner-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      animation: pulse 2s ease-in-out infinite;
+      transition: background 0.4s;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.75); }
+    }
+    .banner-label {
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      flex-shrink: 0;
+      transition: color 0.4s;
+    }
+    .banner-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: color 0.4s;
+    }
+    .banner-time {
+      margin-left: auto;
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      color: var(--accent-dim);
+      transition: color 0.4s;
+    }
+
+    /* ── Day nav ── */
+    .day-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border-mid);
+      transition: border-color 0.4s;
+    }
+    .day-tab {
+      flex: 1;
+      padding: 10px 6px;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      font-family: 'Barlow', sans-serif;
+    }
+    .day-tab.active {
+      border-bottom-color: var(--accent);
+    }
+    .day-tab-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      color: var(--text-faint);
+      display: block;
+      transition: color 0.4s;
+    }
+    .day-tab.active .day-tab-num { color: var(--accent); }
+    .day-tab-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      display: block;
+      transition: color 0.4s;
+    }
+    .day-tab.active .day-tab-label { color: var(--text); }
+
+    /* ── Main content ── */
+    .main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 24px 20px 120px;
+    }
+
+    /* Day section header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .section-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      transition: color 0.4s;
+    }
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--divider);
+      transition: background 0.4s;
+    }
+    .section-count {
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      transition: color 0.4s;
+    }
+
+    /* ── Event row ── */
+    .event-row {
+      display: flex;
+      gap: 0;
+      margin-bottom: 14px;
+    }
+
+    /* Time col */
+    .time-col {
+      width: 52px;
+      flex-shrink: 0;
+      text-align: right;
+      padding-right: 12px;
+      padding-top: 16px;
+      font-size: 11px;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-dim);
+      transition: color 0.4s;
+    }
+    .time-col.is-next { color: var(--accent); }
+    .time-period {
+      display: block;
+      font-size: 9px;
+      color: var(--text-faint);
+      letter-spacing: 0.05em;
+      transition: color 0.4s;
+    }
+
+    /* Dot */
+    .timeline-dot-wrap {
+      flex-shrink: 0;
+      padding: 12px 5px 0;
+      margin: 0 -6px;
+      z-index: 1;
+    }
+    .timeline-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--dot-inactive);
+      border: 1.5px solid var(--dot-border);
+      transition: all 0.4s;
+    }
+    .timeline-dot.is-next {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(109,184,126,0.15);
+    }
+    [data-theme="day"] .timeline-dot.is-next {
+      box-shadow: 0 0 0 3px rgba(46,107,58,0.15);
+    }
+
+    /* Card */
+    .event-card {
+      flex: 1;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-left: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      transition: background 0.4s, border-color 0.4s;
+      backdrop-filter: blur(4px);
+    }
+    .event-card.is-next {
+      background: var(--bg-card-next);
+      border-color: var(--border-next);
+    }
+    [data-theme="day"] .event-card {
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    }
+
+    /* Type badge */
+    .type-badge {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      transition: color 0.4s;
+    }
+    .type-badge.activity   { color: var(--type-activity); }
+    .type-badge.experience { color: var(--type-experience); }
+    .type-badge.restaurant { color: var(--type-restaurant); }
+    .type-badge.lodging    { color: var(--type-lodging); }
+    .type-badge.travel     { color: var(--type-travel); }
+
+    /* Card title */
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 22px;
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 4px;
+      transition: color 0.4s;
+    }
+    [data-theme="day"] .card-title {
+      font-size: 23px;
+      font-weight: 400;
+    }
+
+    /* Card body */
+    .card-body {
+      font-size: 12px;
+      line-height: 1.65;
+      color: var(--text-muted);
+      margin-bottom: 0;
+      transition: color 0.4s;
+    }
+
+    /* Note */
+    .card-note {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-left: 2px solid var(--border-note);
+      border-radius: 0 6px 6px 0;
+      background: var(--bg-note);
+      font-size: 11px;
+      color: var(--accent);
+      line-height: 1.55;
+      transition: all 0.4s;
+    }
+
+    /* Links */
+    .card-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      font-family: 'Barlow', sans-serif;
+      font-weight: 400;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: 1px solid;
+    }
+    .link-btn.waze {
+      background: var(--link-waze-bg);
+      border-color: var(--link-waze-border);
+      color: var(--link-waze-text);
+    }
+    .link-btn.star {
+      background: var(--link-star-bg);
+      border-color: var(--link-star-border);
+      color: var(--link-star-text);
+    }
+    .link-btn.conn {
+      background: var(--link-conn-bg);
+      border-color: var(--link-conn-border);
+      color: var(--link-conn-text);
+    }
+    .link-btn.web {
+      background: var(--link-web-bg);
+      border-color: var(--link-web-border);
+      color: var(--link-web-text);
+    }
+
+    /* Playlist card */
+    .playlist-card {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--toggle-bg);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.4s;
+    }
+    .playlist-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .playlist-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      transition: color 0.4s;
+    }
+    .playlist-mood {
+      font-size: 10px;
+      color: var(--text-faint);
+      transition: color 0.4s;
+    }
+    .playlist-action {
+      margin-left: auto;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-dim);
+      transition: color 0.4s;
+    }
+
+    /* Footer nav links */
+    .footer {
+      border-top: 1px solid var(--footer-border);
+      padding: 32px 20px;
+      text-align: center;
+      transition: border-color 0.4s;
+    }
+    .footer-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .footer-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      text-decoration: none;
+    }
+    .footer-link-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 22px;
+      color: var(--text);
+      transition: color 0.4s;
+    }
+    .footer-link-sub {
+      font-size: 8px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--footer-text);
+      transition: color 0.4s;
+    }
+    .footer-divider {
+      width: 1px;
+      height: 32px;
+      background: var(--divider);
+      transition: background 0.4s;
+    }
+    .footer-site {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--footer-text);
+      transition: color 0.4s;
+    }
+    .footer-tagline {
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      transition: color 0.4s;
+    }
+
+    /* ── Theme indicator pill (bottom of screen) ── */
+    .theme-indicator {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      border: 1px solid var(--toggle-border);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: all 0.4s;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    }
+    .theme-indicator-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      transition: background 0.4s;
+    }
+    [data-theme="night"] .theme-indicator-dot { background: #B8AADF; }
+    [data-theme="day"]   .theme-indicator-dot { background: var(--accent); }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 2px; }
+
+  </style>
+</head>
+<body>
+
+<div id="root" data-theme="night">
+
+  <!-- ── Theme toggle bar ── -->
+  <div class="theme-bar">
+    <div>
+      <div class="theme-label">Theme Preview</div>
+      <div class="theme-meta" id="time-display">detecting time…</div>
+    </div>
+    <div class="toggle-row">
+      <button class="toggle-btn" id="btn-day" onclick="setTheme('day')">☀ Day</button>
+      <button class="toggle-btn" id="btn-night" onclick="setTheme('night')">☽ Night</button>
+      <div class="override-chip" id="override-chip" onclick="toggleOverride()">Auto</div>
+    </div>
+  </div>
+
+  <!-- ── App ── -->
+  <div class="app">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-eyebrow">✦ Private Itinerary · Smoky Mountains</div>
+      <h1 class="header-title">Among the Stars</h1>
+      <div class="header-subtitle">Twenty-Eight Years</div>
+      <div class="header-dates">
+        <div class="header-date-item">
+          <div class="header-date-label">Depart</div>
+          <div class="header-date-value">May 15, Friday</div>
+        </div>
+        <div class="header-date-item">
+          <div class="header-date-label">Return</div>
+          <div class="header-date-value">May 17, Sunday</div>
+        </div>
+        <div class="header-date-item">
+          <div class="header-date-label">Cabin</div>
+          <div class="header-date-value">Stellara Resort</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Up Next Banner -->
+    <div class="banner">
+      <div class="banner-dot"></div>
+      <div class="banner-label">Up Next</div>
+      <div class="banner-text">After Dark — A Night Among the Stars</div>
+      <div class="banner-time">9:30 pm</div>
+    </div>
+
+    <!-- Day Nav -->
+    <div class="day-nav">
+      <button class="day-tab active">
+        <span class="day-tab-num">01</span>
+        <span class="day-tab-label">Friday</span>
+      </button>
+      <button class="day-tab">
+        <span class="day-tab-num">02</span>
+        <span class="day-tab-label">Saturday</span>
+      </button>
+      <button class="day-tab">
+        <span class="day-tab-num">03</span>
+        <span class="day-tab-label">Sunday</span>
+      </button>
+    </div>
+
+    <!-- Main content -->
+    <div class="main">
+      <div class="section-header">
+        <span class="section-label">Friday, May 15</span>
+        <div class="section-rule"></div>
+        <span class="section-count">8 stops</span>
+      </div>
+
+      <!-- Event: Porters Creek (activity) -->
+      <div class="event-row">
+        <div class="time-col">
+          <span>1:00</span>
+          <span class="time-period">pm</span>
+        </div>
+        <div class="timeline-dot-wrap">
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="event-card">
+          <div class="type-badge activity">✦ Activity</div>
+          <h3 class="card-title">Porters Creek Trail</h3>
+          <p class="card-body">One of the quieter corners of the Smokies — huge trees, creek crossings, old stone walls, and Fern Branch Falls tucked into the forest at the end.</p>
+          <div class="card-note">Moderate trail, roughly 4–4.5 miles round trip. Parking tag required ($5/day).</div>
+          <div class="card-links">
+            <a class="link-btn waze" href="#">▲ Waze</a>
+            <a class="link-btn web" href="#">↗ AllTrails</a>
+          </div>
+          <div class="playlist-card">
+            <div class="playlist-icon">♫</div>
+            <div>
+              <div class="playlist-label">Into the forest</div>
+              <div class="playlist-mood">Quiet, green, unhurried</div>
+            </div>
+            <div class="playlist-action">Find →</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event: Check In (lodging, is-next) -->
+      <div class="event-row">
+        <div class="time-col is-next">
+          <span>5:00</span>
+          <span class="time-period">pm</span>
+        </div>
+        <div class="timeline-dot-wrap">
+          <div class="timeline-dot is-next"></div>
+        </div>
+        <div class="event-card is-next">
+          <div class="type-badge lodging">✦ Lodging</div>
+          <h3 class="card-title">Check In — Stellara Resort</h3>
+          <p class="card-body">Arrive at Stellara and settle in slowly. Hot tub, mountain air, quiet woods, and nowhere else to be.</p>
+          <div class="card-note">Check-in assistance available 4–7:30 PM. The access road is unlit gravel — arriving before dark makes settling in easier.</div>
+          <div class="card-links">
+            <a class="link-btn web" href="#">◇ Reservation</a>
+            <a class="link-btn waze" href="#">▲ Waze</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event: Connection (experience) -->
+      <div class="event-row">
+        <div class="time-col">
+          <span>—</span>
+        </div>
+        <div class="timeline-dot-wrap">
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="event-card">
+          <div class="type-badge experience">✦ Experience</div>
+          <h3 class="card-title">Connection Activity</h3>
+          <p class="card-body">A guided shared experience built around thoughtful questions, memories, and honest conversation. Pour something good, get comfortable.</p>
+          <div class="card-links">
+            <a class="link-btn conn" href="#">♡ Open Connection Guide</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event: Star Tour (activity) -->
+      <div class="event-row">
+        <div class="time-col">
+          <span>9:30</span>
+          <span class="time-period">pm</span>
+        </div>
+        <div class="timeline-dot-wrap">
+          <div class="timeline-dot"></div>
+        </div>
+        <div class="event-card">
+          <div class="type-badge activity">✦ Activity</div>
+          <h3 class="card-title">After Dark — A Night Among the Stars</h3>
+          <p class="card-body">Ten stops across the night sky — planets, stars, clusters, and galaxies — guided by a custom star tour built for this trip.</p>
+          <div class="card-note">Begin after dark when the sky is fully dark.</div>
+          <div class="card-links">
+            <a class="link-btn star" href="#">✦ Launch Star Tour</a>
+          </div>
+          <div class="playlist-card">
+            <div class="playlist-icon">♫</div>
+            <div>
+              <div class="playlist-label">Among the stars</div>
+              <div class="playlist-mood">Still, vast, and timeless</div>
+            </div>
+            <div class="playlist-action">Find →</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-links">
+        <a class="footer-link" href="#">
+          <span class="footer-link-title">Connection</span>
+          <span class="footer-link-sub">28 questions</span>
+        </a>
+        <div class="footer-divider"></div>
+        <a class="footer-link" href="#">
+          <span class="footer-link-title">Intimacy</span>
+          <span class="footer-link-sub">Private ✦</span>
+        </a>
+        <div class="footer-divider"></div>
+        <a class="footer-link" href="#">
+          <span class="footer-link-title">Exploration</span>
+          <span class="footer-link-sub">Private ✦</span>
+        </a>
+      </div>
+      <div class="footer-site">pecanandpoplar.com</div>
+      <div class="footer-tagline" style="margin-top:4px;">Made with love · Private itinerary</div>
+    </div>
+
+  </div><!-- /app -->
+
+  <!-- Theme indicator -->
+  <div class="theme-indicator">
+    <div class="theme-indicator-dot"></div>
+    <span id="indicator-text">Night mode — eye-safe for stargazing</span>
+  </div>
+
+</div><!-- /root -->
+
+<script>
+  const root = document.getElementById('root');
+
+  // ── Time detection ───────────────────────────────────────────
+  function getAutoTheme() {
+    const h = new Date().getHours();
+    // Night: 8pm – 6am  (20–6)
+    return (h >= 20 || h < 6) ? 'night' : 'day';
+  }
+
+  // ── State ────────────────────────────────────────────────────
+  let overridden = false;
+  let currentTheme = getAutoTheme();
+
+  function updateTimeDisplay() {
+    const now = new Date();
+    const h = now.getHours();
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const period = h >= 12 ? 'pm' : 'am';
+    const h12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    document.getElementById('time-display').textContent =
+      `${h12}:${m} ${period} · auto-${getAutoTheme()}`;
+  }
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    root.setAttribute('data-theme', theme);
+
+    document.getElementById('btn-day').classList.toggle('active', theme === 'day');
+    document.getElementById('btn-night').classList.toggle('active', theme === 'night');
+
+    document.getElementById('indicator-text').textContent = theme === 'night'
+      ? 'Night mode — eye-safe for stargazing'
+      : 'Day mode — bold & bright for adventures';
+  }
+
+  function setTheme(theme) {
+    const auto = getAutoTheme();
+    overridden = (theme !== auto);
+    const chip = document.getElementById('override-chip');
+    chip.textContent = overridden ? 'Override' : 'Auto';
+    chip.classList.toggle('active', overridden);
+    applyTheme(theme);
+  }
+
+  function toggleOverride() {
+    if (overridden) {
+      overridden = false;
+      const chip = document.getElementById('override-chip');
+      chip.textContent = 'Auto';
+      chip.classList.remove('active');
+      applyTheme(getAutoTheme());
+    }
+  }
+
+  // ── Init ─────────────────────────────────────────────────────
+  applyTheme(getAutoTheme());
+  updateTimeDisplay();
+  setInterval(updateTimeDisplay, 30000);
+</script>
+</body>
+</html>
