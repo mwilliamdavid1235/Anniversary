@@ -97,9 +97,14 @@ export default function SettingsPage() {
   }
 
   // ── Clear all data ───────────────────────────────────────────
-  function clearAllData() {
+  async function clearAllData() {
     [...DATA_KEYS, ...LOCK_KEYS].forEach((k) => localStorage.removeItem(k));
     setLocks({ star_tour: false, connection: false, intimacy_exploration: false });
+    await Promise.all([
+      fetch("/api/connection/answers", { method: "DELETE" }),
+      fetch("/api/intimacy/answers", { method: "DELETE" }),
+      fetch("/api/exploration/answers", { method: "DELETE" }),
+    ]);
     showToast("All data cleared.", "danger");
   }
 

@@ -37,3 +37,10 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE() {
+  const sb = createServerClient();
+  const { error } = await sb.from("intimacy_answers").delete().in("person", ["mary", "md"]);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
