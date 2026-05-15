@@ -116,7 +116,7 @@ function BackupsPanel({ options }: { options: EventOption[] }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="mt-3" style={{ borderTop: "1px solid #141F13", paddingTop: 12 }}>
+    <div className="mt-3" style={{ borderTop: "1px solid var(--t-border)", paddingTop: 12 }}>
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5"
@@ -132,7 +132,7 @@ function BackupsPanel({ options }: { options: EventOption[] }) {
             fontSize: "9px",
             letterSpacing: "0.15em",
             textTransform: "uppercase",
-            color: "#2D4D28",
+            color: "var(--t-text-faint)",
           }}
         >
           {open ? "▲" : "▼"}
@@ -142,7 +142,7 @@ function BackupsPanel({ options }: { options: EventOption[] }) {
             fontSize: "9px",
             letterSpacing: "0.15em",
             textTransform: "uppercase",
-            color: "#2D4D28",
+            color: "var(--t-text-faint)",
           }}
         >
           Backup plans
@@ -156,17 +156,17 @@ function BackupsPanel({ options }: { options: EventOption[] }) {
               key={opt.id}
               className="rounded-lg p-3 mb-2 last:mb-0"
               style={{
-                background: "rgba(11,19,9,0.4)",
-                border: "1px solid #141F13",
+                background: "var(--t-surface)",
+                border: "1px solid var(--t-border)",
               }}
             >
               <p
                 className="font-display italic mb-1"
-                style={{ fontSize: "15px", color: "#7A9980" }}
+                style={{ fontSize: "15px", color: "var(--t-text-muted)" }}
               >
                 {opt.name}
               </p>
-              <p className="leading-relaxed mb-2" style={{ fontSize: "11px", color: "#3A5040" }}>
+              <p className="leading-relaxed mb-2" style={{ fontSize: "11px", color: "var(--t-text-dim)" }}>
                 {opt.description}
               </p>
               {opt.links.length > 0 && (
@@ -215,14 +215,14 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
         <div
           className="rounded-lg p-3"
           style={{
-            background: "rgba(61,107,71,0.12)",
-            border: "1px solid #2D5038",
+            background: "var(--t-surface-next)",
+            border: "1px solid var(--t-border-hi)",
           }}
         >
           <div className="flex items-start justify-between gap-2 mb-1">
             <p
               className="font-display italic"
-              style={{ fontSize: "17px", color: "#E2D9C6" }}
+              style={{ fontSize: "17px", color: "var(--t-text)" }}
             >
               ✓ {chosen.name}
             </p>
@@ -231,7 +231,7 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
               style={{
                 fontSize: "9px",
                 letterSpacing: "0.12em",
-                color: "#3A5040",
+                color: "var(--t-text-dim)",
                 background: "none",
                 border: "none",
                 cursor: "pointer",
@@ -243,7 +243,7 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
               Change
             </button>
           </div>
-          <p className="leading-relaxed mb-2" style={{ fontSize: "11px", color: "#6E8A74" }}>
+          <p className="leading-relaxed mb-2" style={{ fontSize: "11px", color: "var(--t-text-muted)" }}>
             {chosen.description}
           </p>
           {chosen.links.length > 0 && (
@@ -267,7 +267,7 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
           fontSize: "9px",
           letterSpacing: "0.15em",
           textTransform: "uppercase",
-          color: "#3A5040",
+          color: "var(--t-text-dim)",
         }}
       >
         — Choose one —
@@ -279,8 +279,8 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
             key={opt.id}
             className="rounded-lg mb-2 last:mb-0 overflow-hidden"
             style={{
-              background: isExpanded ? "rgba(11,19,9,0.8)" : "rgba(11,19,9,0.4)",
-              border: `1px solid ${isExpanded ? "#2D5038" : "#1E3319"}`,
+              background: isExpanded ? "var(--t-surface-next)" : "var(--t-surface)",
+              border: `1px solid ${isExpanded ? "var(--t-border-hi)" : "var(--t-border-mid)"}`,
               transition: "background 0.15s ease, border-color 0.15s ease",
             }}
           >
@@ -297,14 +297,14 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
             >
               <span
                 className="font-display italic"
-                style={{ fontSize: "15px", color: isExpanded ? "#E2D9C6" : "#9BB09E" }}
+                style={{ fontSize: "15px", color: isExpanded ? "var(--t-text)" : "var(--t-text-muted)" }}
               >
                 {opt.name}
               </span>
               <span
                 style={{
                   fontSize: "9px",
-                  color: "#3A5040",
+                  color: "var(--t-text-dim)",
                   marginLeft: 8,
                   flexShrink: 0,
                 }}
@@ -316,7 +316,7 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
             {/* Expanded details */}
             {isExpanded && (
               <div style={{ padding: "0 12px 12px" }}>
-                <p className="leading-relaxed mb-3" style={{ fontSize: "11px", color: "#6E8A74" }}>
+                <p className="leading-relaxed mb-3" style={{ fontSize: "11px", color: "var(--t-text-muted)" }}>
                   {opt.description}
                 </p>
                 {opt.links.length > 0 && (
@@ -334,9 +334,9 @@ function OptionsPanel({ eventId, options }: { eventId: string; options: EventOpt
                     letterSpacing: "0.1em",
                     textTransform: "uppercase",
                     padding: "6px 14px",
-                    background: "rgba(61,107,71,0.25)",
-                    border: "1px solid #2D5038",
-                    color: "#6DB87E",
+                    background: "var(--t-surface-next)",
+                    border: "1px solid var(--t-border-hi)",
+                    color: "var(--t-accent)",
                     cursor: "pointer",
                   }}
                 >
