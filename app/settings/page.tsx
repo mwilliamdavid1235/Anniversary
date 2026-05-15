@@ -87,10 +87,14 @@ export default function SettingsPage() {
     showToast("Seeding data…", "success");
 
     const res = await fetch("/api/seed", { method: "POST" });
+    const body = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
       showToast("Seed failed: " + (body.error ?? res.status), "danger");
       return;
+    }
+    const { counts } = body;
+    if (counts) {
+      console.log("[seed] DB row counts after seed:", counts);
     }
 
     // Connection

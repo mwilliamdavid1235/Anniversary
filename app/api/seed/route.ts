@@ -100,5 +100,12 @@ export async function POST() {
     return NextResponse.json({ error: errors.map((e) => e!.message).join("; ") }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  // Read back counts to verify writes landed
+  const [connCount, intimCount, explCount] = await Promise.all([
+    sb.from("connection_answers").select("*", { count: "exact", head: true }).then((r) => r.count ?? 0),
+    sb.from("intimacy_answers").select("*", { count: "exact", head: true }).then((r) => r.count ?? 0),
+    sb.from("exploration_answers").select("*", { count: "exact", head: true }).then((r) => r.count ?? 0),
+  ]);
+
+  return NextResponse.json({ ok: true, counts: { connection: connCount, intimacy: intimCount, exploration: explCount } });
 }
