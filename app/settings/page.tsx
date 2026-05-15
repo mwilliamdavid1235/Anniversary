@@ -83,16 +83,42 @@ export default function SettingsPage() {
   }
 
   // ── Fill test data ───────────────────────────────────────────
-  function fillTestData() {
+  async function fillTestData() {
+    showToast("Seeding data…", "success");
+
+    const res = await fetch("/api/seed", { method: "POST" });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      showToast("Seed failed: " + (body.error ?? res.status), "danger");
+      return;
+    }
+
+    // Connection
     localStorage.setItem("connection_person", "md");
     localStorage.setItem("connection_section", "memories");
-    localStorage.setItem("connection_submitted", JSON.stringify(["memories", "right-now"]));
+    localStorage.setItem("connection_submitted", JSON.stringify(["memories", "right-now", "us", "forward"]));
+
+    // Intimacy
     localStorage.setItem("intimacy_person", "md");
+    localStorage.setItem("intimacy_active_section", "Acknowledgment");
+    localStorage.setItem("intimacy_submitted", JSON.stringify([
+      "Acknowledgment", "Safety & Access", "Desire & Turn-On", "Pleasure", "Exploration", "The Real Talk",
+    ]));
+    localStorage.setItem("intimacy_unlocked", "true");
+
+    // Exploration
+    localStorage.setItem("exploration_section", "affection");
+    localStorage.setItem("exploration_submitted_sections", JSON.stringify([
+      "affection", "sensual", "communication", "foreplay", "power", "novelty", "aftercare",
+    ]));
+
+    // Itinerary option selections
     localStorage.setItem("option-selection-d1-e2", "opt-peaceful-side-fri");
     localStorage.setItem("option-selection-d2-e2", "opt-breakfast-cabin");
     localStorage.setItem("option-selection-d2-e8", "opt-star-tour-sat");
     localStorage.setItem("option-selection-d3-e2", "opt-breakfast-cabin-sun");
     localStorage.setItem("option-selection-d3-e4", "opt-laurel-falls");
+
     showToast("Test data loaded.", "success");
   }
 
