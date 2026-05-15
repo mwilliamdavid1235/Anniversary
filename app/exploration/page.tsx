@@ -14,12 +14,12 @@ import {
 } from "@/lib/exploration-items";
 
 const PALETTE = {
-  bg: "#0C0810",
-  edge: "#2E1F40",
-  text: "#EDE0E8",
-  textMuted: "#9B7FA8",
-  textFaint: "#6B4A7A",
-  textDim: "#3D2850",
+  bg: "var(--t-bg)",
+  edge: "var(--t-border)",
+  text: "var(--t-text)",
+  textMuted: "var(--t-text-muted)",
+  textFaint: "var(--t-text-dim)",
+  textDim: "var(--t-text-faint)",
   rose: "#C47EA0",
   gold: "#C49A45",
 };
@@ -84,7 +84,7 @@ function ItemCard({
     <div
       className="mb-3 rounded-xl overflow-hidden"
       style={{
-        background: isOpen ? "rgba(196,126,160,0.04)" : "rgba(255,255,255,0.02)",
+        background: isOpen ? "rgba(196,126,160,0.04)" : "var(--t-surface)",
         border: `1px solid ${isOpen ? PALETTE.rose + "35" : hasAnswer ? color + "40" : PALETTE.edge}`,
         transition: "background 0.2s ease, border-color 0.2s ease",
       }}
@@ -144,7 +144,7 @@ function ItemCard({
                 onClick={() => onSelect(opt)}
                 className="text-left rounded-lg px-4 py-3 transition-all duration-150"
                 style={{
-                  background: selected ? `${optColor}15` : "rgba(255,255,255,0.02)",
+                  background: selected ? `${optColor}15` : "var(--t-surface)",
                   border: `1px solid ${selected ? optColor + "55" : PALETTE.edge}`,
                   cursor: "pointer",
                 }}
@@ -174,7 +174,7 @@ function ItemCard({
                 rows={2}
                 className="w-full rounded-xl outline-none resize-none leading-relaxed"
                 style={{
-                  background: "rgba(12,8,16,0.6)",
+                  background: "var(--t-surface)",
                   border: `1px solid ${PALETTE.edge}`,
                   color: PALETTE.text,
                   fontSize: "13px",
@@ -288,7 +288,7 @@ function DiscussScreen({
                   const myC = myComments[item.id]?.trim();
                   const partnerC = partnerComments[item.id]?.trim();
                   return (
-                    <div key={item.id} className="rounded-xl p-4" style={{ background: "rgba(13,11,16,0.3)", border: `1px solid ${PALETTE.edge}` }}>
+                    <div key={item.id} className="rounded-xl p-4" style={{ background: "var(--t-surface)", border: `1px solid ${PALETTE.edge}` }}>
                       <p style={{ fontSize: "14px", color: PALETTE.text, fontFamily: "var(--font-display), serif", fontWeight: 600, fontStyle: "italic", marginBottom: 2 }}>
                         {item.label}
                       </p>
@@ -297,7 +297,7 @@ function DiscussScreen({
                       </p>
                       <div className="flex gap-3">
                         {myR && (
-                          <div className="flex-1 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${PALETTE.edge}` }}>
+                          <div className="flex-1 rounded-lg px-3 py-2" style={{ background: "var(--t-surface)", border: `1px solid ${PALETTE.edge}` }}>
                             <p style={{ fontSize: "9px", letterSpacing: "0.1em", color: PALETTE.textDim, marginBottom: 3, textTransform: "uppercase" }}>{myName}</p>
                             <p style={{ fontSize: "12px", color: RESPONSE_COLORS[myR] }}>
                               {EXPLORATION_OPTION_LABELS[myR].emoji} {EXPLORATION_OPTION_LABELS[myR].short}
@@ -306,7 +306,7 @@ function DiscussScreen({
                           </div>
                         )}
                         {partnerR && (
-                          <div className="flex-1 rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${PALETTE.edge}` }}>
+                          <div className="flex-1 rounded-lg px-3 py-2" style={{ background: "var(--t-surface)", border: `1px solid ${PALETTE.edge}` }}>
                             <p style={{ fontSize: "9px", letterSpacing: "0.1em", color: PALETTE.textDim, marginBottom: 3, textTransform: "uppercase" }}>{partnerName}</p>
                             <p style={{ fontSize: "12px", color: RESPONSE_COLORS[partnerR] }}>
                               {EXPLORATION_OPTION_LABELS[partnerR].emoji} {EXPLORATION_OPTION_LABELS[partnerR].short}
@@ -546,7 +546,7 @@ export default function ExplorationPage() {
       {/* Header */}
       <div
         className="sticky top-0 z-10 flex items-center justify-between px-5 py-4"
-        style={{ background: "rgba(12,8,16,0.92)", backdropFilter: "blur(8px)", borderBottom: `1px solid ${PALETTE.edge}` }}
+        style={{ background: "var(--t-nav-bg)", backdropFilter: "blur(8px)", borderBottom: `1px solid ${PALETTE.edge}` }}
       >
         <Link href="/intimacy" style={{ fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: PALETTE.textFaint, textDecoration: "none" }}>
           ← Intimacy
@@ -591,7 +591,7 @@ export default function ExplorationPage() {
                 padding: "5px 11px",
                 borderRadius: "4px",
                 border: `1px solid ${activeSectionId === s.id ? PALETTE.rose : PALETTE.edge}`,
-                background: activeSectionId === s.id ? "rgba(196,126,160,0.15)" : "rgba(255,255,255,0.02)",
+                background: activeSectionId === s.id ? "rgba(196,126,160,0.15)" : "var(--t-surface)",
                 color: activeSectionId === s.id ? PALETTE.rose : PALETTE.textFaint,
                 cursor: "pointer",
                 transition: "all 0.15s ease",
@@ -647,7 +647,7 @@ export default function ExplorationPage() {
             ))}
 
             {isSubmitted ? (
-              <div className="mt-6 rounded-xl p-4 text-center" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${PALETTE.edge}` }}>
+              <div className="mt-6 rounded-xl p-4 text-center" style={{ background: "var(--t-surface)", border: `1px solid ${PALETTE.edge}` }}>
                 {waitingForSummary ? (
                   <p style={{ fontSize: "11px", color: PALETTE.textFaint }}>Reading your answers…</p>
                 ) : (

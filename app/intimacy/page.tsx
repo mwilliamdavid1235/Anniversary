@@ -7,12 +7,12 @@ import PersonSelector, { type Person } from "@/components/sections/PersonSelecto
 import { INTIMACY_QUESTIONS, INTIMACY_CATEGORIES } from "@/lib/intimacy-questions";
 
 const PALETTE = {
-  bg: "#0C0810",
-  edge: "#2E1F40",
-  text: "#EDE0E8",
-  textMuted: "#9B7FA8",
-  textFaint: "#6B4A7A",
-  textDim: "#3D2850",
+  bg: "var(--t-bg)",
+  edge: "var(--t-border)",
+  text: "var(--t-text)",
+  textMuted: "var(--t-text-muted)",
+  textFaint: "var(--t-text-dim)",
+  textDim: "var(--t-text-faint)",
 };
 
 const SECTION_COLORS: Record<string, string> = {
@@ -91,7 +91,7 @@ function AnswerCard({
     <div
       className="mb-3 rounded-xl overflow-hidden"
       style={{
-        background: isOpen ? `${sectionColor}0D` : "rgba(255,255,255,0.02)",
+        background: isOpen ? `${sectionColor}0D` : "var(--t-surface)",
         border: `1px solid ${isOpen ? sectionColor + "50" : hasAnswer ? sectionColor + "30" : PALETTE.edge}`,
         transition: "background 0.2s ease, border-color 0.2s ease",
       }}
@@ -140,7 +140,7 @@ function AnswerCard({
                   onClick={() => handleChoice(opt)}
                   className="text-left rounded-lg px-4 py-3 transition-all duration-150"
                   style={{
-                    background: answer === opt ? `${sectionColor}20` : "rgba(255,255,255,0.03)",
+                    background: answer === opt ? `${sectionColor}20` : "var(--t-surface)",
                     border: `1px solid ${answer === opt ? sectionColor + "60" : PALETTE.edge}`,
                     color: answer === opt ? PALETTE.text : PALETTE.textMuted,
                     fontSize: "13px",
@@ -163,7 +163,7 @@ function AnswerCard({
               rows={4}
               className="w-full rounded-xl outline-none resize-none leading-relaxed"
               style={{
-                background: "rgba(12,8,16,0.6)",
+                background: "var(--t-surface)",
                 border: `1px solid ${hasAnswer ? sectionColor + "40" : PALETTE.edge}`,
                 color: PALETTE.text,
                 fontSize: "14px",
@@ -233,13 +233,13 @@ function DiscussScreen({
               </p>
               <div className="flex flex-col gap-2">
                 {myA && (
-                  <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${PALETTE.edge}` }}>
+                  <div className="rounded-lg px-3 py-2" style={{ background: "var(--t-surface)", border: `1px solid ${PALETTE.edge}` }}>
                     <p style={{ fontSize: "9px", letterSpacing: "0.12em", color: PALETTE.textDim, marginBottom: 4, textTransform: "uppercase" }}>{myName}</p>
                     <p style={{ fontSize: "13px", color: PALETTE.textMuted, lineHeight: 1.5 }}>{myA}</p>
                   </div>
                 )}
                 {partnerA && (
-                  <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${PALETTE.edge}` }}>
+                  <div className="rounded-lg px-3 py-2" style={{ background: "var(--t-surface)", border: `1px solid ${PALETTE.edge}` }}>
                     <p style={{ fontSize: "9px", letterSpacing: "0.12em", color: PALETTE.textDim, marginBottom: 4, textTransform: "uppercase" }}>{partnerName}</p>
                     <p style={{ fontSize: "13px", color: PALETTE.textMuted, lineHeight: 1.5 }}>{partnerA}</p>
                   </div>
@@ -483,7 +483,7 @@ export default function IntimacyPage() {
       <div
         className="sticky top-0 z-10 flex items-center justify-between px-5 py-4"
         style={{
-          background: "rgba(12,8,16,0.92)",
+          background: "var(--t-nav-bg)",
           backdropFilter: "blur(8px)",
           borderBottom: `1px solid ${PALETTE.edge}`,
         }}
@@ -524,7 +524,7 @@ export default function IntimacyPage() {
                 padding: "6px 12px",
                 borderRadius: "4px",
                 border: `1px solid ${activeSectionId === s.id ? s.color : PALETTE.edge}`,
-                background: activeSectionId === s.id ? `${s.color}20` : "rgba(255,255,255,0.02)",
+                background: activeSectionId === s.id ? `${s.color}20` : "var(--t-surface)",
                 color: activeSectionId === s.id ? s.color : PALETTE.textFaint,
                 cursor: "pointer",
                 transition: "all 0.15s ease",
@@ -573,7 +573,7 @@ export default function IntimacyPage() {
             {isSubmitted ? (
               <div
                 className="mt-6 rounded-xl p-4 text-center"
-                style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${PALETTE.edge}` }}
+                style={{ background: "var(--t-surface)", border: `1px solid ${PALETTE.edge}` }}
               >
                 {waitingForSummary ? (
                   <>

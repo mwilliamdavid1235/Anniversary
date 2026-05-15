@@ -30,18 +30,18 @@ const LOCK_KEYS = ["star_tour_locked", "connection_locked", "intimacy_exploratio
 
 // ── Palette ──────────────────────────────────────────────────
 const C = {
-  bg:         "#0B1309",
-  card:       "rgba(255,255,255,0.025)",
-  border:     "#1A2E18",
-  borderMid:  "#1E3319",
-  borderHi:   "#2D5038",
-  text:       "#E2D9C6",
-  muted:      "#6E8A74",
-  dim:        "#3A5040",
-  faint:      "#2D4D28",
-  accent:     "#6DB87E",
-  accentDim:  "#3D6B47",
-  gold:       "#C49A45",
+  bg:         "var(--t-bg)",
+  card:       "var(--t-surface)",
+  border:     "var(--t-border)",
+  borderMid:  "var(--t-border-mid)",
+  borderHi:   "var(--t-border-hi)",
+  text:       "var(--t-text)",
+  muted:      "var(--t-text-muted)",
+  dim:        "var(--t-text-dim)",
+  faint:      "var(--t-text-faint)",
+  accent:     "var(--t-accent)",
+  accentDim:  "var(--t-accent-dim)",
+  gold:       "var(--t-gold)",
   rose:       "#C47A8A",
   danger:     "#C47A7A",
 };
@@ -115,7 +115,7 @@ export default function SettingsPage() {
       <div
         style={{
           borderBottom: `1px solid ${C.borderMid}`,
-          background: "rgba(11,19,9,0.92)",
+          background: "var(--t-nav-bg)",
           backdropFilter: "blur(12px)",
           padding: "18px 20px",
           display: "flex",
@@ -324,7 +324,7 @@ function LockRow({
   return (
     <div
       style={{
-        background: locked ? "rgba(255,255,255,0.015)" : C.card,
+        background: C.card,
         border: `1px solid ${locked ? accentColor + "33" : C.border}`,
         borderRadius: 14,
         padding: "16px 18px",
@@ -340,7 +340,7 @@ function LockRow({
           width: 36,
           height: 36,
           borderRadius: "50%",
-          background: locked ? `${accentColor}18` : "rgba(255,255,255,0.03)",
+          background: locked ? `${accentColor}18` : C.card,
           border: `1px solid ${locked ? accentColor + "44" : C.border}`,
           display: "flex",
           alignItems: "center",
@@ -371,7 +371,7 @@ function LockRow({
           height: 26,
           borderRadius: 13,
           border: `1px solid ${locked ? accentColor + "66" : C.border}`,
-          background: locked ? `${accentColor}22` : "rgba(255,255,255,0.04)",
+          background: locked ? `${accentColor}22` : C.card,
           cursor: "pointer",
           position: "relative",
           transition: "all 0.25s",

@@ -97,8 +97,8 @@ function AnswerCard({
     <div
       className="mb-3 rounded-xl overflow-hidden"
       style={{
-        background: isOpen ? `${sectionColor}0D` : "rgba(255,255,255,0.025)",
-        border: `1px solid ${isOpen ? sectionColor + "50" : hasAnswer ? "#2D5038" : "#1A2E18"}`,
+        background: isOpen ? `${sectionColor}0D` : "var(--t-surface)",
+        border: `1px solid ${isOpen ? sectionColor + "50" : hasAnswer ? "var(--t-border-hi)" : "var(--t-border)"}`,
         transition: "background 0.2s ease, border-color 0.2s ease",
       }}
     >
@@ -112,17 +112,17 @@ function AnswerCard({
           className="font-display italic leading-snug"
           style={{
             fontSize: isOpen ? "20px" : "17px",
-            color: isOpen ? "#E2D9C6" : hasAnswer ? "#A8C0A8" : "#7A9980",
+            color: isOpen ? "var(--t-text)" : hasAnswer ? "var(--t-text-muted)" : "var(--t-text-dim)",
             transition: "font-size 0.15s ease, color 0.15s ease",
           }}
         >
           {hasAnswer && !isOpen && (
-            <span style={{ fontSize: "10px", color: "#2D5038", marginRight: 8, verticalAlign: "middle" }}>✓</span>
+            <span style={{ fontSize: "10px", color: "var(--t-border-hi)", marginRight: 8, verticalAlign: "middle" }}>✓</span>
           )}
           {question.text}
         </p>
         {!locked && (
-          <span style={{ fontSize: "9px", color: "#2D4D28", flexShrink: 0, marginTop: 5 }}>
+          <span style={{ fontSize: "9px", color: "var(--t-text-faint)", flexShrink: 0, marginTop: 5 }}>
             {isOpen ? "▲" : "▼"}
           </span>
         )}
@@ -134,7 +134,7 @@ function AnswerCard({
           style={{
             padding: "0 18px 14px",
             fontSize: "12px",
-            color: "#4A6B50",
+            color: "var(--t-text-muted)",
             lineHeight: 1.5,
             marginTop: -6,
           }}
@@ -154,19 +154,19 @@ function AnswerCard({
             rows={4}
             className="w-full rounded-xl outline-none resize-none leading-relaxed"
             style={{
-              background: "rgba(11,19,9,0.6)",
-              border: `1px solid ${hasAnswer ? "#2D5038" : "#1E3319"}`,
-              color: "#E2D9C6",
+              background: "var(--t-surface)",
+              border: `1px solid ${hasAnswer ? "var(--t-border-hi)" : "var(--t-border-mid)"}`,
+              color: "var(--t-text)",
               fontSize: "14px",
               padding: "12px 14px",
               fontFamily: "var(--font-dm-mono), monospace",
               transition: "border-color 0.2s ease",
             }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "#2D4D28"; }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = hasAnswer ? "#2D5038" : "#1E3319"; }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--t-border-hi)"; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = hasAnswer ? "var(--t-border-hi)" : "var(--t-border-mid)"; }}
           />
           {saved && (
-            <p style={{ fontSize: "9px", letterSpacing: "0.1em", color: "#6DB87E", marginTop: 6 }}>
+            <p style={{ fontSize: "9px", letterSpacing: "0.1em", color: "var(--t-accent)", marginTop: 6 }}>
               ✓ saved
             </p>
           )}
@@ -222,7 +222,7 @@ function DiscussScreen({
         </p>
         <p
           className="font-display italic leading-relaxed"
-          style={{ fontSize: "18px", color: "#E2D9C6" }}
+          style={{ fontSize: "18px", color: "var(--t-text)" }}
         >
           {summary}
         </p>
@@ -238,7 +238,7 @@ function DiscussScreen({
               <p
                 style={{
                   fontSize: "11px",
-                  color: "#4A6B50",
+                  color: "var(--t-text-muted)",
                   marginBottom: 8,
                   lineHeight: 1.4,
                   fontStyle: "italic",
@@ -250,19 +250,19 @@ function DiscussScreen({
                 {myA && (
                   <div
                     className="rounded-lg px-3 py-2"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid #1E3319" }}
+                    style={{ background: "var(--t-surface)", border: "1px solid var(--t-border-mid)" }}
                   >
-                    <p style={{ fontSize: "9px", letterSpacing: "0.12em", color: "#3A5040", marginBottom: 4, textTransform: "uppercase" }}>{myName}</p>
-                    <p style={{ fontSize: "13px", color: "#B8C8B8", lineHeight: 1.5 }}>{myA}</p>
+                    <p style={{ fontSize: "9px", letterSpacing: "0.12em", color: "var(--t-text-dim)", marginBottom: 4, textTransform: "uppercase" }}>{myName}</p>
+                    <p style={{ fontSize: "13px", color: "var(--t-text)", lineHeight: 1.5 }}>{myA}</p>
                   </div>
                 )}
                 {partnerA && (
                   <div
                     className="rounded-lg px-3 py-2"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid #1E3319" }}
+                    style={{ background: "var(--t-surface)", border: "1px solid var(--t-border-mid)" }}
                   >
-                    <p style={{ fontSize: "9px", letterSpacing: "0.12em", color: "#3A5040", marginBottom: 4, textTransform: "uppercase" }}>{partnerName}</p>
-                    <p style={{ fontSize: "13px", color: "#B8C8B8", lineHeight: 1.5 }}>{partnerA}</p>
+                    <p style={{ fontSize: "9px", letterSpacing: "0.12em", color: "var(--t-text-dim)", marginBottom: 4, textTransform: "uppercase" }}>{partnerName}</p>
+                    <p style={{ fontSize: "13px", color: "var(--t-text)", lineHeight: 1.5 }}>{partnerA}</p>
                   </div>
                 )}
               </div>
@@ -280,7 +280,7 @@ function DiscussScreen({
           <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#9B8FC4", marginBottom: 10, opacity: 0.8 }}>
             ✦ You finished Connection
           </p>
-          <p className="font-display italic mb-2" style={{ fontSize: "22px", color: "#E2D9C6" }}>
+          <p className="font-display italic mb-2" style={{ fontSize: "22px", color: "var(--t-text)" }}>
             Ready to go deeper?
           </p>
           <p style={{ fontSize: "13px", color: "#6B5A8A", marginBottom: 20, lineHeight: 1.5 }}>
@@ -335,12 +335,12 @@ const LOCKED_MSGS = [
 function LockedScreen() {
   const msg = LOCKED_MSGS[Math.floor(Math.random() * LOCKED_MSGS.length)];
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center" style={{ background: "#0B1309" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center" style={{ background: "var(--t-bg)" }}>
       <div style={{ fontSize: 36, marginBottom: 20 }}>🔒</div>
-      <h1 className="font-display italic mb-4" style={{ fontSize: "clamp(26px,7vw,38px)", color: "#E2D9C6", lineHeight: 1.2 }}>
+      <h1 className="font-display italic mb-4" style={{ fontSize: "clamp(26px,7vw,38px)", color: "var(--t-text)", lineHeight: 1.2 }}>
         Not quite yet.
       </h1>
-      <p style={{ fontSize: "14px", color: "#6E8A74", maxWidth: 300, lineHeight: 1.75, fontStyle: "italic" }}>
+      <p style={{ fontSize: "14px", color: "var(--t-text-muted)", maxWidth: 300, lineHeight: 1.75, fontStyle: "italic" }}>
         {msg}
       </p>
     </div>
@@ -507,36 +507,36 @@ export default function ConnectionPage() {
   if (!person) return <PersonSelector onSelect={selectPerson} />;
 
   return (
-    <div className="min-h-screen" style={{ background: "#060E05", color: "#E2D9C6" }}>
+    <div className="min-h-screen" style={{ background: "var(--t-bg)", color: "var(--t-text)" }}>
       {/* Header */}
       <div
         className="sticky top-0 z-10 flex items-center justify-between px-5 py-4"
         style={{
-          background: "rgba(6,14,5,0.92)",
+          background: "var(--t-nav-bg)",
           backdropFilter: "blur(8px)",
-          borderBottom: "1px solid #0D1A0C",
+          borderBottom: "1px solid var(--t-border)",
         }}
       >
         <Link
           href="/"
-          style={{ fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "#3A5040", textDecoration: "none" }}
+          style={{ fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--t-text-dim)", textDecoration: "none" }}
         >
           ← Back
         </Link>
-        <p style={{ fontSize: "9px", letterSpacing: "0.25em", textTransform: "uppercase", color: "#2D4D28" }}>
+        <p style={{ fontSize: "9px", letterSpacing: "0.25em", textTransform: "uppercase", color: "var(--t-text-faint)" }}>
           Connection
         </p>
-        <p style={{ fontSize: "10px", color: "#3A5040" }}>
+        <p style={{ fontSize: "10px", color: "var(--t-text-dim)" }}>
           {person === "mary" ? "Mary" : "MD"}
         </p>
       </div>
 
       <div className="px-5 pt-8 pb-16 max-w-lg mx-auto">
         {/* Title */}
-        <h1 className="font-display italic mb-1" style={{ fontSize: "34px", color: "#E2D9C6", lineHeight: 1.1 }}>
+        <h1 className="font-display italic mb-1" style={{ fontSize: "34px", color: "var(--t-text)", lineHeight: 1.1 }}>
           A Night for Two
         </h1>
-        <p className="mb-8 leading-relaxed" style={{ fontSize: "13px", color: "#4A6B50" }}>
+        <p className="mb-8 leading-relaxed" style={{ fontSize: "13px", color: "var(--t-text-muted)" }}>
           Take turns. Go as deep or as light as the night calls for. There are no wrong answers here.
         </p>
 
@@ -552,9 +552,9 @@ export default function ConnectionPage() {
                 textTransform: "uppercase",
                 padding: "6px 14px",
                 borderRadius: "4px",
-                border: `1px solid ${activeSectionId === s.id ? s.color : "#1E3319"}`,
-                background: activeSectionId === s.id ? `${s.color}20` : "rgba(255,255,255,0.02)",
-                color: activeSectionId === s.id ? s.color : "#3A5040",
+                border: `1px solid ${activeSectionId === s.id ? s.color : "var(--t-border-mid)"}`,
+                background: activeSectionId === s.id ? `${s.color}20` : "var(--t-surface)",
+                color: activeSectionId === s.id ? s.color : "var(--t-text-dim)",
                 cursor: "pointer",
                 transition: "all 0.15s ease",
                 position: "relative",
@@ -607,19 +607,19 @@ export default function ConnectionPage() {
             {isSubmitted ? (
               <div
                 className="mt-6 rounded-xl p-4 text-center"
-                style={{ background: "rgba(255,255,255,0.02)", border: "1px solid #1A2E18" }}
+                style={{ background: "var(--t-surface)", border: "1px solid var(--t-border)" }}
               >
                 {waitingForSummary ? (
                   <>
-                    <p style={{ fontSize: "11px", color: "#4A6B50", marginBottom: 4 }}>Reading your answers…</p>
-                    <p style={{ fontSize: "10px", color: "#2D4D28" }}>Just a moment</p>
+                    <p style={{ fontSize: "11px", color: "var(--t-text-muted)", marginBottom: 4 }}>Reading your answers…</p>
+                    <p style={{ fontSize: "10px", color: "var(--t-text-faint)" }}>Just a moment</p>
                   </>
                 ) : (
                   <>
-                    <p style={{ fontSize: "11px", color: "#4A6B50", marginBottom: 4 }}>
+                    <p style={{ fontSize: "11px", color: "var(--t-text-muted)", marginBottom: 4 }}>
                       Your answers are in. Waiting for {PARTNER[person]}…
                     </p>
-                    <p style={{ fontSize: "10px", color: "#2D4D28" }}>
+                    <p style={{ fontSize: "10px", color: "var(--t-text-faint)" }}>
                       The discussion will open when they finish this section.
                     </p>
                   </>
@@ -643,7 +643,7 @@ export default function ConnectionPage() {
               </button>
             ) : (
               <div className="mt-4">
-                <p style={{ fontSize: "10px", color: "#2D4D28", textAlign: "center" }}>
+                <p style={{ fontSize: "10px", color: "var(--t-text-faint)", textAlign: "center" }}>
                   {section.questions.filter((q) => myAnswers[q.id]?.trim()).length} / {section.questions.length} answered
                 </p>
               </div>
