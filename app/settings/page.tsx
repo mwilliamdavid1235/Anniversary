@@ -84,10 +84,10 @@ export default function SettingsPage() {
 
   // ── Fill test data ───────────────────────────────────────────
   function fillTestData() {
-    localStorage.setItem("connection_person", "michael");
+    localStorage.setItem("connection_person", "md");
     localStorage.setItem("connection_section", "memories");
     localStorage.setItem("connection_submitted", JSON.stringify(["memories", "right-now"]));
-    localStorage.setItem("intimacy_person", "michael");
+    localStorage.setItem("intimacy_person", "md");
     localStorage.setItem("option-selection-d1-e2", "opt-peaceful-side-fri");
     localStorage.setItem("option-selection-d2-e2", "opt-breakfast-cabin");
     localStorage.setItem("option-selection-d2-e8", "opt-star-tour-sat");
